@@ -6,4 +6,13 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="ClashOfClans" Version="8.4.2" />
+    <PackageReference Include="Google.Apis.Calendar.v3" Version="1.57.0.2759" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Wp.Common\Wp.Common.csproj" />
+  </ItemGroup>
+
 </Project>
