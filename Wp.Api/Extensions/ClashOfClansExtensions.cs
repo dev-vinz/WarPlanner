@@ -1,5 +1,4 @@
 ﻿using ClashOfClans.Models;
-using Wp.Common.Services.Extensions;
 
 namespace Wp.Api.Extensions
 {
@@ -23,6 +22,7 @@ namespace Wp.Api.Extensions
                 .Clan?
                 .Members?
                 .SelectMany(m => m.Attacks ?? Enumerable.Empty<ClanWarAttack>())
+                .ToList()
                 .ForEach(a => attacks.Add(a));
 
             // Opponent attacks
@@ -30,6 +30,7 @@ namespace Wp.Api.Extensions
                 .Opponent?
                 .Members?
                 .SelectMany(m => m.Attacks ?? Enumerable.Empty<ClanWarAttack>())
+                .ToList()
                 .ForEach(a => attacks.Add(a));
 
             return attacks.OrderBy(a => a.Order).ToArray();

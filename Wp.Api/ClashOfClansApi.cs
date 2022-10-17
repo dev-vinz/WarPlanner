@@ -1,7 +1,7 @@
 ﻿using ClashOfClans;
 using ClashOfClans.Core;
 using ClashOfClans.Models;
-using Wp.Common.Settings;
+using Wp.Api.Settings;
 
 namespace Wp.Api
 {

@@ -2,7 +2,7 @@
 using Google.Apis.Calendar.v3;
 using Google.Apis.Calendar.v3.Data;
 using Google.Apis.Services;
-using Wp.Common.Settings;
+using Wp.Api.Settings;
 
 namespace Wp.Api
 {
@@ -13,6 +13,7 @@ namespace Wp.Api
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         private static readonly CalendarService service;
+        private static readonly string email = "warplanner@vinz-discord.iam.gserviceaccount.com";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                            CONSTRUCTORS                           *|
@@ -21,7 +22,7 @@ namespace Wp.Api
         static GoogleCalendarApi()
         {
             ServiceAccountCredential credential = new ServiceAccountCredential(
-                new ServiceAccountCredential.Initializer(Configurations.GoogleCalendarEmail)
+                new ServiceAccountCredential.Initializer(email)
                 {
                     Scopes = new string[] { CalendarService.Scope.Calendar, CalendarService.Scope.CalendarEvents }
                 }.FromPrivateKey(Keys.GoogleCalendarToken)

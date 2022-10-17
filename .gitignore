@@ -9,7 +9,7 @@
 
 # Database and keys
 Wp.Common/Settings/DBSettings.cs
-Wp.Common/Settings/Keys.cs
+Wp.Api/Settings/Keys.cs
 
 # User-specific files
 *.rsuser
