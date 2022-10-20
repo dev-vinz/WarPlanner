@@ -69,8 +69,8 @@
 
             // Defaults
             {
-                language = Language.English;
-                premiumLevel = PremiumLevel.None;
+                language = Language.ENGLISH;
+                premiumLevel = PremiumLevel.NONE;
                 minimalTownHallLevel = 0;
             }
         }

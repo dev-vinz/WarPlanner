@@ -17,10 +17,10 @@ namespace Wp.Common.Models
         private readonly WarResult result;
         private readonly int attackStars;
         private readonly double attackPercent;
-        private readonly int attackAvgDuration;
+        private readonly double attackAvgDuration;
         private readonly int defenseStars;
         private readonly double defensePercent;
-        private readonly int defenseAvgDuration;
+        private readonly double defenseAvgDuration;
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                             PROPERTIES                            *|
@@ -74,7 +74,7 @@ namespace Wp.Common.Models
         /// <summary>
         /// Gets the average attack duration
         /// </summary>
-        public int AttackAvgDuration { get => attackAvgDuration; }
+        public double AttackAvgDuration { get => attackAvgDuration; }
 
         /// <summary>
         /// Gets the number of stars made in defense
@@ -89,7 +89,7 @@ namespace Wp.Common.Models
         /// <summary>
         /// Gets the average defense duration
         /// </summary>
-        public int DefenseAvgDuration { get => defenseAvgDuration; }
+        public double DefenseAvgDuration { get => defenseAvgDuration; }
 
         /* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
