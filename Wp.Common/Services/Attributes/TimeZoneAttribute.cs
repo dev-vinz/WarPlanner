@@ -1,6 +1,6 @@
 ﻿using NodaTime;
 
-namespace Wp.Common.Services.Attributes
+namespace Wp.Database.Services.Attributes
 {
     [AttributeUsage(AttributeTargets.All)]
     public class TimeZoneAttribute : Attribute

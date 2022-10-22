@@ -1,7 +1,7 @@
 ﻿using System.Web;
 using Wp.Api;
 
-namespace Wp.Common.Models
+namespace Wp.Database.Models
 {
     public class Clan
     {

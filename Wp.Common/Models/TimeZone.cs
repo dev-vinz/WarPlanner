@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
-using Wp.Common.Services.Attributes;
+using Wp.Database.Services.Attributes;
 
-namespace Wp.Common.Models
+namespace Wp.Database.Models
 {
     public enum TimeZone
     {

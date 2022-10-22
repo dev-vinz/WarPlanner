@@ -1,6 +1,6 @@
 ﻿using Wp.Api;
 
-namespace Wp.Common.Models
+namespace Wp.Database.Models
 {
     public class WarStatistic
     {

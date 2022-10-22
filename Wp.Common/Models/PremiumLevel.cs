@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
-namespace Wp.Common.Models
+namespace Wp.Database.Models
 {
     public enum PremiumLevel
     {

@@ -1,4 +1,4 @@
-﻿namespace Wp.Common.Models
+﻿namespace Wp.Database.Models
 {
     public enum PlayerStatisticAction
     {

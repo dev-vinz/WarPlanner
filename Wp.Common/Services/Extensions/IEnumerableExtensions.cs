@@ -1,4 +1,4 @@
-﻿namespace Wp.Common.Services.Extensions
+﻿namespace Wp.Database.Services.Extensions
 {
     public static class IEnumerableExtensions
     {
