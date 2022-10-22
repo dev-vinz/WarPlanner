@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Wp.Database.Models
+namespace Wp.Database.EFModels
 {
     public partial class Role
     {

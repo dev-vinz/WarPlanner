@@ -1,4 +1,4 @@
-﻿namespace Wp.Database.Models
+﻿namespace Wp.Common.Models
 {
     public class Guild
     {
@@ -10,7 +10,7 @@
         private Language language;
         private TimeZone timeZone;
         private PremiumLevel premiumLevel;
-        private int minimalTownHallLevel;
+        private uint minimalTownHallLevel;
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                             PROPERTIES                            *|
@@ -39,7 +39,7 @@
         /// <summary>
         /// Gets / Sets the minimal town hall level "filter" for the list during a war adding command
         /// </summary>
-        public int MinimalTownHallLevel { get => minimalTownHallLevel; set => minimalTownHallLevel = value; }
+        public uint MinimalTownHallLevel { get => minimalTownHallLevel; set => minimalTownHallLevel = value; }
 
         /* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|

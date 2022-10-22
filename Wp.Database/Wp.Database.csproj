@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="EFModels\" />
     <Folder Include="SQL\" />
   </ItemGroup>
 
@@ -16,6 +17,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Wp.Common\Wp.Common.csproj" />
   </ItemGroup>
 
 </Project>

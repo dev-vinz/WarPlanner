@@ -2,7 +2,7 @@
 using System.Reflection;
 using Wp.Database.Services.Attributes;
 
-namespace Wp.Database.Models
+namespace Wp.Common.Models
 {
     public enum Language
     {

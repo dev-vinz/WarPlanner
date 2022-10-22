@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Wp.Database.Models
+namespace Wp.Database.EFModels
 {
     public partial class Guild
     {
@@ -21,6 +21,7 @@ namespace Wp.Database.Models
         public int Language { get; set; }
         public int TimeZone { get; set; }
         public int PremiumLevel { get; set; }
+        public int MinThlevel { get; set; }
 
         public virtual ICollection<Calendar> Calendars { get; set; }
         public virtual ICollection<Clan> Clans { get; set; }

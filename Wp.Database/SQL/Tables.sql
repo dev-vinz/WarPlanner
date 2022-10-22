@@ -13,6 +13,7 @@ CREATE TABLE Guild (
     Language INT NOT NULL,
     TimeZone INT NOT NULL,
     PremiumLevel INT NOT NULL,
+	MinTHLevel INT NOT NULL,
     PRIMARY KEY (Id)
 );
 
@@ -53,6 +54,7 @@ CREATE TABLE Competition (
     Guild DECIMAL(25,0) NOT NULL,
     CategoryId DECIMAL(25, 0) NOT NULL,
     ResultId DECIMAL(25, 0) NOT NULL,
+	Name VARCHAR(MAX) NOT NULL,
     MainClan VARCHAR(50) NOT NULL,
     SecondClan VARCHAR(50),
     PRIMARY KEY (Guild, CategoryId),
@@ -92,7 +94,7 @@ CREATE TABLE WarStatistic (
     DateStart DATETIME NOT NULL,
     WarType INT NOT NULL,
     ClanTag VARCHAR(50) NOT NULL,
-    CompetitionCategory DECIMAL(25, 0) NOT NULL,
+    CompetitionCategory DECIMAL(25, 0),
     OpponentName VARCHAR(50) NOT NULL,
     Result INT NOT NULL,
     AttackStars INT NOT NULL,

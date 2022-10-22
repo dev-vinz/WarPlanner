@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Wp.Database.Models
+namespace Wp.Database.EFModels
 {
     public partial class WarStatistic
     {
@@ -9,7 +9,7 @@ namespace Wp.Database.Models
         public DateTime DateStart { get; set; }
         public int WarType { get; set; }
         public string ClanTag { get; set; } = null!;
-        public decimal CompetitionCategory { get; set; }
+        public decimal? CompetitionCategory { get; set; }
         public string OpponentName { get; set; } = null!;
         public int Result { get; set; }
         public int AttackStars { get; set; }

@@ -1,4 +1,4 @@
-﻿namespace Wp.Database.Models
+﻿namespace Wp.Common.Models
 {
     public class Time
     {

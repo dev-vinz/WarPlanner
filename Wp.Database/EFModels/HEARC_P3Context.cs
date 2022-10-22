@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Wp.Database.Settings;
 
-namespace Wp.Database.Models
+namespace Wp.Database.EFModels
 {
     public partial class HEARC_P3Context : DbContext
     {
@@ -37,7 +37,7 @@ namespace Wp.Database.Models
             modelBuilder.Entity<Calendar>(entity =>
             {
                 entity.HasKey(e => new { e.Guild, e.CalendarId })
-                    .HasName("PK__Calendar__4C9FE5D5B6BBF550");
+                    .HasName("PK__Calendar__4C9FE5D5405288FD");
 
                 entity.ToTable("Calendar");
 
@@ -54,13 +54,13 @@ namespace Wp.Database.Models
                 entity.HasOne(d => d.GuildNavigation)
                     .WithMany(p => p.Calendars)
                     .HasForeignKey(d => d.Guild)
-                    .HasConstraintName("FK__Calendar__Guild__3B75D760");
+                    .HasConstraintName("FK__Calendar__Guild__160F4887");
             });
 
             modelBuilder.Entity<Clan>(entity =>
             {
                 entity.HasKey(e => new { e.Guild, e.Tag })
-                    .HasName("PK__Clan__B5E60FD0AE15DB2E");
+                    .HasName("PK__Clan__B5E60FD0D2E01C61");
 
                 entity.ToTable("Clan");
 
@@ -73,13 +73,13 @@ namespace Wp.Database.Models
                 entity.HasOne(d => d.GuildNavigation)
                     .WithMany(p => p.Clans)
                     .HasForeignKey(d => d.Guild)
-                    .HasConstraintName("FK__Clan__Guild__38996AB5");
+                    .HasConstraintName("FK__Clan__Guild__1332DBDC");
             });
 
             modelBuilder.Entity<Competition>(entity =>
             {
                 entity.HasKey(e => new { e.Guild, e.CategoryId })
-                    .HasName("PK__Competit__28338A31134F1059");
+                    .HasName("PK__Competit__28338A316397BC18");
 
                 entity.ToTable("Competition");
 
@@ -91,6 +91,8 @@ namespace Wp.Database.Models
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
+                entity.Property(e => e.Name).IsUnicode(false);
+
                 entity.Property(e => e.ResultId).HasColumnType("decimal(25, 0)");
 
                 entity.Property(e => e.SecondClan)
@@ -100,7 +102,7 @@ namespace Wp.Database.Models
                 entity.HasOne(d => d.GuildNavigation)
                     .WithMany(p => p.Competitions)
                     .HasForeignKey(d => d.Guild)
-                    .HasConstraintName("FK__Competiti__Guild__412EB0B6");
+                    .HasConstraintName("FK__Competiti__Guild__1BC821DD");
             });
 
             modelBuilder.Entity<Guild>(entity =>
@@ -108,12 +110,14 @@ namespace Wp.Database.Models
                 entity.ToTable("Guild");
 
                 entity.Property(e => e.Id).HasColumnType("decimal(25, 0)");
+
+                entity.Property(e => e.MinThlevel).HasColumnName("MinTHLevel");
             });
 
             modelBuilder.Entity<Player>(entity =>
             {
                 entity.HasKey(e => new { e.Guild, e.Tag })
-                    .HasName("PK__Player__B5E60FD032418408");
+                    .HasName("PK__Player__B5E60FD0AFCBB9FE");
 
                 entity.ToTable("Player");
 
@@ -128,13 +132,13 @@ namespace Wp.Database.Models
                 entity.HasOne(d => d.GuildNavigation)
                     .WithMany(p => p.Players)
                     .HasForeignKey(d => d.Guild)
-                    .HasConstraintName("FK__Player__Guild__46E78A0C");
+                    .HasConstraintName("FK__Player__Guild__2180FB33");
             });
 
             modelBuilder.Entity<PlayerStatistic>(entity =>
             {
                 entity.HasKey(e => new { e.DiscordId, e.ClanTag, e.WarDateStart, e.AttackOrder })
-                    .HasName("PK__PlayerSt__195E8FEBD381F0EA");
+                    .HasName("PK__PlayerSt__195E8FEB39725BD4");
 
                 entity.ToTable("PlayerStatistic");
 
@@ -155,13 +159,13 @@ namespace Wp.Database.Models
                 entity.HasOne(d => d.GuildNavigation)
                     .WithMany(p => p.PlayerStatistics)
                     .HasForeignKey(d => d.Guild)
-                    .HasConstraintName("FK__PlayerSta__Guild__4CA06362");
+                    .HasConstraintName("FK__PlayerSta__Guild__2739D489");
             });
 
             modelBuilder.Entity<Role>(entity =>
             {
                 entity.HasKey(e => new { e.Id, e.Type })
-                    .HasName("PK__Role__8D8F664F038A18CB");
+                    .HasName("PK__Role__8D8F664FB0CB761C");
 
                 entity.ToTable("Role");
 
@@ -172,13 +176,13 @@ namespace Wp.Database.Models
                 entity.HasOne(d => d.GuildNavigation)
                     .WithMany(p => p.Roles)
                     .HasForeignKey(d => d.Guild)
-                    .HasConstraintName("FK__Role__Guild__3E52440B");
+                    .HasConstraintName("FK__Role__Guild__18EBB532");
             });
 
             modelBuilder.Entity<Time>(entity =>
             {
                 entity.HasKey(e => new { e.Guild, e.Action, e.Additional })
-                    .HasName("PK__Time__F473DB48EE40DD89");
+                    .HasName("PK__Time__F473DB486641416E");
 
                 entity.ToTable("Time");
 
@@ -195,13 +199,13 @@ namespace Wp.Database.Models
                 entity.HasOne(d => d.GuildNavigation)
                     .WithMany(p => p.Times)
                     .HasForeignKey(d => d.Guild)
-                    .HasConstraintName("FK__Time__Guild__440B1D61");
+                    .HasConstraintName("FK__Time__Guild__1EA48E88");
             });
 
             modelBuilder.Entity<WarStatistic>(entity =>
             {
                 entity.HasKey(e => new { e.DateStart, e.ClanTag })
-                    .HasName("PK__WarStati__8099B70D7509A06C");
+                    .HasName("PK__WarStati__8099B70DDED0D215");
 
                 entity.ToTable("WarStatistic");
 
@@ -230,7 +234,7 @@ namespace Wp.Database.Models
                 entity.HasOne(d => d.GuildNavigation)
                     .WithMany(p => p.WarStatistics)
                     .HasForeignKey(d => d.Guild)
-                    .HasConstraintName("FK__WarStatis__Guild__49C3F6B7");
+                    .HasConstraintName("FK__WarStatis__Guild__245D67DE");
             });
 
             OnModelCreatingPartial(modelBuilder);

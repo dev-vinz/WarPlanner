@@ -1,6 +1,6 @@
 ﻿using Wp.Api;
 
-namespace Wp.Database.Models
+namespace Wp.Common.Models
 {
     public class WarStatistic
     {
@@ -120,7 +120,7 @@ namespace Wp.Database.Models
         /// <param name="defenseStars">A number of total stars made in defense</param>
         /// <param name="defensePercent">A total percentage made in defense</param>
         /// <param name="defenseAvgDuration">An average defense duration</param>
-        public WarStatistic(Guild guild, DateTimeOffset date, WarType type, string clanTag, ulong? competitionId, string opponentName, WarResult result, int attackStars, double attackPercent, int attackAvgDuration, int defenseStars, double defensePercent, int defenseAvgDuration)
+        public WarStatistic(Guild guild, DateTimeOffset date, WarType type, string clanTag, ulong? competitionId, string opponentName, WarResult result, int attackStars, double attackPercent, double attackAvgDuration, int defenseStars, double defensePercent, double defenseAvgDuration)
         {
             // Inputs
             {

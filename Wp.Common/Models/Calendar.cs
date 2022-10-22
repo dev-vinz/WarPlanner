@@ -1,4 +1,4 @@
-﻿namespace Wp.Database.Models
+﻿namespace Wp.Common.Models
 {
     public class Calendar
     {
@@ -7,7 +7,7 @@
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         private readonly Guild guild;
-        private string calendarId;
+        private string id;
         private ulong? channelId;
         private ulong? messageId;
 
@@ -23,7 +23,7 @@
         /// <summary>
         /// Gets / Sets the Google Calendar id associated at this instance
         /// </summary>
-        public string CalendarId { get => calendarId; set => calendarId = value; }
+        public string Id { get => id; set => id = value; }
 
         /// <summary>
         /// Gets / Sets the discord channel's id where the calendar is posted everyday
@@ -55,7 +55,7 @@
             // Inputs
             {
                 this.guild = guild;
-                this.calendarId = calendarId;
+                this.id = calendarId;
             }
         }
 
@@ -98,13 +98,13 @@
             {
                 Calendar? calendar = obj as Calendar;
 
-                return Guild == calendar?.Guild && CalendarId == calendar?.CalendarId;
+                return Guild == calendar?.Guild && Id == calendar?.Id;
             }
         }
 
         public override int GetHashCode()
         {
-            return Guild.GetHashCode() ^ CalendarId.GetHashCode();
+            return Guild.GetHashCode() ^ Id.GetHashCode();
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
