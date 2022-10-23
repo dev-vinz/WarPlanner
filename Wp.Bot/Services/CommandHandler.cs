@@ -1,36 +1,25 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
-using Wp.Bot.Services;
-using Wp.Database.Settings;
+using System.Reflection;
 
-namespace Wp.Bot
+namespace Wp.Bot.Services
 {
-    public class Program
+    public class CommandHandler
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        private DiscordSocketClient? client;
-        private InteractionService? commands;
+        private readonly DiscordSocketClient client;
+        private readonly InteractionService commands;
+        private readonly IServiceProvider services;
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                             PROPERTIES                            *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        private static bool IsDebug
-        {
-            get
-            {
-#if DEBUG
-                return true;
-#else
-                return false;
-#endif
-            }
-        }
+
 
         /* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
@@ -42,7 +31,15 @@ namespace Wp.Bot
         |*                            CONSTRUCTORS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
+        public CommandHandler(DiscordSocketClient client, InteractionService commands, IServiceProvider services)
+        {
+            // Inputs
+            {
+                this.client = client;
+                this.commands = commands;
+                this.services = services;
+            }
+        }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          ABSTRACT METHODS                         *|
@@ -54,29 +51,16 @@ namespace Wp.Bot
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public async Task MainAsync()
+        public async Task InitializeAsync()
         {
-            // Call ConfigureServices to create the ServiceCollection/Provider for passing around the services
-            using ServiceProvider services = ConfigureServices();
+            // Add the public modules that inherit InteractionModuleBase<T> to the InteractionService
+            await commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
 
-            // Get the client and assign to client 
-            // You get the services via GetRequiredService<T>
-            client = services.GetRequiredService<DiscordSocketClient>();
-            commands = services.GetRequiredService<InteractionService>();
+            // Process the InteractionCreated payloads to execute Interactions commands
+            client.InteractionCreated += HandleInteraction;
 
-            // Setup logging and the ready event
-            client.Log += LogAsync;
-            client.Ready += ReadyAsync;
-            commands.Log += LogAsync;
-
-            // This is where we get the Token value from the configuration file, and start the bot
-            await client.LoginAsync(TokenType.Bot, "");
-            await client.StartAsync();
-
-            // We get the CommandHandler class here and call the InitializeAsync method to start things up for the CommandHandler service
-            await services.GetRequiredService<CommandHandler>().InitializeAsync();
-
-            await Task.Delay(Timeout.Infinite);
+            // Process the command execution results
+            commands.SlashCommandExecuted += SlashCommandExecuted;
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -89,25 +73,53 @@ namespace Wp.Bot
         |*                          PRIVATE METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        private Task LogAsync(LogMessage log)
+        private async Task HandleInteraction(SocketInteraction socket)
         {
-            Console.WriteLine(log.ToString());
-            return Task.CompletedTask;
+            try
+            {
+                // Create an execution context that matches the generic type parameter of the InteractionModuleBase<T> modules
+                SocketInteractionContext ctx = new(client, socket);
+
+                await commands.ExecuteCommandAsync(ctx, services);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+
+                if (socket.Type == InteractionType.ApplicationCommand)
+                {
+                    // Let the user know / Log into error channel
+                    await socket.GetOriginalResponseAsync().ContinueWith(async msg => await msg.Result.DeleteAsync());
+                }
+            }
         }
 
-        private async Task ReadyAsync()
+        private Task SlashCommandExecuted(SlashCommandInfo info, IInteractionContext ctx, IResult result)
         {
-            if (IsDebug)
+            if (!result.IsSuccess)
             {
-                Console.WriteLine($"DEBUG MODE : Adding commands to {Configurations.SUPPORT_GUILD_ID}...");
-                await commands!.RegisterCommandsToGuildAsync(Configurations.SUPPORT_GUILD_ID);
-            }
-            else
-            {
-                await commands!.RegisterCommandsGloballyAsync(true);
+                switch (result.Error)
+                {
+                    case InteractionCommandError.UnknownCommand:
+                        break;
+                    case InteractionCommandError.ConvertFailed:
+                        break;
+                    case InteractionCommandError.BadArgs:
+                        break;
+                    case InteractionCommandError.Exception:
+                        break;
+                    case InteractionCommandError.Unsuccessful:
+                        break;
+                    case InteractionCommandError.UnmetPrecondition:
+                        break;
+                    case InteractionCommandError.ParseFailed:
+                        break;
+                    default:
+                        break;
+                }
             }
 
-            Console.WriteLine($"Connected as [{client!.CurrentUser}]");
+            return Task.CompletedTask;
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -120,16 +132,7 @@ namespace Wp.Bot
         |*                           STATIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        private static ServiceProvider ConfigureServices()
-        {
-            return new ServiceCollection()
-                .AddSingleton<DiscordSocketClient>()
-                .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
-                .AddSingleton<CommandHandler>()
-                .BuildServiceProvider();
-        }
 
-        public static Task Main(string[] args) => new Program().MainAsync();
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                              INDEXERS                             *|
