@@ -49,13 +49,13 @@
         /// Represents a calendar inside a discord server
         /// </summary>
         /// <param name="guild">A discord server, represented by the Guild object</param>
-        /// <param name="calendarId">A Google Calendar id, that can be found on calendar's settings</param>
-        public Calendar(Guild guild, string calendarId)
+        /// <param name="id">A Google Calendar id, that can be found on calendar's settings</param>
+        public Calendar(Guild guild, string id)
         {
             // Inputs
             {
                 this.guild = guild;
-                this.id = calendarId;
+                this.id = id;
             }
         }
 
@@ -98,7 +98,7 @@
             {
                 Calendar? calendar = obj as Calendar;
 
-                return Guild == calendar?.Guild && Id == calendar?.Id;
+                return Guild == calendar?.Guild;
             }
         }
 

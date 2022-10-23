@@ -23,9 +23,9 @@ namespace Wp.Database
 			MessageId = calendar.MessageId,
 		};
 
-		public static EFModels.Calendar ToEFModel(this Calendar calendar, DbSet<EFModels.Calendar> calendars)
+		public static EFModels.Calendar GetEFModel(this DbSet<EFModels.Calendar> calendars, Calendar calendar)
 		{
-			return calendars.AsEnumerable().First(c => c.CalendarId == calendar.Id);
+			return calendars.AsEnumerable().First(c => c.Guild == calendar.Guild.Id);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -40,7 +40,7 @@ namespace Wp.Database
 			Tag = clan.Tag,
 		};
 
-		public static EFModels.Clan ToEFModel(this Clan clan, DbSet<EFModels.Clan> clans)
+		public static EFModels.Clan GetEFModel(this DbSet<EFModels.Clan> clans, Clan clan)
 		{
 			return clans.AsEnumerable().First(c => c.Guild == clan.Guild.Id && c.Tag == clan.Tag);
 		}
@@ -64,7 +64,7 @@ namespace Wp.Database
 			SecondClan = competition.SecondTag,
 		};
 
-		public static EFModels.Competition ToEFModel(this Competition competition, DbSet<EFModels.Competition> competitions)
+		public static EFModels.Competition GetEFModel(this DbSet<EFModels.Competition> competitions, Competition competition)
 		{
 			return competitions.AsEnumerable().First(c => c.Guild == competition.Guild.Id && c.CategoryId == competition.Id);
 		}
@@ -89,7 +89,7 @@ namespace Wp.Database
 			MinThlevel = (int)guild.MinimalTownHallLevel,
 		};
 
-		public static EFModels.Guild ToEFModel(this Guild guild, DbSet<EFModels.Guild> guilds)
+		public static EFModels.Guild GetEFModel(this DbSet<EFModels.Guild> guilds, Guild guild)
 		{
 			return guilds.AsEnumerable().First(g => g.Id == guild.Id);
 		}
@@ -107,7 +107,7 @@ namespace Wp.Database
 			Tag = player.Tag,
 		};
 
-		public static EFModels.Player ToEFModel(this Player player, DbSet<EFModels.Player> players)
+		public static EFModels.Player GetEFModel(this DbSet<EFModels.Player> players, Player player)
 		{
 			return players.AsEnumerable().First(p => p.Guild == player.Guild.Id && p.Tag == player.Tag);
 		}
@@ -138,7 +138,7 @@ namespace Wp.Database
 			Duration = playerStatistic.Duration,
 		};
 
-		public static EFModels.PlayerStatistic ToEFModel(this PlayerStatistic playerStatistic, DbSet<EFModels.PlayerStatistic> playerStatistics)
+		public static EFModels.PlayerStatistic GetEFModel(this DbSet<EFModels.PlayerStatistic> playerStatistics, PlayerStatistic playerStatistic)
 		{
 			return playerStatistics.AsEnumerable().First(ps => ps.DiscordId == playerStatistic.PlayerId &&
 															   ps.ClanTag == playerStatistic.ClanTag &&
@@ -159,7 +159,7 @@ namespace Wp.Database
 			Type = (int)role.Type,
 		};
 
-		public static EFModels.Role ToEFModel(this Role role, DbSet<EFModels.Role> roles)
+		public static EFModels.Role GetEFModel(this DbSet<EFModels.Role> roles, Role role)
 		{
 			return roles.AsEnumerable().First(r => r.Id == role.Id && r.Type == (int)role.Type);
 		}
@@ -168,7 +168,7 @@ namespace Wp.Database
 		|*                                TIME                               *|
 		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public static Time ToModel(this EFModels.Time time) => new(time.GuildNavigation.ToModel(), (TimeAction)time.Action, new DateTimeOffset(time.Date, TimeZoneInfo.Utc.BaseUtcOffset), time.Interval, time.Additional)
+		public static Time ToModel(this EFModels.Time time) => new(time.GuildNavigation.ToModel(), (TimeAction)time.Action, new DateTimeOffset(time.Date, TimeZoneInfo.Utc.BaseUtcOffset), TimeSpan.FromSeconds(time.Interval), time.Additional)
 		{
 			Optional = time.Optional,
 		};
@@ -178,12 +178,12 @@ namespace Wp.Database
 			Guild = time.Guild.Id,
 			Action = (int)time.Action,
 			Date = time.Date.UtcDateTime,
-			Interval = time.Interval,
+			Interval = (int)time.Interval.TotalSeconds,
 			Additional = time.Additional,
 			Optional = time.Optional,
 		};
 
-		public static EFModels.Time ToEFModel(this Time time, DbSet<EFModels.Time> times)
+		public static EFModels.Time GetEFModel(this DbSet<EFModels.Time> times, Time time)
 		{
 			return times.AsEnumerable().First(t => t.Guild == time.Guild.Id && t.Action == (int)time.Action && t.Additional == time.Additional);
 		}
@@ -215,7 +215,7 @@ namespace Wp.Database
 			DefenseAvgDuration = (decimal)warStatistic.DefenseAvgDuration,
 		};
 
-		public static EFModels.WarStatistic ToEFModel(this WarStatistic warStatistic, DbSet<EFModels.WarStatistic> warStatistics)
+		public static EFModels.WarStatistic GetEFModel(this DbSet<EFModels.WarStatistic> warStatistics, WarStatistic warStatistic)
 		{
 			return warStatistics.AsEnumerable().First(ws => DateTimeOffset.Compare(ws.DateStart, warStatistic.Date) == 0 && ws.ClanTag == warStatistic.ClanTag);
 		}

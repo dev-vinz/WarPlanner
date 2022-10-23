@@ -12,7 +12,7 @@
         private readonly Guild guild;
         private readonly TimeAction action;
         private DateTimeOffset date;
-        private readonly int interval;
+        private readonly TimeSpan interval;
         private string additional;
         private string? optional;
 
@@ -38,7 +38,7 @@
         /// <summary>
         /// Gets the interval between to scans
         /// </summary>
-        public int Interval { get => interval; }
+        public TimeSpan Interval { get => interval; }
 
         /// <summary>
         /// Gets / Sets an additional information
@@ -68,7 +68,7 @@
         /// <param name="date">The last time this has been checked</param>
         /// <param name="interval">An interval between 2 scans</param>
         /// <param name="additional">An additional information, depending on the action</param>
-        public Time(Guild guild, TimeAction action, DateTimeOffset date, int interval, string additional)
+        public Time(Guild guild, TimeAction action, DateTimeOffset date, TimeSpan interval, string additional)
         {
             // Inputs
             {
@@ -107,7 +107,7 @@
         /// <returns>The next DateTimeOffset value after the interval has been elapsed</returns>
         public DateTimeOffset Next()
         {
-            return date.AddSeconds(interval);
+            return date.AddSeconds(interval.TotalSeconds);
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
