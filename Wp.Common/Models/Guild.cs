@@ -1,4 +1,6 @@
-﻿namespace Wp.Common.Models
+﻿using Wp.Common.Services.NodaTime;
+
+namespace Wp.Common.Models
 {
     public class Guild
     {
@@ -48,7 +50,7 @@
         /// <summary>
         /// Gets the current time and date object with the offset of the server's TimeZone
         /// </summary>
-        public DateTimeOffset Now => DateTimeOffset.Now; // TODO
+        public DateTimeOffset Now => new NodaConverter().ConvertNowTo(timeZone);
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                            CONSTRUCTORS                           *|
