@@ -25,7 +25,7 @@ namespace Wp.Api
                 new ServiceAccountCredential.Initializer(email)
                 {
                     Scopes = new string[] { CalendarService.Scope.Calendar, CalendarService.Scope.CalendarEvents }
-                }.FromPrivateKey(Keys.GoogleCalendarToken)
+                }.FromPrivateKey(Keys.GOOGLE_CALENDAR_TOKEN)
             );
 
             service = new CalendarService(new BaseClientService.Initializer()

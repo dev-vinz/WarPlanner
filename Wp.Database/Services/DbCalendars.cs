@@ -29,7 +29,7 @@ namespace Wp.Database.Services
 		{
 			lock (_lock)
 			{
-				using Context ctx = new();
+				using EFModels.HEARC_P3Context ctx = new();
 
 				ctx.Calendars.Add(calendar.ToEFModel());
 				ctx.SaveChanges();
@@ -42,7 +42,7 @@ namespace Wp.Database.Services
 		{
 			lock (_lock)
 			{
-				using Context ctx = new();
+				using EFModels.HEARC_P3Context ctx = new();
 
 				EFModels.Calendar dbCalendar = ctx.Calendars.GetEFModel(calendar);
 				ctx.Calendars.Remove(dbCalendar);
@@ -63,7 +63,7 @@ namespace Wp.Database.Services
 		{
 			lock (_lock)
 			{
-				using Context ctx = new();
+				using EFModels.HEARC_P3Context ctx = new();
 
 				EFModels.Calendar dbCalendar = ctx.Calendars.GetEFModel(calendar);
 

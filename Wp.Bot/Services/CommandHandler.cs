@@ -61,6 +61,7 @@ namespace Wp.Bot.Services
 
             // Process the command execution results
             commands.SlashCommandExecuted += SlashCommandExecuted;
+            commands.ModalCommandExecuted += ModalCommandExecuted;
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -72,6 +73,11 @@ namespace Wp.Bot.Services
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          PRIVATE METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        private Task ModalCommandExecuted(ModalCommandInfo info, IInteractionContext ctx, IResult result)
+        {
+            return Task.CompletedTask;
+        }
 
         private async Task HandleInteraction(SocketInteraction socket)
         {

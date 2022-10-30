@@ -1,37 +1,23 @@
-﻿using Discord;
-using Discord.Interactions;
-using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
-using Wp.Api.Settings;
-using Wp.Bot.Services;
-using Wp.Database.Settings;
+﻿using Discord.Interactions;
+using Wp.Bot.Services.Languages;
+using Wp.Bot.Services.Languages.French;
+using Wp.Common.Models;
 
-namespace Wp.Bot
+namespace Wp.Bot.Modules.ModalCommands
 {
-    public class Program
+    public class ModalCommandModel : InteractionModuleBase<SocketInteractionContext>
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        private DiscordSocketClient? client;
-        private InteractionService? commands;
+
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                             PROPERTIES                            *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        private static bool IsDebug
-        {
-            get
-            {
-#if DEBUG
-                return true;
-#else
-                return false;
-#endif
-            }
-        }
+        public InteractionService? Commands { get; set; }
 
         /* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
@@ -55,61 +41,32 @@ namespace Wp.Bot
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public async Task MainAsync()
-        {
-            // Call ConfigureServices to create the ServiceCollection/Provider for passing around the services
-            using ServiceProvider services = ConfigureServices();
 
-            // Get the client and assign to client 
-            // You get the services via GetRequiredService<T>
-            client = services.GetRequiredService<DiscordSocketClient>();
-            commands = services.GetRequiredService<InteractionService>();
-
-            // Setup logging and the ready event
-            client.Log += LogAsync;
-            client.Ready += ReadyAsync;
-            commands.Log += LogAsync;
-
-            // This is where we get the Token value from the configuration file, and start the bot
-            await client.LoginAsync(TokenType.Bot, Keys.DISCORD_BOT_TOKEN);
-            await client.StartAsync();
-
-            // We get the CommandHandler class here and call the InitializeAsync method to start things up for the CommandHandler service
-            await services.GetRequiredService<CommandHandler>().InitializeAsync();
-
-            await Task.Delay(Timeout.Infinite);
-        }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         PROTECTED METHODS                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        protected IPlayer GetPlayerModalText()
+        {
+            Guild? dbGuild = Database.Context
+                .Guilds
+                .FirstOrDefault(g => g.Id == Context.Guild.Id);
 
+            if (dbGuild is null) throw new ArgumentNullException(nameof(dbGuild));
+
+            return dbGuild.Language switch
+            {
+                Common.Models.Language.FRENCH => new PlayerFrench(),
+                _ => throw new ArgumentOutOfRangeException(nameof(dbGuild.Language), dbGuild.Language, null),
+            };
+        }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          PRIVATE METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        private Task LogAsync(LogMessage log)
-        {
-            Console.WriteLine(log.ToString());
-            return Task.CompletedTask;
-        }
 
-        private async Task ReadyAsync()
-        {
-            if (IsDebug)
-            {
-                Console.WriteLine($"DEBUG MODE : Adding commands to {Configurations.DEV_GUILD_ID}...");
-                await commands!.RegisterCommandsToGuildAsync(Configurations.DEV_GUILD_ID);
-            }
-            else
-            {
-                await commands!.RegisterCommandsGloballyAsync(true);
-            }
-
-            Console.WriteLine($"Connected as [{client!.CurrentUser}]");
-        }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          OVERRIDE METHODS                         *|
@@ -121,16 +78,7 @@ namespace Wp.Bot
         |*                           STATIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        private static ServiceProvider ConfigureServices()
-        {
-            return new ServiceCollection()
-                .AddSingleton<DiscordSocketClient>()
-                .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
-                .AddSingleton<CommandHandler>()
-                .BuildServiceProvider();
-        }
 
-        public static Task Main(string[] args) => new Program().MainAsync();
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                              INDEXERS                             *|
@@ -141,5 +89,8 @@ namespace Wp.Bot
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         OPERATORS OVERLOAD                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+
     }
 }

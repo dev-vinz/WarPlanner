@@ -21,6 +21,7 @@ namespace Wp.Api.Extensions
             cWar
                 .Clan?
                 .Members?
+                .AsParallel()
                 .SelectMany(m => m.Attacks ?? Enumerable.Empty<ClanWarAttack>())
                 .ToList()
                 .ForEach(a => attacks.Add(a));
@@ -29,6 +30,7 @@ namespace Wp.Api.Extensions
             cWar
                 .Opponent?
                 .Members?
+                .AsParallel()
                 .SelectMany(m => m.Attacks ?? Enumerable.Empty<ClanWarAttack>())
                 .ToList()
                 .ForEach(a => attacks.Add(a));

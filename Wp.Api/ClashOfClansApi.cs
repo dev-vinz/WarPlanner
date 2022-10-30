@@ -14,12 +14,20 @@ namespace Wp.Api
         private static readonly ClashOfClansClient client;
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                             PROPERTIES                            *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public static ClashOfClansError Error { get; set; }
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                            CONSTRUCTORS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         static ClashOfClansApi()
         {
-            client = new ClashOfClansClient(Keys.ClashOfClansToken);
+            client = new ClashOfClansClient(Keys.CLASH_OF_CLANS_TOKEN);
+
+            Error = ClashOfClansError.NOT_FOUND;
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -36,6 +44,8 @@ namespace Wp.Api
                 {
                     try
                     {
+                        if (!tag.StartsWith('#')) tag = $"#{tag}";
+
                         clan = await client.Clans.GetClanAsync(tag);
                     }
                     catch (ClashOfClansException)
@@ -54,6 +64,8 @@ namespace Wp.Api
                 {
                     try
                     {
+                        if (!tag.StartsWith('#')) tag = $"#{tag}";
+
                         group = await client.Clans.GetClanWarLeagueGroupAsync(tag);
                     }
                     catch (ClashOfClansException)
@@ -72,6 +84,8 @@ namespace Wp.Api
                 {
                     try
                     {
+                        if (!tag.StartsWith('#')) tag = $"#{tag}";
+
                         war = await client.Clans.GetCurrentWarAsync(tag);
                     }
                     catch (ClashOfClansException)
@@ -98,6 +112,8 @@ namespace Wp.Api
                 {
                     try
                     {
+                        if (!tag.StartsWith('#')) tag = $"#{tag}";
+
                         player = await client.Players.GetPlayerAsync(tag.ToUpper().Replace('O', '0'));
                     }
                     catch (ClashOfClansException)
@@ -116,6 +132,8 @@ namespace Wp.Api
                 {
                     try
                     {
+                        if (!tag.StartsWith('#')) tag = $"#{tag}";
+
                         verifyResponse = await client.Players.VerifyTokenAsync(tag, token);
                     }
                     catch (ClashOfClansException)

@@ -1,11 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Wp.Database.Services;
 using Wp.Database.Services.Extensions;
-using Context = Wp.Database.EFModels.HEARC_P3Context;
 
 namespace Wp.Database
 {
-    public static class Database
+    public static class Context
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
@@ -26,7 +25,7 @@ namespace Wp.Database
             {
                 lock (_lock)
                 {
-                    using Context ctx = new();
+                    using EFModels.HEARC_P3Context ctx = new();
 
                     return new DbCalendars(
                         ctx.Calendars
@@ -48,7 +47,7 @@ namespace Wp.Database
             {
                 lock (_lock)
                 {
-                    using Context ctx = new();
+                    using EFModels.HEARC_P3Context ctx = new();
 
                     return new DbClans(
                         ctx.Clans
@@ -70,7 +69,7 @@ namespace Wp.Database
             {
                 lock (_lock)
                 {
-                    using Context ctx = new();
+                    using EFModels.HEARC_P3Context ctx = new();
 
                     return new DbCompetitions(
                         ctx.Competitions
@@ -92,7 +91,7 @@ namespace Wp.Database
             {
                 lock (_lock)
                 {
-                    using Context ctx = new();
+                    using EFModels.HEARC_P3Context ctx = new();
 
                     return new DbGuilds(
                         ctx.Guilds
@@ -113,7 +112,7 @@ namespace Wp.Database
             {
                 lock (_lock)
                 {
-                    using Context ctx = new();
+                    using EFModels.HEARC_P3Context ctx = new();
 
                     return new DbPlayers(
                         ctx.Players
@@ -135,7 +134,7 @@ namespace Wp.Database
             {
                 lock (_lock)
                 {
-                    using Context ctx = new();
+                    using EFModels.HEARC_P3Context ctx = new();
 
                     return new DbPlayerStatistics(
                         ctx.PlayerStatistics
@@ -157,7 +156,7 @@ namespace Wp.Database
             {
                 lock (_lock)
                 {
-                    using Context ctx = new();
+                    using EFModels.HEARC_P3Context ctx = new();
 
                     return new DbRoles(
                         ctx.Roles
@@ -179,7 +178,7 @@ namespace Wp.Database
             {
                 lock (_lock)
                 {
-                    using Context ctx = new();
+                    using EFModels.HEARC_P3Context ctx = new();
 
                     return new DbTimes(
                         ctx.Times
@@ -201,7 +200,7 @@ namespace Wp.Database
             {
                 lock (_lock)
                 {
-                    using Context ctx = new();
+                    using EFModels.HEARC_P3Context ctx = new();
 
                     return new DbWarStatistics(
                         ctx.WarStatistics

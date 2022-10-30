@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Wp.Common.Models;
 using Wp.Database.Services;
-using DB = Wp.Database.Database;
+using DB = Wp.Database.Context;
 
 namespace Wp.Test.Database
 {
