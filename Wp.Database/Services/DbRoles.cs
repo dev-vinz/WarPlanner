@@ -1,6 +1,5 @@
 ﻿using Wp.Common.Models;
 using Wp.Database.Services.Extensions;
-using Context = Wp.Database.EFModels.HEARC_P3Context;
 
 namespace Wp.Database.Services
 {
@@ -25,6 +24,10 @@ namespace Wp.Database.Services
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		/// <summary>
+		/// Adds a role to the database and saves it
+		/// </summary>
+		/// <param name="role">The role to be added to the database</param>
 		public new void Add(Role role)
 		{
 			lock (_lock)
@@ -38,6 +41,11 @@ namespace Wp.Database.Services
 			base.Add(role);
 		}
 
+		/// <summary>
+		/// Removes a role from the database
+		/// </summary>
+		/// <param name="role">The role to be removed</param>
+		/// <returns>true if role is successfully removed; false otherwise</returns>
 		public new bool Remove(Role role)
 		{
 			lock (_lock)
@@ -52,6 +60,11 @@ namespace Wp.Database.Services
 			return base.Remove(role);
 		}
 
+		/// <summary>
+		/// Removes a role from the database
+		/// </summary>
+		/// <param name="predicate">A delegate for the matching role to be removed</param>
+		/// <returns>true if role is successfully removed; false otherwise</returns>
 		public bool Remove(Predicate<Role> predicate)
 		{
 			Role? role = Find(predicate);

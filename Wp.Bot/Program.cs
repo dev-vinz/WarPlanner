@@ -124,7 +124,12 @@ namespace Wp.Bot
         private static ServiceProvider ConfigureServices()
         {
             return new ServiceCollection()
-                .AddSingleton<DiscordSocketClient>()
+                //.AddSingleton<DiscordSocketClient>()
+                .AddSingleton(x => new DiscordSocketClient(new DiscordSocketConfig
+                {
+                    GatewayIntents = GatewayIntents.AllUnprivileged,
+                    AlwaysDownloadUsers = true,
+                }))
                 .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
                 .AddSingleton<CommandHandler>()
                 .BuildServiceProvider();

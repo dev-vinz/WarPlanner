@@ -1,8 +1,8 @@
 ﻿using Wp.Api;
 
-namespace Wp.Bot.Services.Languages
+namespace Wp.Language
 {
-    public interface IGlobalResponse
+    public interface IGeneralResponse
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         PROTECTED FIELDS                          *|

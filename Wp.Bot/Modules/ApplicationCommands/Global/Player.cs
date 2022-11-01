@@ -1,17 +1,16 @@
 ﻿using Discord.Interactions;
-using Wp.Bot.Services.Languages;
-using Wp.Bot.Services.Languages.French;
-using Wp.Common.Models;
+using Wp.Bot.Modules.ModalCommands.Modals;
+using Wp.Bot.Services;
 
-namespace Wp.Bot.Modules.ApplicationCommands
+namespace Wp.Bot.Modules.ApplicationCommands.Global
 {
-    public class ApplicationCommandModel : InteractionModuleBase<SocketInteractionContext>
+    public class Player : InteractionModuleBase<SocketInteractionContext>
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
+        private readonly CommandHandler handler;
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                             PROPERTIES                            *|
@@ -29,7 +28,10 @@ namespace Wp.Bot.Modules.ApplicationCommands
         |*                            CONSTRUCTORS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
+        public Player(CommandHandler handler)
+        {
+            this.handler = handler;
+        }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          ABSTRACT METHODS                         *|
@@ -41,26 +43,25 @@ namespace Wp.Bot.Modules.ApplicationCommands
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        [SlashCommand("claim", "Link a COC account to your Discord profile")]
+        public async Task ClaimAccount()
+        {
+            await RespondWithModalAsync<ClaimModal>(ClaimModal.ID);
+        }
 
+        [SlashCommand("defer", "Defer test")]
+        public async Task Defer()
+        {
+            await DeferAsync(true);
+
+            await ModifyOriginalResponseAsync(m => m.Content = "Terminé");
+        }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         PROTECTED METHODS                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        protected IPlayer GetPlayerCommandText()
-        {
-            Guild? dbGuild = Database.Context
-                .Guilds
-                .FirstOrDefault(g => g.Id == Context.Guild.Id);
 
-            if (dbGuild is null) throw new ArgumentNullException(nameof(dbGuild));
-
-            return dbGuild.Language switch
-            {
-                Language.FRENCH => new PlayerFrench(),
-                _ => throw new ArgumentOutOfRangeException(nameof(dbGuild.Language), dbGuild.Language, null),
-            };
-        }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          PRIVATE METHODS                          *|

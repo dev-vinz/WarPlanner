@@ -7,12 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NodaTime" Version="3.1.5" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Wp.Api\Wp.Api.csproj" />
-    <ProjectReference Include="..\Wp.Language\Wp.Language.csproj" />
   </ItemGroup>
 
 </Project>

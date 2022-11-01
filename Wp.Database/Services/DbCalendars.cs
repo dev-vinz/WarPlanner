@@ -1,6 +1,5 @@
 ﻿using Wp.Common.Models;
 using Wp.Database.Services.Extensions;
-using Context = Wp.Database.EFModels.HEARC_P3Context;
 
 namespace Wp.Database.Services
 {
@@ -25,6 +24,10 @@ namespace Wp.Database.Services
 		|*                           PUBLIC METHODS                          *|
 		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		/// <summary>
+		/// Adds a calendar to the database and saves it
+		/// </summary>
+		/// <param name="calendar">The calendar to be added to the database</param>
 		public new void Add(Calendar calendar)
 		{
 			lock (_lock)
@@ -38,6 +41,11 @@ namespace Wp.Database.Services
 			base.Add(calendar);
 		}
 
+		/// <summary>
+		/// Removes a calendar from the database
+		/// </summary>
+		/// <param name="calendar">The calendar to be removed</param>
+		/// <returns>true if calendar is successfully removed; false otherwise</returns>
 		public new bool Remove(Calendar calendar)
 		{
 			lock (_lock)
@@ -52,6 +60,11 @@ namespace Wp.Database.Services
 			return base.Remove(calendar);
 		}
 
+		/// <summary>
+		/// Removes a calendar from the database
+		/// </summary>
+		/// <param name="predicate">A delegate for the matching calendar to be removed</param>
+		/// <returns>true if calendar is successfully removed; false otherwise</returns>
 		public bool Remove(Predicate<Calendar> predicate)
 		{
 			Calendar? calendar = Find(predicate);
@@ -59,6 +72,10 @@ namespace Wp.Database.Services
 			return calendar != null && Remove(calendar);
 		}
 
+		/// <summary>
+		/// Updates a calendar in the database
+		/// </summary>
+		/// <param name="calendar">The calendar to be updated</param>
 		public void Update(Calendar calendar)
 		{
 			lock (_lock)

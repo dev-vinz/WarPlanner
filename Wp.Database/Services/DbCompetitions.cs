@@ -1,6 +1,5 @@
 ﻿using Wp.Common.Models;
 using Wp.Database.Services.Extensions;
-using Context = Wp.Database.EFModels.HEARC_P3Context;
 
 namespace Wp.Database.Services
 {
@@ -25,6 +24,10 @@ namespace Wp.Database.Services
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        /// <summary>
+		/// Adds a competition to the database and saves it
+		/// </summary>
+		/// <param name="competition">The competition to be added to the database</param>
         public new void Add(Competition competition)
         {
             lock (_lock)
@@ -38,6 +41,11 @@ namespace Wp.Database.Services
             base.Add(competition);
         }
 
+        /// <summary>
+		/// Removes a competition from the database
+		/// </summary>
+		/// <param name="competition">The competition to be removed</param>
+		/// <returns>true if competition is successfully removed; false otherwise</returns>
         public new bool Remove(Competition competition)
         {
             lock (_lock)
@@ -52,6 +60,11 @@ namespace Wp.Database.Services
             return base.Remove(competition);
         }
 
+        /// <summary>
+		/// Removes a competition from the database
+		/// </summary>
+		/// <param name="predicate">A delegate for the matching competition to be removed</param>
+		/// <returns>true if competition is successfully removed; false otherwise</returns>
         public bool Remove(Predicate<Competition> predicate)
         {
             Competition? competition = Find(predicate);
@@ -59,6 +72,10 @@ namespace Wp.Database.Services
             return competition != null && Remove(competition);
         }
 
+        /// <summary>
+		/// Updates a competition in the database
+		/// </summary>
+		/// <param name="competition">The competition to be updated</param>
         public void Update(Competition competition)
         {
             lock (_lock)

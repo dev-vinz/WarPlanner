@@ -1,6 +1,5 @@
 ﻿using Wp.Common.Models;
 using Wp.Database.Services.Extensions;
-using Context = Wp.Database.EFModels.HEARC_P3Context;
 
 namespace Wp.Database.Services
 {
@@ -25,6 +24,10 @@ namespace Wp.Database.Services
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		/// <summary>
+		/// Adds a player statistic to the database and saves it
+		/// </summary>
+		/// <param name="playerStatistic">The player statistic to be added to the database</param>
 		public new void Add(PlayerStatistic playerStatistic)
 		{
 			lock (_lock)
@@ -38,6 +41,11 @@ namespace Wp.Database.Services
 			base.Add(playerStatistic);
 		}
 
+		/// <summary>
+		/// Removes a player statistic from the database
+		/// </summary>
+		/// <param name="playerStatistic">The player statistic to be removed</param>
+		/// <returns>true if player statistic is successfully removed; false otherwise</returns>
 		public new bool Remove(PlayerStatistic playerStatistic)
 		{
 			lock (_lock)
@@ -52,6 +60,11 @@ namespace Wp.Database.Services
 			return base.Remove(playerStatistic);
 		}
 
+		/// <summary>
+		/// Removes a player statistic from the database
+		/// </summary>
+		/// <param name="predicate">A delegate for the matching player statistic to be removed</param>
+		/// <returns>true if player statistic is successfully removed; false otherwise</returns>
 		public bool Remove(Predicate<PlayerStatistic> predicate)
 		{
 			PlayerStatistic? playerStatistic = Find(predicate);

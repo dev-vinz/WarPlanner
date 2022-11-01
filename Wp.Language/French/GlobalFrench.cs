@@ -1,6 +1,6 @@
-﻿namespace Wp.Bot.Services.Languages.French
+﻿namespace Wp.Language.French
 {
-    public class PlayerFrench : IPlayer
+    public class GlobalFrench : IGlobal
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                            CLAIM MODAL                            *|

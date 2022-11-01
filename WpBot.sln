@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wp.Database", "Wp.Database\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wp.Api", "Wp.Api\Wp.Api.csproj", "{7B5C5DCD-923A-4A00-BD46-69C555557323}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wp.Test", "Wp.Test\Wp.Test.csproj", "{9A6FEB41-ACAB-4E58-A3B5-4D1E4B23DE29}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wp.Test", "Wp.Test\Wp.Test.csproj", "{9A6FEB41-ACAB-4E58-A3B5-4D1E4B23DE29}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wp.Language", "Wp.Language\Wp.Language.csproj", "{7A1212BE-5DF7-487F-91FA-99F4C5DA8290}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{9A6FEB41-ACAB-4E58-A3B5-4D1E4B23DE29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A6FEB41-ACAB-4E58-A3B5-4D1E4B23DE29}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A6FEB41-ACAB-4E58-A3B5-4D1E4B23DE29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A1212BE-5DF7-487F-91FA-99F4C5DA8290}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A1212BE-5DF7-487F-91FA-99F4C5DA8290}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A1212BE-5DF7-487F-91FA-99F4C5DA8290}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A1212BE-5DF7-487F-91FA-99F4C5DA8290}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

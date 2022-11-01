@@ -62,6 +62,7 @@ namespace Wp.Bot.Services
             // Process the command execution results
             commands.SlashCommandExecuted += SlashCommandExecuted;
             commands.ModalCommandExecuted += ModalCommandExecuted;
+            commands.ComponentCommandExecuted += ComponentCommandExecuted;
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -74,8 +75,59 @@ namespace Wp.Bot.Services
         |*                          PRIVATE METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        private Task ComponentCommandExecuted(ComponentCommandInfo info, IInteractionContext ctx, IResult result)
+        {
+            if (!result.IsSuccess)
+            {
+                switch (result.Error)
+                {
+                    case InteractionCommandError.UnknownCommand:
+                        break;
+                    case InteractionCommandError.ConvertFailed:
+                        break;
+                    case InteractionCommandError.BadArgs:
+                        break;
+                    case InteractionCommandError.Exception:
+                        break;
+                    case InteractionCommandError.Unsuccessful:
+                        break;
+                    case InteractionCommandError.UnmetPrecondition:
+                        break;
+                    case InteractionCommandError.ParseFailed:
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+
         private Task ModalCommandExecuted(ModalCommandInfo info, IInteractionContext ctx, IResult result)
         {
+            if (!result.IsSuccess)
+            {
+                switch (result.Error)
+                {
+                    case InteractionCommandError.UnknownCommand:
+                        break;
+                    case InteractionCommandError.ConvertFailed:
+                        break;
+                    case InteractionCommandError.BadArgs:
+                        break;
+                    case InteractionCommandError.Exception:
+                        break;
+                    case InteractionCommandError.Unsuccessful:
+                        break;
+                    case InteractionCommandError.UnmetPrecondition:
+                        break;
+                    case InteractionCommandError.ParseFailed:
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             return Task.CompletedTask;
         }
 

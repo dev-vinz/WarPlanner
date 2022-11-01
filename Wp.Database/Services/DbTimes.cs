@@ -1,6 +1,5 @@
 ﻿using Wp.Common.Models;
 using Wp.Database.Services.Extensions;
-using Context = Wp.Database.EFModels.HEARC_P3Context;
 
 namespace Wp.Database.Services
 {
@@ -25,6 +24,10 @@ namespace Wp.Database.Services
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		/// <summary>
+		/// Adds a time to the database and saves it
+		/// </summary>
+		/// <param name="time">The time to be added to the database</param>
 		public new void Add(Time time)
 		{
 			lock (_lock)
@@ -38,6 +41,11 @@ namespace Wp.Database.Services
 			base.Add(time);
 		}
 
+		/// <summary>
+		/// Removes a time from the database
+		/// </summary>
+		/// <param name="time">The time to be removed</param>
+		/// <returns>true if time is successfully removed; false otherwise</returns>
 		public new bool Remove(Time time)
 		{
 			lock (_lock)
@@ -52,6 +60,11 @@ namespace Wp.Database.Services
 			return base.Remove(time);
 		}
 
+		/// <summary>
+		/// Removes a time from the database
+		/// </summary>
+		/// <param name="predicate">A delegate for the matching time to be removed</param>
+		/// <returns>true if time is successfully removed; false otherwise</returns>
 		public bool Remove(Predicate<Time> predicate)
 		{
 			Time? time = Find(predicate);
@@ -59,6 +72,10 @@ namespace Wp.Database.Services
 			return time != null && Remove(time);
 		}
 
+		/// <summary>
+		/// Updates a time in the database
+		/// </summary>
+		/// <param name="time">The time to be updated</param>
 		public void Update(Time time)
 		{
 			lock (_lock)

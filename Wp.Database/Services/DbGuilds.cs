@@ -1,6 +1,5 @@
 ﻿using Wp.Common.Models;
 using Wp.Database.Services.Extensions;
-using Context = Wp.Database.EFModels.HEARC_P3Context;
 
 namespace Wp.Database.Services
 {
@@ -25,6 +24,10 @@ namespace Wp.Database.Services
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		/// <summary>
+		/// Adds a guild to the database and saves it
+		/// </summary>
+		/// <param name="guild">The guild to be added to the database</param>
 		public new void Add(Guild guild)
 		{
 			lock (_lock)
@@ -38,6 +41,11 @@ namespace Wp.Database.Services
 			base.Add(guild);
 		}
 
+		/// <summary>
+		/// Removes a guild from the database
+		/// </summary>
+		/// <param name="guild">The guild to be removed</param>
+		/// <returns>true if guild is successfully removed; false otherwise</returns>
 		public new bool Remove(Guild guild)
 		{
 			lock (_lock)
@@ -52,6 +60,11 @@ namespace Wp.Database.Services
 			return base.Remove(guild);
 		}
 
+		/// <summary>
+		/// Removes a guild from the database
+		/// </summary>
+		/// <param name="predicate">A delegate for the matching guild to be removed</param>
+		/// <returns>true if guild is successfully removed; false otherwise</returns>
 		public bool Remove(Predicate<Guild> predicate)
 		{
 			Guild? guild = Find(predicate);
@@ -59,6 +72,10 @@ namespace Wp.Database.Services
 			return guild != null && Remove(guild);
 		}
 
+		/// <summary>
+		/// Updates a guild in the database
+		/// </summary>
+		/// <param name="guild">The guild to be updated</param>
 		public void Update(Guild guild)
 		{
 			lock (_lock)

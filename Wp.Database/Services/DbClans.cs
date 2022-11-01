@@ -1,6 +1,5 @@
 ﻿using Wp.Common.Models;
 using Wp.Database.Services.Extensions;
-using Context = Wp.Database.EFModels.HEARC_P3Context;
 
 namespace Wp.Database.Services
 {
@@ -25,6 +24,10 @@ namespace Wp.Database.Services
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        /// <summary>
+        /// Adds a clan to the database and saves it
+        /// </summary>
+        /// <param name="clan">The clan to be added to the database</param>
         public new void Add(Clan clan)
         {
             lock (_lock)
@@ -38,6 +41,11 @@ namespace Wp.Database.Services
             base.Add(clan);
         }
 
+        /// <summary>
+		/// Removes a clan from the database
+		/// </summary>
+		/// <param name="clan">The clan to be removed</param>
+		/// <returns>true if clan is successfully removed; false otherwise</returns>
         public new bool Remove(Clan clan)
         {
             lock (_lock)
@@ -52,6 +60,11 @@ namespace Wp.Database.Services
             return base.Remove(clan);
         }
 
+        /// <summary>
+		/// Removes a clan from the database
+		/// </summary>
+		/// <param name="predicate">A delegate for the matching clan to be removed</param>
+		/// <returns>true if clan is successfully removed; false otherwise</returns>
         public bool Remove(Predicate<Clan> predicate)
         {
             Clan? clan = Find(predicate);

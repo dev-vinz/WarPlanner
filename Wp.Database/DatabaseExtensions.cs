@@ -75,7 +75,7 @@ namespace Wp.Database
 
 		public static Guild ToModel(this EFModels.Guild guild) => new((ulong)guild.Id, (Common.Models.TimeZone)guild.TimeZone)
 		{
-			Language = (Language)guild.Language,
+			Language = (Common.Models.Language)guild.Language,
 			PremiumLevel = (PremiumLevel)guild.PremiumLevel,
 			MinimalTownHallLevel = (uint)guild.MinThlevel,
 		};

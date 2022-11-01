@@ -4,15 +4,15 @@ using Discord.Interactions;
 using Wp.Api;
 using Wp.Bot.Modules.ModalCommands.Modals;
 using Wp.Bot.Services;
-using Wp.Bot.Services.Languages;
 using Wp.Common.Models;
 using Wp.Database.Services;
 using Wp.Database.Services.Extensions;
 using Wp.Database.Settings;
+using Wp.Language;
 
-namespace Wp.Bot.Modules.ModalCommands.Player
+namespace Wp.Bot.Modules.ModalCommands.Global
 {
-    public class Player : ModalCommandModel
+    public class Player : InteractionModuleBase<SocketInteractionContext>
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
@@ -24,7 +24,7 @@ namespace Wp.Bot.Modules.ModalCommands.Player
         |*                             PROPERTIES                            *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
+        public InteractionService? Commands { get; set; }
 
         /* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
@@ -54,7 +54,7 @@ namespace Wp.Bot.Modules.ModalCommands.Player
         [ModalInteraction(ClaimModal.ID)]
         public async Task ClaimAccount(ClaimModal modal)
         {
-            await RespondAsync("Loading...", ephemeral: true); // TODO : Change to DeferAsync... but seem's to doesn't work...
+            await RespondAsync("Loading...", ephemeral: true); // TODO : Change to DeferAsync... but seems to doesn't work...
             //await DeferAsync();
 
             // Loads databases infos
@@ -65,22 +65,20 @@ namespace Wp.Bot.Modules.ModalCommands.Player
             Guild dbGuild = guilds
                 .First(g => g.Id == Context.Guild.Id);
 
-            // Gets global responses
-            IGlobalResponse globalResponses = dbGuild
-                .Language
-                .GetGlobalResponse();
+            // Gets general responses
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
             ClashOfClans.Models.Player? cPlayer = await ClashOfClansApi.Players.GetByTagAsync(modal.Tag);
 
             if (cPlayer is null)
             {
-                await ModifyOriginalResponseAsync(msg => msg.Content = globalResponses.ClashOfClansError);
+                await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.ClashOfClansError);
 
                 return;
             }
 
-            // Gets commands responses
-            IPlayer commandText = GetPlayerModalText();
+            // Gets modal responses
+            IGlobal commandText = dbGuild.GlobalText;
 
             VerifyTokenResponse? verifyToken = await ClashOfClansApi.Players.VerifyTokenAsync(cPlayer.Tag, modal.Token);
 
@@ -100,7 +98,7 @@ namespace Wp.Bot.Modules.ModalCommands.Player
             {
                 ButtonBuilder supportButton = new ButtonBuilder()
                     .WithUrl(Configurations.SUPPORT_GUILD_INVITATION)
-                    .WithLabel(globalResponses.SupportServer)
+                    .WithLabel(generalResponses.SupportServer)
                     .WithStyle(ButtonStyle.Link)
                     .WithDisabled(false)
                     .WithEmote(new Emoji("⚙️"));
@@ -131,10 +129,7 @@ namespace Wp.Bot.Modules.ModalCommands.Player
             // Register new global account
             players.Add(dbPlayer);
 
-            await ModifyOriginalResponseAsync(msg =>
-            {
-                msg.Content = commandText.AccountClaimed(cPlayer.Name);
-            });
+            await ModifyOriginalResponseAsync(msg => msg.Content = commandText.AccountClaimed(cPlayer.Name));
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

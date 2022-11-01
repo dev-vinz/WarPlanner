@@ -1,4 +1,6 @@
 ﻿using Wp.Common.Services.NodaTime;
+using Wp.Language;
+using Wp.Language.French;
 
 namespace Wp.Common.Models
 {
@@ -51,6 +53,33 @@ namespace Wp.Common.Models
         /// Gets the current time and date object with the offset of the server's TimeZone
         /// </summary>
         public DateTimeOffset Now => new NodaConverter().ConvertNowTo(timeZone);
+
+        /// <summary>
+        /// Gets the general responses text, depending on the guild's language
+        /// </summary>
+        public IGeneralResponse GeneralResponses => language switch
+        {
+            Language.FRENCH => new FrenchGeneralResponse(),
+            _ => throw new ArgumentOutOfRangeException(nameof(language), language, null),
+        };
+
+        /// <summary>
+        /// Gets the global commands texts, depending on the guild's language
+        /// </summary>
+        public IGlobal GlobalText => language switch
+        {
+            Language.FRENCH => new GlobalFrench(),
+            _ => throw new ArgumentOutOfRangeException(nameof(language), language, null),
+        };
+
+        /// <summary>
+        /// Gets the manager commands texts, depending on the guild's language
+        /// </summary>
+        public IManager ManagerText => language switch
+        {
+            Language.FRENCH => new ManagerFrench(),
+            _ => throw new ArgumentOutOfRangeException(nameof(language), language, null),
+        };
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                            CONSTRUCTORS                           *|

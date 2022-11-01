@@ -1,6 +1,6 @@
-﻿namespace Wp.Bot.Services.Languages
+﻿namespace Wp.Language
 {
-    public interface IPlayer
+    public interface IGlobal
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                            CLAIM MODAL                            *|
