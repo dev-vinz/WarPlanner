@@ -1,5 +1,4 @@
 ﻿using Wp.Common.Models;
-using Wp.Database.Services.Extensions;
 
 namespace Wp.Database.Services
 {
@@ -17,7 +16,9 @@ namespace Wp.Database.Services
 
 		public DbTimes(IEnumerable<Time> times)
 		{
-			times.ForEach(t => base.Add(t));
+			times
+				.AsParallel()
+				.ForAll(t => base.Add(t));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

@@ -32,7 +32,8 @@ namespace Wp.Database
                             .Include(c => c.GuildNavigation)
                             .AsParallel()
                             .Select(c => c.ToModel())
-                            .CopyAsArray()
+                            .ToArray()
+                            .Copy()
                     );
                 }
             }
@@ -54,7 +55,8 @@ namespace Wp.Database
                             .Include(c => c.GuildNavigation)
                             .AsParallel()
                             .Select(c => c.ToModel())
-                            .CopyAsArray()
+                            .ToArray()
+                            .Copy()
                     );
                 }
             }
@@ -76,7 +78,8 @@ namespace Wp.Database
                             .Include(c => c.GuildNavigation)
                             .AsParallel()
                             .Select(c => c.ToModel())
-                            .CopyAsArray()
+                            .ToArray()
+                            .Copy()
                     );
                 }
             }
@@ -97,7 +100,8 @@ namespace Wp.Database
                         ctx.Guilds
                             .AsParallel()
                             .Select(g => g.ToModel())
-                            .CopyAsArray()
+                            .ToArray()
+                            .Copy()
                     );
                 }
             }
@@ -119,7 +123,8 @@ namespace Wp.Database
                             .Include(p => p.GuildNavigation)
                             .AsParallel()
                             .Select(p => p.ToModel())
-                            .CopyAsArray()
+                            .ToArray()
+                            .Copy()
                     );
                 }
             }
@@ -141,7 +146,8 @@ namespace Wp.Database
                             .Include(ps => ps.GuildNavigation)
                             .AsParallel()
                             .Select(ps => ps.ToModel())
-                            .CopyAsArray()
+                            .ToArray()
+                            .Copy()
                     );
                 }
             }
@@ -163,7 +169,8 @@ namespace Wp.Database
                             .Include(r => r.GuildNavigation)
                             .AsParallel()
                             .Select(r => r.ToModel())
-                            .CopyAsArray()
+                            .ToArray()
+                            .Copy()
                     );
                 }
             }
@@ -185,7 +192,8 @@ namespace Wp.Database
                             .Include(t => t.GuildNavigation)
                             .AsParallel()
                             .Select(t => t.ToModel())
-                            .CopyAsArray()
+                            .ToArray()
+                            .Copy()
                     );
                 }
             }
@@ -207,7 +215,8 @@ namespace Wp.Database
                             .Include(ws => ws.GuildNavigation)
                             .AsParallel()
                             .Select(ws => ws.ToModel())
-                            .CopyAsArray()
+                            .ToArray()
+                            .Copy()
                     );
                 }
             }

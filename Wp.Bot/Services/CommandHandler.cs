@@ -147,7 +147,9 @@ namespace Wp.Bot.Services
                 if (socket.Type == InteractionType.ApplicationCommand)
                 {
                     // Let the user know / Log into error channel
-                    await socket.GetOriginalResponseAsync().ContinueWith(async msg => await msg.Result.DeleteAsync());
+                    await socket
+                        .GetOriginalResponseAsync()
+                        .ContinueWith(async msg => await msg.Result.DeleteAsync());
                 }
             }
         }

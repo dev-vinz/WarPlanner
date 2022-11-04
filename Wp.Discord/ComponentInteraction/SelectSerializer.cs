@@ -1,22 +1,33 @@
-﻿using Discord.Interactions;
-using Wp.Bot.Modules.ModalCommands.Modals;
-using Wp.Bot.Services;
-
-namespace Wp.Bot.Modules.ApplicationCommands.Global
+﻿namespace Wp.Discord.ComponentInteraction
 {
-    public class Player : InteractionModuleBase<SocketInteractionContext>
+    public class SelectSerializer
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        private readonly CommandHandler handler;
+        private readonly ulong userId;
+        private readonly ulong channelId;
+        private readonly string selectId;
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                             PROPERTIES                            *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public InteractionService? Commands { get; set; }
+        /// <summary>
+        /// Gets the user id who can interact with the select component
+        /// </summary>
+        public ulong UserId { get => userId; }
+
+        /// <summary>
+        /// Gets the channel id where the select component was displayed
+        /// </summary>
+        public ulong ChannelId { get => channelId; }
+
+        /// <summary>
+        /// Gets the discord select component's id
+        /// </summary>
+        public string SelectId { get => selectId; }
 
         /* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
@@ -28,9 +39,20 @@ namespace Wp.Bot.Modules.ApplicationCommands.Global
         |*                            CONSTRUCTORS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public Player(CommandHandler handler)
+        /// <summary>
+        /// Represents a select component, wich can be encoded to determine an unique key value
+        /// </summary>
+        /// <param name="userId">An user id who interacts with the select</param>
+        /// <param name="channelId">An discord channel id where the select is</param>
+        /// <param name="selectId">A select component id</param>
+        public SelectSerializer(ulong userId, ulong channelId, string selectId)
         {
-            this.handler = handler;
+            // Inputs
+            {
+                this.userId = userId;
+                this.channelId = channelId;
+                this.selectId = selectId;
+            }
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -43,18 +65,13 @@ namespace Wp.Bot.Modules.ApplicationCommands.Global
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        [SlashCommand("claim", "Link a COC account to your Discord profile", runMode: RunMode.Async)]
-        public async Task ClaimAccount()
+        /// <summary>
+        /// Encodes the select component interaction to a string key value
+        /// </summary>
+        /// <returns>The string key value encoded</returns>
+        public string Encode()
         {
-            await RespondWithModalAsync<PlayerClaimModal>(PlayerClaimModal.ID);
-        }
-
-        [SlashCommand("defer", "Defer test", runMode: RunMode.Async)]
-        public async Task Defer()
-        {
-            await DeferAsync(true);
-
-            await ModifyOriginalResponseAsync(m => m.Content = "Terminé");
+            return $"{userId}_{channelId}_{selectId}";
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -73,13 +90,38 @@ namespace Wp.Bot.Modules.ApplicationCommands.Global
         |*                          OVERRIDE METHODS                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
+        public override string ToString()
+        {
+            return Encode();
+        }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           STATIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        /// <summary>
+        /// Decodes a string into a SelectSerializer
+        /// </summary>
+        /// <param name="encodedValue">The encoded string value to be decoded</param>
+        /// <returns>The select serialized with the different values</returns>
+        public static SelectSerializer? Decode(string encodedValue)
+        {
+            string[] tab = encodedValue.Split('_');
 
+            if (tab.Length != 3) return null;
+
+            string strUserId = tab[0];
+            string strChannelId = tab[1];
+            string selectId = tab[2];
+
+            if (!ulong.TryParse(strUserId, out ulong userId)) return null;
+
+            if (!ulong.TryParse(strChannelId, out ulong channelId)) return null;
+
+            if (string.IsNullOrWhiteSpace(selectId)) return null;
+
+            return new SelectSerializer(userId, channelId, selectId);
+        }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                              INDEXERS                             *|
@@ -90,7 +132,6 @@ namespace Wp.Bot.Modules.ApplicationCommands.Global
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         OPERATORS OVERLOAD                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 
 
 

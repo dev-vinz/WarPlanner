@@ -10,7 +10,6 @@ namespace Wp.Bot.Modules
         {
             // try setting a breakpoint here to see what kind of data is supplied in a ComponentInteraction.
             var c = Context;
-            var m = await Context.Interaction.GetOriginalResponseAsync();
             await RespondAsync($"You pressed a button!");
         }
 
@@ -18,8 +17,10 @@ namespace Wp.Bot.Modules
         [ComponentInteraction("menu1")]
         public async Task MenuHandler(string[] selections)
         {
+            var m = await Context.Interaction.GetOriginalResponseAsync();
+
             // For the sake of demonstration, we only want the first value selected.
-            await RespondAsync($"You selected {selections.First()}");
+            await RespondAsync($"You selected {selections.First()}", ephemeral: true);
         }
     }
 }

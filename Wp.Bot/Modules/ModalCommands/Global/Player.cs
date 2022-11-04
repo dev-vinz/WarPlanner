@@ -6,7 +6,6 @@ using Wp.Bot.Modules.ModalCommands.Modals;
 using Wp.Bot.Services;
 using Wp.Common.Models;
 using Wp.Database.Services;
-using Wp.Database.Services.Extensions;
 using Wp.Database.Settings;
 using Wp.Language;
 
@@ -51,8 +50,8 @@ namespace Wp.Bot.Modules.ModalCommands.Global
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        [ModalInteraction(ClaimModal.ID)]
-        public async Task ClaimAccount(ClaimModal modal)
+        [ModalInteraction(PlayerClaimModal.ID, runMode: RunMode.Async)]
+        public async Task ClaimAccount(PlayerClaimModal modal)
         {
             await RespondAsync("Loading...", ephemeral: true); // TODO : Change to DeferAsync... but seems to doesn't work...
             //await DeferAsync();
@@ -119,7 +118,9 @@ namespace Wp.Bot.Modules.ModalCommands.Global
             }
 
             // Remove local accounts
-            anyPlayers.ForEach(p => players.Remove(p!));
+            anyPlayers
+                .AsParallel()
+                .ForAll(p => players.Remove(p!));
 
             Guild devGuild = guilds
                 .First(g => g.Id == Configurations.DEV_GUILD_ID);

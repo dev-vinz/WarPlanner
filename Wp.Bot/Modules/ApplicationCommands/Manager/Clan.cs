@@ -4,6 +4,8 @@ using Wp.Api;
 using Wp.Bot.Services;
 using Wp.Common.Models;
 using Wp.Database.Services;
+using Wp.Discord.ComponentInteraction;
+using Wp.Discord.Extensions;
 using Wp.Language;
 
 namespace Wp.Bot.Modules.ApplicationCommands.Manager
@@ -48,7 +50,7 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        [SlashCommand("add", "Register a new clan within the guild")]
+        [SlashCommand("add", "Register a new clan within the guild", runMode: RunMode.Async)]
         public async Task Add([Summary("tag", "Clash Of Clans clan's tag")] string tag)
         {
             await DeferAsync(true);
@@ -89,7 +91,74 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
             await ModifyOriginalResponseAsync(msg => msg.Content = commandText.ClanRegistered(cClan.Name));
         }
 
-        [SlashCommand("button", "Test button")]
+        [SlashCommand("remove", "Remove a registered clan from the guild", runMode: RunMode.Async)]
+        public async Task Remove()
+        {
+            await DeferAsync();
+
+            // Loads databases infos
+            DbClans clans = Database.Context.Clans;
+
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
+
+            Competition[] competitions = Database.Context
+                .Competitions
+                .AsParallel()
+                .Where(c => c.Guild == dbGuild)
+                .ToArray();
+
+            // Gets command responses
+            IManager commandText = dbGuild.ManagerText;
+
+            if (clans.Count < 1)
+            {
+                await ModifyOriginalResponseAsync(msg => msg.Content = commandText.NoClanRegistered);
+
+                return;
+            }
+
+            // Build select menu
+            SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+                .WithCustomId(IdProvider.CLAN_REMOVE_SELECT_MENU);
+
+            clans
+                .AsParallel()
+                .ForAll(c =>
+                {
+                    if (!competitions.AsParallel().Any(comp => comp.MainTag == c.Tag || comp.SecondTag == c.Tag))
+                    {
+                        SelectOptionSerializer optionSerializer = new(dbGuild.Id, Context.User.Id, c.Tag);
+                        menuBuilder.AddOption(c.Profile?.Name, optionSerializer.ToString());
+                    }
+                });
+
+            if (menuBuilder.Options.Count < 1)
+            {
+                await ModifyOriginalResponseAsync(msg => msg.Content = commandText.ClansCurrentlyUsed);
+
+                return;
+            }
+
+            menuBuilder.Options = menuBuilder.Options
+                .AsParallel()
+                .OrderBy(o => o.Label)
+                .ToList();
+
+            ComponentBuilder componentBuilder = new ComponentBuilder()
+                .WithSelectMenu(menuBuilder);
+
+            IUserMessage message = await ModifyOriginalResponseAsync(msg =>
+            {
+                msg.Content = commandText.SelectClanToRemove;
+                msg.Components = new(componentBuilder.Build());
+            });
+
+            await message.DisableSelectAfterSelectionAsync(IdProvider.CLAN_REMOVE_SELECT_MENU, Context.User.Id);
+        }
+
+        [SlashCommand("button", "Test button", runMode: RunMode.Async)]
         public async Task ButtonInput()
         {
             var components = new ComponentBuilder();
@@ -105,28 +174,6 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
             components.WithButton(button);
 
             await RespondAsync("This message has a button!", components: components.Build(), ephemeral: true);
-        }
-
-        // Simple slash command to bring up a message with a select menu
-        [SlashCommand("menu", "Select Menu demo command")]
-        public async Task MenuInput()
-        {
-            var components = new ComponentBuilder();
-            // A SelectMenuBuilder is created
-            var select = new SelectMenuBuilder()
-            {
-                CustomId = "menu1",
-                Placeholder = "Select something"
-            };
-            // Options are added to the select menu. The option values can be generated on execution of the command. You can then use the value in the Handler for the select menu
-            // to determine what to do next. An example would be including the ID of the user who made the selection in the value.
-            select.AddOption("abc", "abc_value");
-            select.AddOption("def", "def_value");
-            select.AddOption("ghi", "ghi_value");
-
-            components.WithSelectMenu(select);
-
-            await RespondAsync("This message has a menu!", components: components.Build());
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

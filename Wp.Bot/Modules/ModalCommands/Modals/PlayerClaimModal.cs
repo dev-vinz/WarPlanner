@@ -2,7 +2,7 @@
 
 namespace Wp.Bot.Modules.ModalCommands.Modals
 {
-    public class ClaimModal : IModal
+    public class PlayerClaimModal : IModal
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|

@@ -12,11 +12,14 @@
     <PackageReference Include="Discord.Net.Commands" Version="3.8.1" />
     <PackageReference Include="Discord.Net.Extensions" Version="1.2.1" />
     <PackageReference Include="Discord.Net.Interactions" Version="3.8.1" />
+    <PackageReference Include="Discord.Net.Webhook" Version="3.8.1" />
+    <PackageReference Include="Discord.Net.WebSocket" Version="3.8.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Wp.Common\Wp.Common.csproj" />
     <ProjectReference Include="..\Wp.Database\Wp.Database.csproj" />
+    <ProjectReference Include="..\Wp.Discord\Wp.Discord.csproj" />
   </ItemGroup>
 
 </Project>

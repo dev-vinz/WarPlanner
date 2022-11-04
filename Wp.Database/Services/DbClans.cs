@@ -1,5 +1,4 @@
 ﻿using Wp.Common.Models;
-using Wp.Database.Services.Extensions;
 
 namespace Wp.Database.Services
 {
@@ -17,7 +16,9 @@ namespace Wp.Database.Services
 
         public DbClans(IEnumerable<Clan> clans)
         {
-            clans.ForEach(c => base.Add(c));
+            clans
+                .AsParallel()
+                .ForAll(c => base.Add(c));
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

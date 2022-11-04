@@ -1,5 +1,4 @@
 ﻿using Wp.Common.Models;
-using Wp.Database.Services.Extensions;
 
 namespace Wp.Database.Services
 {
@@ -17,7 +16,9 @@ namespace Wp.Database.Services
 
 		public DbRoles(IEnumerable<Role> roles)
 		{
-			roles.ForEach(r => base.Add(r));
+			roles
+				.AsParallel()
+				.ForAll(r => base.Add(r));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

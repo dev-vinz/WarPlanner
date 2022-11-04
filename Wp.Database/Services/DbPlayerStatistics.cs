@@ -1,5 +1,4 @@
 ﻿using Wp.Common.Models;
-using Wp.Database.Services.Extensions;
 
 namespace Wp.Database.Services
 {
@@ -17,7 +16,9 @@ namespace Wp.Database.Services
 
 		public DbPlayerStatistics(IEnumerable<PlayerStatistic> playerStatistics)
 		{
-			playerStatistics.ForEach(ps => base.Add(ps));
+			playerStatistics
+				.AsParallel()
+				.ForAll(ps => base.Add(ps));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

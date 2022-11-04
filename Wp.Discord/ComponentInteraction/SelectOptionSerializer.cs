@@ -1,22 +1,24 @@
-﻿using Discord.Interactions;
-using Wp.Bot.Modules.ModalCommands.Modals;
-using Wp.Bot.Services;
-
-namespace Wp.Bot.Modules.ApplicationCommands.Global
+﻿namespace Wp.Discord.ComponentInteraction
 {
-    public class Player : InteractionModuleBase<SocketInteractionContext>
+    public class SelectOptionSerializer
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        private readonly CommandHandler handler;
+        private readonly ulong guildId;
+        private readonly ulong userId;
+        private readonly string value;
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                             PROPERTIES                            *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public InteractionService? Commands { get; set; }
+        public ulong GuildId { get => guildId; }
+
+        public ulong UserId { get => userId; }
+
+        public string Value { get => value; }
 
         /* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
@@ -28,9 +30,14 @@ namespace Wp.Bot.Modules.ApplicationCommands.Global
         |*                            CONSTRUCTORS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public Player(CommandHandler handler)
+        public SelectOptionSerializer(ulong guildId, ulong userId, string value)
         {
-            this.handler = handler;
+            // Inputs
+            {
+                this.guildId = guildId;
+                this.userId = userId;
+                this.value = value;
+            }
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -43,18 +50,9 @@ namespace Wp.Bot.Modules.ApplicationCommands.Global
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        [SlashCommand("claim", "Link a COC account to your Discord profile", runMode: RunMode.Async)]
-        public async Task ClaimAccount()
+        public string Encode()
         {
-            await RespondWithModalAsync<PlayerClaimModal>(PlayerClaimModal.ID);
-        }
-
-        [SlashCommand("defer", "Defer test", runMode: RunMode.Async)]
-        public async Task Defer()
-        {
-            await DeferAsync(true);
-
-            await ModifyOriginalResponseAsync(m => m.Content = "Terminé");
+            return $"{guildId}_{userId}_{value}";
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -73,13 +71,38 @@ namespace Wp.Bot.Modules.ApplicationCommands.Global
         |*                          OVERRIDE METHODS                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
+        public override string ToString()
+        {
+            return Encode();
+        }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           STATIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        /// <summary>
+        /// Decodes a string into a SelectOptionSerializer
+        /// </summary>
+        /// <param name="encodedValue">The encoded string value to be decoded</param>
+        /// <returns>The select option serialized with the different values</returns>
+        public static SelectOptionSerializer? Decode(string encodedValue)
+        {
+            string[] tab = encodedValue.Split('_');
 
+            if (tab.Length != 3) return null;
+
+            string strGuildId = tab[0];
+            string strUserId = tab[1];
+            string value = tab[2];
+
+            if (!ulong.TryParse(strGuildId, out ulong guildId)) return null;
+
+            if (!ulong.TryParse(strUserId, out ulong userId)) return null;
+
+            if (string.IsNullOrWhiteSpace(value)) return null;
+
+            return new SelectOptionSerializer(guildId, userId, value);
+        }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                              INDEXERS                             *|
@@ -90,7 +113,6 @@ namespace Wp.Bot.Modules.ApplicationCommands.Global
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         OPERATORS OVERLOAD                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 
 
 

@@ -1,5 +1,4 @@
 ﻿using Wp.Common.Models;
-using Wp.Database.Services.Extensions;
 
 namespace Wp.Database.Services
 {
@@ -17,7 +16,9 @@ namespace Wp.Database.Services
 
         public DbCompetitions(IEnumerable<Competition> competitions)
         {
-            competitions.ForEach(c => base.Add(c));
+            competitions
+                .AsParallel()
+                .ForAll(c => base.Add(c));
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

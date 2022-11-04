@@ -1,22 +1,28 @@
-﻿using Discord.Interactions;
-using Wp.Bot.Modules.ModalCommands.Modals;
-using Wp.Bot.Services;
-
-namespace Wp.Bot.Modules.ApplicationCommands.Global
+﻿namespace Wp.Discord.ComponentInteraction
 {
-    public class Player : InteractionModuleBase<SocketInteractionContext>
+    public class ComponentStorage
     {
+        private static readonly object _lock = new();
+
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        private readonly CommandHandler handler;
+        private static ComponentStorage instance = null!;
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                             PROPERTIES                            *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public InteractionService? Commands { get; set; }
+        /// <summary>
+        /// Gets all the select ids that are waiting for interaction
+        /// </summary>
+        public HashSet<string> Selects { get; }
+
+        /// <summary>
+        /// Gets all the buttons id that are waiting for interaction and their custom value data
+        /// </summary>
+        public Dictionary<string, string> Buttons { get; }
 
         /* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
@@ -28,9 +34,10 @@ namespace Wp.Bot.Modules.ApplicationCommands.Global
         |*                            CONSTRUCTORS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public Player(CommandHandler handler)
+        private ComponentStorage()
         {
-            this.handler = handler;
+            Selects = new HashSet<string>();
+            Buttons = new Dictionary<string, string>();
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -43,19 +50,7 @@ namespace Wp.Bot.Modules.ApplicationCommands.Global
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        [SlashCommand("claim", "Link a COC account to your Discord profile", runMode: RunMode.Async)]
-        public async Task ClaimAccount()
-        {
-            await RespondWithModalAsync<PlayerClaimModal>(PlayerClaimModal.ID);
-        }
 
-        [SlashCommand("defer", "Defer test", runMode: RunMode.Async)]
-        public async Task Defer()
-        {
-            await DeferAsync(true);
-
-            await ModifyOriginalResponseAsync(m => m.Content = "Terminé");
-        }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         PROTECTED METHODS                         *|
@@ -79,7 +74,22 @@ namespace Wp.Bot.Modules.ApplicationCommands.Global
         |*                           STATIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        /// <summary>
+        /// Gets an unique instance of this class
+        /// </summary>
+        /// <returns>The Singleton</returns>
+        public static ComponentStorage GetInstance()
+        {
+            if (instance == null)
+            {
+                lock (_lock)
+                {
+                    instance ??= new ComponentStorage();
+                }
+            }
 
+            return instance;
+        }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                              INDEXERS                             *|
@@ -90,7 +100,6 @@ namespace Wp.Bot.Modules.ApplicationCommands.Global
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         OPERATORS OVERLOAD                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 
 
 

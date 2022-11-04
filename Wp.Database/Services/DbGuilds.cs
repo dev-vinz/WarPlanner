@@ -1,5 +1,4 @@
 ﻿using Wp.Common.Models;
-using Wp.Database.Services.Extensions;
 
 namespace Wp.Database.Services
 {
@@ -17,7 +16,9 @@ namespace Wp.Database.Services
 
 		public DbGuilds(IEnumerable<Guild> guilds)
 		{
-			guilds.ForEach(g => base.Add(g));
+			guilds
+				.AsParallel()
+				.ForAll(g => base.Add(g));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
