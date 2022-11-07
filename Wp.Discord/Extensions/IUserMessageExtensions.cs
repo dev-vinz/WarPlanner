@@ -19,7 +19,7 @@ namespace Wp.Discord.Extensions
         public static async Task DisableSelectAfterSelectionAsync(this IUserMessage message, string select_id, ulong userId, TimeSpan? limit = null)
         {
             // Encodes key
-            string key = new SelectSerializer(userId, message.Channel.Id, select_id).Encode();
+            string key = new SelectSerializer(userId, message.Id, select_id).Encode();
 
             // Gets the component interaction storage
             ComponentStorage storage = ComponentStorage.GetInstance();

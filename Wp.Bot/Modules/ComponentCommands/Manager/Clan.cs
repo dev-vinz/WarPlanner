@@ -1,4 +1,5 @@
 ﻿using Discord.Interactions;
+using Discord.WebSocket;
 using Wp.Api;
 using Wp.Bot.Services;
 using Wp.Common.Models;
@@ -82,6 +83,10 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 
         private bool TryDecodeSelectInteraction(string[] selections, out SelectSerializer selectSerializer, out SelectOptionSerializer[] optionsSerializer)
         {
+            // Get SocketMessageComponent and original message
+            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+            SocketUserMessage msg = socket.Message;
+
             // Decodes all options
             List<SelectOptionSerializer?> options = new();
 
@@ -89,7 +94,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
                 .AsParallel()
                 .ForAll(s => options.Add(SelectOptionSerializer.Decode(s)));
 
-            selectSerializer = new(Context.User.Id, Context.Channel.Id, IdProvider.CLAN_REMOVE_SELECT_MENU);
+            selectSerializer = new(Context.User.Id, msg.Id, IdProvider.CLAN_REMOVE_SELECT_MENU);
             optionsSerializer = options
                 .AsParallel()
                 .Where(o => o != null)

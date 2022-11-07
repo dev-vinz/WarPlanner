@@ -7,7 +7,7 @@
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         private readonly ulong userId;
-        private readonly ulong channelId;
+        private readonly ulong messageId;
         private readonly string selectId;
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -20,9 +20,9 @@
         public ulong UserId { get => userId; }
 
         /// <summary>
-        /// Gets the channel id where the select component was displayed
+        /// Gets the message id of the select
         /// </summary>
-        public ulong ChannelId { get => channelId; }
+        public ulong MessageId { get => messageId; }
 
         /// <summary>
         /// Gets the discord select component's id
@@ -43,14 +43,14 @@
         /// Represents a select component, wich can be encoded to determine an unique key value
         /// </summary>
         /// <param name="userId">An user id who interacts with the select</param>
-        /// <param name="channelId">An discord channel id where the select is</param>
+        /// <param name="messageId">An discord message id where the select is</param>
         /// <param name="selectId">A select component id</param>
-        public SelectSerializer(ulong userId, ulong channelId, string selectId)
+        public SelectSerializer(ulong userId, ulong messageId, string selectId)
         {
             // Inputs
             {
                 this.userId = userId;
-                this.channelId = channelId;
+                this.messageId = messageId;
                 this.selectId = selectId;
             }
         }
@@ -71,7 +71,7 @@
         /// <returns>The string key value encoded</returns>
         public string Encode()
         {
-            return $"{userId}_{channelId}_{selectId}";
+            return $"{userId}_{messageId}_{selectId}";
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
