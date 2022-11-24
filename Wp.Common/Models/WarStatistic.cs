@@ -98,7 +98,11 @@ namespace Wp.Common.Models
         /// <summary>
         /// Gets the Clash Of Clans clan's profile, via the API
         /// </summary>
-        public ClashOfClans.Models.Clan? Clan => ClashOfClansApi.Clans.GetByTagAsync(clanTag).Result;
+        public ClashOfClans.Models.Clan Clan => ClashOfClansApi.Clans.GetByTagAsync(clanTag).Result ?? new ClashOfClans.Models.Clan
+        {
+            Name = "[DELETED]",
+            Tag = clanTag
+        };
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                            CONSTRUCTORS                           *|

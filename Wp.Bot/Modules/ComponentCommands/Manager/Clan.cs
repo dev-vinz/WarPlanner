@@ -45,7 +45,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
         [ComponentInteraction(IdProvider.CLAN_REMOVE_SELECT_MENU, runMode: RunMode.Async)]
         public async Task RemoveSelect(string[] selections)
         {
-            if (!TryDecodeSelectInteraction(selections, out SelectSerializer selectSerializer, out SelectOptionSerializer[] optionsSerializer)) return;
+            if (!TryDecodeSelectInteraction(selections, IdProvider.CLAN_REMOVE_SELECT_MENU, out SelectSerializer selectSerializer, out SelectOptionSerializer[] optionsSerializer)) return;
 
             await DeferAsync();
 
@@ -74,14 +74,14 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             // Removes clan
             clans.Remove(c => c.Guild == dbGuild && c.Tag == cClan.Tag);
 
-            await ModifyOriginalResponseAsync(msg => msg.Content = interactionText.ClanRemoved(cClan.Name));
+            await ModifyOriginalResponseAsync(msg => msg.Content = interactionText.ClanSelectRemoved(cClan.Name));
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          PRIVATE METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        private bool TryDecodeSelectInteraction(string[] selections, out SelectSerializer selectSerializer, out SelectOptionSerializer[] optionsSerializer)
+        private bool TryDecodeSelectInteraction(string[] selections, string selectId, out SelectSerializer selectSerializer, out SelectOptionSerializer[] optionsSerializer)
         {
             // Get SocketMessageComponent and original message
             SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
@@ -94,7 +94,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
                 .AsParallel()
                 .ForAll(s => options.Add(SelectOptionSerializer.Decode(s)));
 
-            selectSerializer = new(Context.User.Id, msg.Id, IdProvider.CLAN_REMOVE_SELECT_MENU);
+            selectSerializer = new(Context.User.Id, msg.Id, selectId);
             optionsSerializer = options
                 .AsParallel()
                 .Where(o => o != null)
@@ -119,7 +119,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             // Checks if user is elligible for interaction
             if (Context.User.Id != optionsSerializer.First().UserId)
             {
-                Task response = RespondAsync(interactionText.UserNotAllowed, ephemeral: true);
+                Task response = RespondAsync(interactionText.UserNotAllowedToSelect, ephemeral: true);
                 response.Wait();
 
                 return false;

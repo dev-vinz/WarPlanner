@@ -20,9 +20,14 @@
         public HashSet<string> Selects { get; }
 
         /// <summary>
-        /// Gets all the buttons id that are waiting for interaction and their custom value data
+        /// Gets all the buttons id that are waiting for interaction, with the user id as value
         /// </summary>
-        public Dictionary<string, string> Buttons { get; }
+        public Dictionary<string, ulong> Buttons { get; }
+
+        /// <summary>
+        /// Gets some datas informations, associated by the message id key
+        /// </summary>
+        public Dictionary<ulong, string[]> ComponentDatas { get; }
 
         /* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
@@ -37,7 +42,8 @@
         private ComponentStorage()
         {
             Selects = new HashSet<string>();
-            Buttons = new Dictionary<string, string>();
+            Buttons = new Dictionary<string, ulong>();
+            ComponentDatas = new Dictionary<ulong, string[]>();
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

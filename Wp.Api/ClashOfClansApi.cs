@@ -11,6 +11,8 @@ namespace Wp.Api
         |*                               FIELDS                              *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        private static readonly string OWNER_TAG = "#J08PCCUQ";
+
         private static readonly ClashOfClansClient client;
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -31,11 +33,52 @@ namespace Wp.Api
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                           STATIC METHODS                          *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        /// <summary>
+        /// Tries to access the api, and change the error
+        /// </summary>
+        /// <returns>True if the request passed; False otherwise</returns>
+        public static async Task<bool> TryAccessApiAsync()
+        {
+            try
+            {
+                // Assumption : This tag (my account) exists forever
+                await client.Players.GetPlayerAsync(OWNER_TAG);
+
+                // Default message error
+                Error = ClashOfClansError.NOT_FOUND;
+
+                return true;
+            }
+            catch (ClashOfClansException exception)
+            {
+                Error = exception.Error.Reason switch
+                {
+                    "inMaintenance" => ClashOfClansError.IN_MAINTENANCE,
+                    "accessDenied" => ClashOfClansError.INVALID_IP,
+                    _ => ClashOfClansError.UNKNOWN_ERROR,
+                };
+
+                return false;
+            }
+        }
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                            CLAN METHODS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        /// <summary>
+        /// Accesses to clans methods
+        /// </summary>
         public static class Clans
         {
+            /// <summary>
+            /// Searches a clan by its tag
+            /// </summary>
+            /// <param name="tag">A Clash of Clans tag</param>
+            /// <returns>A Clash of Clans clan</returns>
             public static async Task<Clan?> GetByTagAsync(string tag)
             {
                 Clan? clan = null;
@@ -56,6 +99,11 @@ namespace Wp.Api
                 return clan;
             }
 
+            /// <summary>
+            /// Searches a clan war league group from a clan
+            /// </summary>
+            /// <param name="tag">A Clash of Clans tag</param>
+            /// <returns>A Clash of Clans clan war league group</returns>
             public static async Task<ClanWarLeagueGroup?> GetWarLeagueGroupAsync(string tag)
             {
                 ClanWarLeagueGroup? group = null;
@@ -76,6 +124,11 @@ namespace Wp.Api
                 return group;
             }
 
+            /// <summary>
+            /// Gets the current war of a clan
+            /// </summary>
+            /// <param name="tag">A Clash of Clans tag</param>
+            /// <returns>A Clash of Clans war</returns>
             public static async Task<ClanWar?> GetCurrentWarAsync(string tag)
             {
                 ClanWar? war = null;
@@ -97,13 +150,20 @@ namespace Wp.Api
             }
         }
 
-
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           PLAYER METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        /// <summary>
+        /// Accesses to players methods
+        /// </summary>
         public static class Players
         {
+            /// <summary>
+            /// Searchss a player account by its tag
+            /// </summary>
+            /// <param name="tag">A Clash of Clans tag</param>
+            /// <returns>A Clash of Clans account</returns>
             public static async Task<Player?> GetByTagAsync(string tag)
             {
                 Player? player = null;
@@ -124,6 +184,12 @@ namespace Wp.Api
                 return player;
             }
 
+            /// <summary>
+            /// Verifies an account by checking if a secret token corresponds to the tag
+            /// </summary>
+            /// <param name="tag">A Clash of Clans tag</param>
+            /// <param name="token">A Clash of Clans secret token</param>
+            /// <returns>A verify response sent by the API</returns>
             public static async Task<VerifyTokenResponse?> VerifyTokenAsync(string tag, string token)
             {
                 VerifyTokenResponse? verifyResponse = null;

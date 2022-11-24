@@ -38,7 +38,11 @@ namespace Wp.Common.Models
         /// <summary>
         /// Gets the Clash Of Clans account via the API
         /// </summary>
-        public ClashOfClans.Models.Player? Account => ClashOfClansApi.Players.GetByTagAsync(tag).Result;
+        public ClashOfClans.Models.Player Account => ClashOfClansApi.Players.GetByTagAsync(tag).Result ?? new ClashOfClans.Models.Player
+        {
+            Name = "[DELETED]",
+            Tag = tag,
+        };
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                            CONSTRUCTORS                           *|

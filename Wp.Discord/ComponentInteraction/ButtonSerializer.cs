@@ -1,64 +1,57 @@
-﻿using System.Web;
-using Wp.Api;
-
-namespace Wp.Common.Models
+﻿namespace Wp.Discord.ComponentInteraction
 {
-    public class Clan
+    public class ButtonSerializer
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        private readonly Guild guild;
-        private readonly string tag;
+        private readonly ulong userId;
+        private readonly ulong messageId;
+        private readonly string buttonId;
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                             PROPERTIES                            *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         /// <summary>
-        /// Gets the discord server associated at this instance
+        /// Gets the user id who can interact with the button component
         /// </summary>
-        public Guild Guild { get => guild; }
+        public ulong UserId { get => userId; }
 
         /// <summary>
-        /// Gets the Clash Of Clans' tag
+        /// Gets the message id of the button
         /// </summary>
-        public string Tag { get => tag; }
+        public ulong MessageId { get => messageId; }
+
+        /// <summary>
+        /// Gets the discord button component's id
+        /// </summary>
+        public string ButtonId { get => buttonId; }
 
         /* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
         \* * * * * * * * * * * * * * * * * */
 
-        /// <summary>
-        /// Gets the Clash Of Clans redirection's link to the clan
-        /// </summary>
-        public string Link => $"https://link.clashofclans.com/{guild.Language.GetShortcutValue()}?action=OpenClanProfile&tag={HttpUtility.UrlEncode(tag)}";
 
-        /// <summary>
-        /// Gets the Clash Of Clans profile via the API
-        /// </summary>
-        public ClashOfClans.Models.Clan Profile => ClashOfClansApi.Clans.GetByTagAsync(tag).Result ?? new ClashOfClans.Models.Clan
-        {
-            Name = "[DELETED]",
-            Tag = tag,
-        };
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                            CONSTRUCTORS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         /// <summary>
-        /// Represents a clan inside a discord server
+        /// Represents a button component, wich can be encoded to determine an unique key value
         /// </summary>
-        /// <param name="guild">A discord server, represented by the Guild object</param>
-        /// <param name="tag">A Clash Of Clans' tag</param>
-        public Clan(Guild guild, string tag)
+        /// <param name="userId">An user id who interacts with the button</param>
+        /// <param name="messageId">An discord message id where the button is</param>
+        /// <param name="buttonId">A button component id</param>
+        public ButtonSerializer(ulong userId, ulong messageId, string buttonId)
         {
             // Inputs
             {
-                this.guild = guild;
-                this.tag = tag;
+                this.userId = userId;
+                this.messageId = messageId;
+                this.buttonId = buttonId;
             }
         }
 
@@ -72,7 +65,14 @@ namespace Wp.Common.Models
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
+        /// <summary>
+        /// Encodes the button component interaction to a string key value
+        /// </summary>
+        /// <returns>The string key value encoded</returns>
+        public string Encode()
+        {
+            return $"{userId}_{messageId}_{buttonId}";
+        }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         PROTECTED METHODS                         *|
@@ -90,31 +90,38 @@ namespace Wp.Common.Models
         |*                          OVERRIDE METHODS                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public override bool Equals(object? obj)
+        public override string ToString()
         {
-            //Check for null and compare run-time types.
-            if ((obj == null) || !GetType().Equals(obj.GetType()))
-            {
-                return false;
-            }
-            else
-            {
-                Clan? clan = obj as Clan;
-
-                return Guild == clan?.Guild && Tag == clan?.Tag;
-            }
-        }
-
-        public override int GetHashCode()
-        {
-            return Guild.GetHashCode() ^ Tag.GetHashCode();
+            return Encode();
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           STATIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        /// <summary>
+        /// Decodes a string into a ButtonSerializer
+        /// </summary>
+        /// <param name="encodedValue">The encoded string value to be decoded</param>
+        /// <returns>The select serialized with the different values</returns>
+        public static ButtonSerializer? Decode(string encodedValue)
+        {
+            string[] tab = encodedValue.Split('_');
 
+            if (tab.Length != 3) return null;
+
+            string strUserId = tab[0];
+            string strChannelId = tab[1];
+            string buttonId = tab[2];
+
+            if (!ulong.TryParse(strUserId, out ulong userId)) return null;
+
+            if (!ulong.TryParse(strChannelId, out ulong channelId)) return null;
+
+            if (string.IsNullOrWhiteSpace(buttonId)) return null;
+
+            return new ButtonSerializer(userId, channelId, buttonId);
+        }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                              INDEXERS                             *|
@@ -126,21 +133,7 @@ namespace Wp.Common.Models
         |*                         OPERATORS OVERLOAD                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public static bool operator ==(Clan? x, Clan? y)
-        {
-            if (x is null && y is null)
-            {
-                return true;
-            }
-            else
-            {
-                return x?.Equals(y) ?? false;
-            }
-        }
 
-        public static bool operator !=(Clan? x, Clan? y)
-        {
-            return !(x == y);
-        }
+
     }
 }

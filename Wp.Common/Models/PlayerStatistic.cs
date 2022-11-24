@@ -92,12 +92,20 @@ namespace Wp.Common.Models
         /// <summary>
         /// Gets the Clash Of Clans player's account, via the API
         /// </summary>
-        public ClashOfClans.Models.Player? Account => ClashOfClansApi.Players.GetByTagAsync(playerTag).Result;
+        public ClashOfClans.Models.Player Account => ClashOfClansApi.Players.GetByTagAsync(playerTag).Result ?? new ClashOfClans.Models.Player
+        {
+            Name = "[DELETED]",
+            Tag = playerTag,
+        };
 
         /// <summary>
         /// Gets the Clash Of Clans clan's profile, via the API
         /// </summary>
-        public ClashOfClans.Models.Clan? Clan => ClashOfClansApi.Clans.GetByTagAsync(clanTag).Result;
+        public ClashOfClans.Models.Clan Clan => ClashOfClansApi.Clans.GetByTagAsync(clanTag).Result ?? new ClashOfClans.Models.Clan
+        {
+            Name = "[DELETED]",
+            Tag = clanTag,
+        };
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                            CONSTRUCTORS                           *|
