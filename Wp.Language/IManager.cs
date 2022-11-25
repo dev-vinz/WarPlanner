@@ -7,7 +7,7 @@
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         public string SelectDontContainsOption { get; }
-        public string UserNotAllowedToSelect { get; }
+        public string UserNotAllowedToInteract { get; }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          CLAN ADD COMMAND                         *|
@@ -35,6 +35,24 @@
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         public string ChooseCompetitionMainClan { get; }
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                      COMPETITION EDIT COMMAND                     *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string EditCompetitionName { get; }
+        public string EditCompetitionResultChannel { get; }
+        public string EditCompetitionMainClan { get; }
+        public string EditCompetitionSecondClan { get; }
+        public string EditCompetitionChooseEdition(string competitionName);
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                       COMPETITION EDIT MODEL                      *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string EditCompetitionNameModalTitle { get; }
+        public string EditCompetitionNameModalField { get; }
+        public string EditCompetitionNameUpdated(string name);
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                       COMPETITION ADD SELECT                      *|

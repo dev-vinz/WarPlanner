@@ -119,7 +119,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             // Checks if user is elligible for interaction
             if (Context.User.Id != optionsSerializer.First().UserId)
             {
-                Task response = RespondAsync(interactionText.UserNotAllowedToSelect, ephemeral: true);
+                Task response = RespondAsync(interactionText.UserNotAllowedToInteract, ephemeral: true);
                 response.Wait();
 
                 return false;

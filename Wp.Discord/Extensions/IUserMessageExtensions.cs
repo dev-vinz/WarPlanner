@@ -1,4 +1,5 @@
 ﻿using Discord;
+using System.Collections.Concurrent;
 using Wp.Common.Services;
 using Wp.Discord.ComponentInteraction;
 
@@ -10,7 +11,8 @@ namespace Wp.Discord.Extensions
         |*                           STATIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        private static readonly List<string> ABORT_EVENT = new();
+        private static readonly ConcurrentDictionary<string, string> ABORT_EVENT = new();
+        private static readonly string DEFAULT_ABORT_VALUE = string.Empty;
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           BUTTON ACTIONS                          *|
@@ -32,15 +34,15 @@ namespace Wp.Discord.Extensions
                 ComponentStorage storage = ComponentStorage.GetInstance();
 
                 // Adds interaction
-                storage.Buttons.Add(key, userId);
+                storage.Buttons.TryAdd(key, userId);
 
                 // Wait till it's interacted or limit reached
                 while (storage.Buttons.ContainsKey(key)) { };
 
                 // In doubt, remove all component datas associated at this message
-                storage.ComponentDatas.Remove(message.Id);
+                storage.MessageDatas.TryRemove(message.Id, out string[] _);
 
-                if (!ABORT_EVENT.Contains(key))
+                if (!ABORT_EVENT.ContainsKey(key))
                 {
                     // Remove all other interactions...
                     // ...buttons
@@ -49,7 +51,7 @@ namespace Wp.Discord.Extensions
                         .Keys
                         .AsParallel()
                         .Where(key => key.Contains(message.Id.ToString()))
-                        .ForAll(key => storage.Buttons.Remove(key));
+                        .ForAll(key => storage.Buttons.TryRemove(key, out ulong _));
 
                     // ...selects
                     storage
@@ -72,7 +74,7 @@ namespace Wp.Discord.Extensions
                     }
                 }
 
-                ABORT_EVENT.Remove(key);
+                ABORT_EVENT.TryRemove(key, out string _);
             }).Start();
         }
 
@@ -98,28 +100,26 @@ namespace Wp.Discord.Extensions
                 {
                     _ = JSFunctions.SetTimeoutAsync(() =>
                     {
-                        storage.Buttons.Remove(key);
+                        storage.Buttons.TryRemove(key, out ulong _);
                     }, (TimeSpan)limit);
                 }
 
                 // Adds interaction
-                storage.Buttons.Add(key, userId);
+                storage.Buttons.TryAdd(key, userId);
 
                 List<ActionRowBuilder> actionRows = new();
 
                 // Gets all action rows with components inside
                 message.Components
-                    .AsParallel()
-                    .AsOrdered()
                     .Select(component => component as ActionRowComponent)
-                    .ForAll(row =>
+                    .ToList()
+                    .ForEach(row =>
                     {
                         ActionRowBuilder rowBuilder = new();
 
                         row?.Components
-                            .AsParallel()
-                            .AsOrdered()
-                            .ForAll(component =>
+                            .ToList()
+                            .ForEach(component =>
                             {
                                 if (component?.Type == ComponentType.Button)
                                 {
@@ -153,9 +153,8 @@ namespace Wp.Discord.Extensions
 
                                     menuComponent
                                         .Options
-                                        .AsParallel()
-                                        .AsOrdered()
-                                        .ForAll(o =>
+                                        .ToList()
+                                        .ForEach(o =>
                                         {
                                             menuBuilder.AddOption(o.Label, o.Value, o.Description, o.Emote, o.IsDefault);
                                         });
@@ -177,13 +176,7 @@ namespace Wp.Discord.Extensions
                 // Wait till it's interacted or limit reached
                 while (storage.Buttons.ContainsKey(key)) { };
 
-                if (disableAll || disableAllComponents)
-                {
-                    // In doubt, remove all component datas associated at this message
-                    storage.ComponentDatas.Remove(message.Id);
-                }
-
-                if (!ABORT_EVENT.Contains(key))
+                if (!ABORT_EVENT.ContainsKey(key))
                 {
                     // If disable all, remove all other button interactions
                     if (disableAll)
@@ -195,8 +188,8 @@ namespace Wp.Discord.Extensions
                             .Where(key => key.Contains(message.Id.ToString()))
                             .ForAll(key =>
                             {
-                                ABORT_EVENT.Add(key);
-                                storage.Buttons.Remove(key);
+                                ABORT_EVENT.TryAdd(key, DEFAULT_ABORT_VALUE);
+                                storage.Buttons.TryRemove(key, out ulong _);
                             });
                     }
 
@@ -214,7 +207,7 @@ namespace Wp.Discord.Extensions
                     }
                 }
 
-                ABORT_EVENT.Remove(key);
+                ABORT_EVENT.TryRemove(key, out string _);
             }).Start();
         }
 
@@ -256,17 +249,15 @@ namespace Wp.Discord.Extensions
 
                 // Gets all action rows with components inside
                 message.Components
-                    .AsParallel()
-                    .AsOrdered()
                     .Select(component => component as ActionRowComponent)
-                    .ForAll(row =>
+                    .ToList()
+                    .ForEach(row =>
                     {
                         ActionRowBuilder rowBuilder = new();
 
                         row?.Components
-                            .AsParallel()
-                            .AsOrdered()
-                            .ForAll(component =>
+                            .ToList()
+                            .ForEach(component =>
                             {
                                 if (component?.Type == ComponentType.SelectMenu)
                                 {
@@ -284,9 +275,8 @@ namespace Wp.Discord.Extensions
 
                                     menuComponent
                                         .Options
-                                        .AsParallel()
-                                        .AsOrdered()
-                                        .ForAll(o =>
+                                        .ToList()
+                                        .ForEach(o =>
                                         {
                                             menuBuilder.AddOption(o.Label, o.Value, o.Description, o.Emote, o.IsDefault);
                                         });
@@ -315,13 +305,7 @@ namespace Wp.Discord.Extensions
                 // Wait till it's interacted or limit reached
                 while (storage.Selects.Contains(key)) { };
 
-                if (removeButtons)
-                {
-                    // In doubt, remove all component datas associated at this message
-                    storage.ComponentDatas.Remove(message.Id);
-                }
-
-                if (!ABORT_EVENT.Contains(key))
+                if (!ABORT_EVENT.ContainsKey(key))
                 {
                     // If disable all, remove all other select interactions
                     if (disableAll)
@@ -332,7 +316,7 @@ namespace Wp.Discord.Extensions
                             .Where(key => key.Contains(message.Id.ToString()))
                             .ForAll(key =>
                             {
-                                ABORT_EVENT.Add(key);
+                                ABORT_EVENT.TryAdd(key, DEFAULT_ABORT_VALUE);
                                 storage.Selects.Remove(key);
                             });
                     }
@@ -347,8 +331,8 @@ namespace Wp.Discord.Extensions
                             .Where(key => key.Contains(message.Id.ToString()))
                             .ForAll(key =>
                             {
-                                ABORT_EVENT.Add(key);
-                                storage.Buttons.Remove(key);
+                                ABORT_EVENT.TryAdd(key, DEFAULT_ABORT_VALUE);
+                                storage.Buttons.TryRemove(key, out ulong _);
                             });
                     }
 
@@ -366,7 +350,7 @@ namespace Wp.Discord.Extensions
                     }
                 }
 
-                ABORT_EVENT.Remove(key);
+                ABORT_EVENT.TryRemove(key, out string _);
             }).Start();
         }
     }

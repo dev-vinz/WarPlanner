@@ -27,14 +27,13 @@ namespace Wp.Database
                 {
                     using EFModels.HEARC_P3Context ctx = new();
 
-                    return new DbCalendars(
-                        ctx.Calendars
+                    Common.Models.Calendar[] calendars = ctx.Calendars
                             .Include(c => c.GuildNavigation)
                             .AsParallel()
                             .Select(c => c.ToModel())
-                            .ToArray()
-                            .Copy()
-                    );
+                            .ToArray();
+
+                    return new DbCalendars(calendars.Copy());
                 }
             }
         }
@@ -50,14 +49,13 @@ namespace Wp.Database
                 {
                     using EFModels.HEARC_P3Context ctx = new();
 
-                    return new DbClans(
-                        ctx.Clans
+                    Common.Models.Clan[] clans = ctx.Clans
                             .Include(c => c.GuildNavigation)
                             .AsParallel()
                             .Select(c => c.ToModel())
-                            .ToArray()
-                            .Copy()
-                    );
+                            .ToArray();
+
+                    return new DbClans(clans.Copy());
                 }
             }
         }
@@ -73,14 +71,13 @@ namespace Wp.Database
                 {
                     using EFModels.HEARC_P3Context ctx = new();
 
-                    return new DbCompetitions(
-                        ctx.Competitions
+                    Common.Models.Competition[] competitions = ctx.Competitions
                             .Include(c => c.GuildNavigation)
                             .AsParallel()
                             .Select(c => c.ToModel())
-                            .ToArray()
-                            .Copy()
-                    );
+                            .ToArray();
+
+                    return new DbCompetitions(competitions.Copy());
                 }
             }
         }
@@ -96,13 +93,12 @@ namespace Wp.Database
                 {
                     using EFModels.HEARC_P3Context ctx = new();
 
-                    return new DbGuilds(
-                        ctx.Guilds
+                    Common.Models.Guild[] guilds = ctx.Guilds
                             .AsParallel()
                             .Select(g => g.ToModel())
-                            .ToArray()
-                            .Copy()
-                    );
+                            .ToArray();
+
+                    return new DbGuilds(guilds.Copy());
                 }
             }
         }
@@ -118,14 +114,13 @@ namespace Wp.Database
                 {
                     using EFModels.HEARC_P3Context ctx = new();
 
-                    return new DbPlayers(
-                        ctx.Players
+                    Common.Models.Player[] players = ctx.Players
                             .Include(p => p.GuildNavigation)
                             .AsParallel()
                             .Select(p => p.ToModel())
-                            .ToArray()
-                            .Copy()
-                    );
+                            .ToArray();
+
+                    return new DbPlayers(players.Copy());
                 }
             }
         }
@@ -141,14 +136,13 @@ namespace Wp.Database
                 {
                     using EFModels.HEARC_P3Context ctx = new();
 
-                    return new DbPlayerStatistics(
-                        ctx.PlayerStatistics
+                    Common.Models.PlayerStatistic[] playerStatistics = ctx.PlayerStatistics
                             .Include(ps => ps.GuildNavigation)
                             .AsParallel()
                             .Select(ps => ps.ToModel())
-                            .ToArray()
-                            .Copy()
-                    );
+                            .ToArray();
+
+                    return new DbPlayerStatistics(playerStatistics.Copy());
                 }
             }
         }
@@ -164,14 +158,13 @@ namespace Wp.Database
                 {
                     using EFModels.HEARC_P3Context ctx = new();
 
-                    return new DbRoles(
-                        ctx.Roles
+                    Common.Models.Role[] roles = ctx.Roles
                             .Include(r => r.GuildNavigation)
                             .AsParallel()
                             .Select(r => r.ToModel())
-                            .ToArray()
-                            .Copy()
-                    );
+                            .ToArray();
+
+                    return new DbRoles(roles.Copy());
                 }
             }
         }
@@ -187,14 +180,13 @@ namespace Wp.Database
                 {
                     using EFModels.HEARC_P3Context ctx = new();
 
-                    return new DbTimes(
-                        ctx.Times
+                    Common.Models.Time[] times = ctx.Times
                             .Include(t => t.GuildNavigation)
                             .AsParallel()
                             .Select(t => t.ToModel())
-                            .ToArray()
-                            .Copy()
-                    );
+                            .ToArray();
+
+                    return new DbTimes(times.Copy());
                 }
             }
         }
@@ -210,14 +202,14 @@ namespace Wp.Database
                 {
                     using EFModels.HEARC_P3Context ctx = new();
 
-                    return new DbWarStatistics(
+                    Common.Models.WarStatistic[] warStatistics =
                         ctx.WarStatistics
                             .Include(ws => ws.GuildNavigation)
                             .AsParallel()
                             .Select(ws => ws.ToModel())
-                            .ToArray()
-                            .Copy()
-                    );
+                            .ToArray();
+
+                    return new DbWarStatistics(warStatistics.Copy());
                 }
             }
         }

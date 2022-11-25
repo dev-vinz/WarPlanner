@@ -2,6 +2,7 @@
 using Discord.Interactions;
 using Discord.WebSocket;
 using Wp.Api;
+using Wp.Bot.Modules.ModalCommands.Modals;
 using Wp.Bot.Services;
 using Wp.Common.Models;
 using Wp.Database.Services;
@@ -44,6 +45,14 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
         |*                          BUTTON COMMANDS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        [ComponentInteraction("test_click_me")]
+        public async Task Test()
+        {
+            await DeferAsync();
+
+            await FollowupAsync("Ok", ephemeral: true);
+        }
+
         [ComponentInteraction(IdProvider.COMPETITION_ADD_BUTTON_NO_SECOND_CLAN, runMode: RunMode.Async)]
         public async Task AddSkipSecondClan()
         {
@@ -69,7 +78,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 
             // Gets component datas
             ComponentStorage storage = ComponentStorage.GetInstance();
-            if (!storage.ComponentDatas.TryGetValue(msg.Id, out string[]? datas) && datas?.Length != 2)
+            if (!storage.MessageDatas.TryGetValue(msg.Id, out string[]? datas) && datas?.Length != 2)
             {
                 await FollowupAsync(generalResponses.FailToGetStorageComponentData);
 
@@ -77,7 +86,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             }
 
             // Remove datas from storage
-            storage.ComponentDatas.Remove(msg.Id);
+            storage.MessageDatas.TryRemove(msg.Id, out string[] _);
 
             // Guild roles
             IReadOnlyCollection<IRole> guildRoles = roles
@@ -103,6 +112,56 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             competitions.Add(dbCompetition);
 
             await FollowupAsync(interactionText.CompetitionAdded(competitionName, dbCompetition.MainClan.Name));
+        }
+
+        [ComponentInteraction(IdProvider.COMPETITION_EDIT_BUTTON_NAME, runMode: RunMode.Async)]
+        public async Task EditName()
+        {
+            // Get SocketMessageComponent and original message
+            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+            SocketUserMessage msg = socket.Message;
+
+            // Gets original user
+            ulong userId = msg.Interaction.User.Id;
+
+            // Gets guild and interaction text
+            DbCompetitions competitions = Database.Context.Competitions;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
+
+            IManager interactionText = dbGuild.ManagerText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+            // Checks if user is elligible for interaction
+            if (Context.User.Id != userId)
+            {
+                await RespondAsync(interactionText.UserNotAllowedToInteract, ephemeral: true);
+
+                return;
+            }
+
+            // Gets component datas
+            ComponentStorage storage = ComponentStorage.GetInstance();
+            if (!storage.MessageDatas.TryGetValue(msg.Id, out string[]? datas) && datas?.Length != 1)
+            {
+                await RespondAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+                return;
+            }
+
+            // Recovers data
+            ulong competitionId = ulong.Parse(datas[0]);
+
+            Common.Models.Competition dbCompetition = competitions
+                .First(c => c.Id == competitionId && c.Guild == dbGuild);
+
+            ModalBuilder modalBuilder = new ModalBuilder()
+                .WithTitle(interactionText.EditCompetitionNameModalTitle)
+                .WithCustomId(CompetitionEditNameModal.ID)
+                .AddTextInput(interactionText.EditCompetitionNameModalField, CompetitionEditNameModal.NAME_ID, value: dbCompetition.Name);
+
+            await RespondWithModalAsync(modalBuilder.Build());
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -187,9 +246,9 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             ComponentStorage storage = ComponentStorage.GetInstance();
 
             string[] datas = new[] { competitionName, option.Value };
-            storage.ComponentDatas.Add(message.Id, datas);
+            storage.MessageDatas.TryAdd(message.Id, datas);
 
-            message.DeleteAllComponentsAfterButtonClick(cancelButtonBuilder.CustomId, Context.User.Id);
+            //message.DeleteAllComponentsAfterButtonClick(cancelButtonBuilder.CustomId, Context.User.Id);
             message.DisableButtonAfterClick(noneButtonBuilder.CustomId, Context.User.Id, disableAllComponents: true);
             message.DisableSelectAfterSelection(menuBuilder.CustomId, Context.User.Id, removeButtons: true);
         }
@@ -200,6 +259,10 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             if (!TryDecodeSelectInteraction(selections, IdProvider.COMPETITION_ADD_SELECT_SECOND_CLAN, out SelectSerializer selectSerializer, out SelectOptionSerializer[] optionsSerializer)) return;
 
             await DeferAsync();
+
+            // Get SocketMessageComponent and original message
+            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+            SocketUserMessage msg = socket.Message;
 
             SelectOptionSerializer option = optionsSerializer.First();
 
@@ -241,6 +304,11 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
                 SecondTag = secondTag,
             };
             competitions.Add(dbCompetition);
+
+
+            // Remove datas from storage
+            ComponentStorage storage = ComponentStorage.GetInstance();
+            storage.MessageDatas.TryRemove(msg.Id, out string[] _);
 
             await FollowupAsync(interactionText.CompetitionAdded(competitionName, dbCompetition.MainClan.Name, dbCompetition.SecondClan?.Name));
         }
@@ -357,13 +425,13 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             // Checks if user is elligible for interaction
             if (Context.User.Id != userId)
             {
-                Task response = RespondAsync(interactionText.UserNotAllowedToSelect, ephemeral: true);
+                Task response = RespondAsync(interactionText.UserNotAllowedToInteract, ephemeral: true);
                 response.Wait();
 
                 return false;
             }
 
-            componentStorage.Buttons.Remove(key);
+            componentStorage.Buttons.TryRemove(key, out ulong _);
 
             return true;
         }
@@ -406,7 +474,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             // Checks if user is elligible for interaction
             if (Context.User.Id != optionsSerializer.First().UserId)
             {
-                Task response = RespondAsync(interactionText.UserNotAllowedToSelect, ephemeral: true);
+                Task response = RespondAsync(interactionText.UserNotAllowedToInteract, ephemeral: true);
                 response.Wait();
 
                 return false;

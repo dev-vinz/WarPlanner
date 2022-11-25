@@ -2,6 +2,7 @@
 using Discord.Interactions;
 using System.Text;
 using Wp.Api;
+using Wp.Bot.Modules.ApplicationCommands.AutoCompletion;
 using Wp.Bot.Services;
 using Wp.Common.Models;
 using Wp.Database.Services;
@@ -129,7 +130,106 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
             });
 
             message.DisableSelectAfterSelection(menuBuilder.CustomId, Context.User.Id, removeButtons: true);
-            message.DeleteAllComponentsAfterButtonClick(cancelButtonBuilder.CustomId, Context.User.Id);
+            //message.DeleteAllComponentsAfterButtonClick(cancelButtonBuilder.CustomId, Context.User.Id);
+        }
+
+        [SlashCommand("edit", "Edit an existing competition registered within the guild", runMode: RunMode.Async)]
+        public async Task Edit([Summary("competition", "A registered competition"), Autocomplete(typeof(CompetitionAutocompleteHandler))] string competition)
+        {
+            await DeferAsync(true);
+
+            ulong competitionId = ulong.Parse(competition);
+
+            // Loads databases infos
+            DbCompetitions competitions = Database.Context.Competitions;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
+
+            // Filters for guild
+            Common.Models.Competition dbCompetition = competitions
+                .First(c => c.Id == competitionId && c.Guild == dbGuild);
+
+            // Gets interaction texts
+            IManager commandText = dbGuild.ManagerText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+            // Edit name button
+            ButtonBuilder nameButtonBuilder = new ButtonBuilder()
+                .WithLabel(commandText.EditCompetitionName)
+                .WithStyle(ButtonStyle.Secondary)
+                .WithCustomId(IdProvider.COMPETITION_EDIT_BUTTON_NAME);
+
+            // Edit result channel
+            ButtonBuilder resultButtonBuilder = new ButtonBuilder()
+                .WithLabel(commandText.EditCompetitionResultChannel)
+                .WithDisabled(true)
+                .WithStyle(ButtonStyle.Secondary)
+                .WithCustomId(IdProvider.COMPETITION_EDIT_BUTTON_RESULT_CHANNEL);
+
+            // Edit main clan
+            ButtonBuilder mainButtonBuilder = new ButtonBuilder()
+                .WithLabel(commandText.EditCompetitionMainClan)
+                .WithStyle(ButtonStyle.Secondary)
+                .WithCustomId(IdProvider.COMPETITION_EDIT_BUTTON_MAIN_CLAN);
+
+            // Edit second clan
+            ButtonBuilder secondButtonBuilder = new ButtonBuilder()
+                .WithLabel(commandText.EditCompetitionSecondClan)
+                .WithStyle(ButtonStyle.Secondary)
+                .WithCustomId(IdProvider.COMPETITION_EDIT_BUTTON_SECOND_CLAN);
+
+            // Cancel button
+            ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+                .WithLabel(generalResponses.CancelButton)
+                .WithStyle(ButtonStyle.Danger)
+                .WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+
+            // Build component
+            ComponentBuilder componentBuilder = new ComponentBuilder()
+                .WithButton(nameButtonBuilder, 0)
+                .WithButton(resultButtonBuilder, 0)
+                .WithButton(mainButtonBuilder, 1)
+                .WithButton(secondButtonBuilder, 1)
+                .WithButton(cancelButtonBuilder, 2);
+
+            IUserMessage message = await ModifyOriginalResponseAsync(msg =>
+            {
+                msg.Content = commandText.EditCompetitionChooseEdition(dbCompetition.Name);
+                msg.Components = new(componentBuilder.Build());
+            });
+
+            // Registers informations into storage
+            ComponentStorage storage = ComponentStorage.GetInstance();
+
+            string[] datas = new[] { competition };
+            storage.MessageDatas.TryAdd(message.Id, datas);
+
+            //message.DeleteAllComponentsAfterButtonClick(cancelButtonBuilder.CustomId, Context.User.Id);
+            //message.DisableButtonAfterClick(nameButtonBuilder.CustomId, Context.User.Id, disableAll: true);
+            //message.DisableButtonAfterClick(resultButtonBuilder.CustomId, Context.User.Id, disableAll: true);
+            //message.DisableButtonAfterClick(mainButtonBuilder.CustomId, Context.User.Id, disableAll: true);
+            //message.DisableButtonAfterClick(secondButtonBuilder.CustomId, Context.User.Id, disableAll: true);
+        }
+
+        [SlashCommand("test", "Test ephemeral")]
+        public async Task Test()
+        {
+            ButtonBuilder buttonBuilder = new ButtonBuilder()
+                .WithLabel("Click Me")
+                .WithStyle(ButtonStyle.Danger)
+                .WithCustomId("test_click_me");
+
+            ButtonBuilder buttonBuilder_2 = new ButtonBuilder()
+                .WithLabel("Not Click Me")
+                .WithStyle(ButtonStyle.Success)
+                .WithCustomId("test_click_me_2");
+
+            ComponentBuilder componentBuilder = new ComponentBuilder()
+                .WithButton(buttonBuilder)
+                .WithButton(buttonBuilder_2);
+
+            await RespondAsync("Test", components: componentBuilder.Build(), ephemeral: true);
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

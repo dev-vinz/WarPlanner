@@ -3,6 +3,7 @@ using Discord.WebSocket;
 using Wp.Bot.Services;
 using Wp.Common.Models;
 using Wp.Discord.ComponentInteraction;
+using Wp.Discord.Extensions;
 using Wp.Language;
 
 namespace Wp.Bot.Modules.ComponentCommands
@@ -43,26 +44,57 @@ namespace Wp.Bot.Modules.ComponentCommands
         [ComponentInteraction(IdProvider.GLOBAL_CANCEL_BUTTON, runMode: RunMode.Async)]
         public async Task CancelButton()
         {
-            if (!TryDecodeButtonInteraction(IdProvider.GLOBAL_CANCEL_BUTTON, out ButtonSerializer buttonSerializer)) return;
+            //if (!TryDecodeButtonInteraction(IdProvider.GLOBAL_CANCEL_BUTTON, out ButtonSerializer buttonSerializer)) return;
 
-            await DeferAsync(true);
+            //await DeferAsync();
+
+            //// Gets guild and interaction text
+            //Guild dbGuild = Database.Context
+            //    .Guilds
+            //    .First(g => g.Id == Context.Guild.Id);
+
+            //// Get SocketMessageComponent and original message
+            //SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+            //SocketUserMessage msg = socket.Message;
+
+            //// Remove any storage component data
+            //ComponentStorage storage = ComponentStorage.GetInstance();
+            //storage.MessageDatas.TryRemove(msg.Id, out string[] _);
+
+            //IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+            //await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.ActionCanceledByButton);
+
+            // Get SocketMessageComponent and original message
+            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+            SocketUserMessage msg = socket.Message;
+
+            // Gets original user
+            ulong userId = msg.Interaction.User.Id;
 
             // Gets guild and interaction text
             Guild dbGuild = Database.Context
                 .Guilds
                 .First(g => g.Id == Context.Guild.Id);
 
-            // Get SocketMessageComponent and original message
-            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
-            SocketUserMessage msg = socket.Message;
+            IManager interactionText = dbGuild.ManagerText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+            // Checks if user is elligible for interaction
+            if (Context.User.Id != userId)
+            {
+                await RespondAsync(interactionText.UserNotAllowedToInteract, ephemeral: true);
+
+                return;
+            }
+
+            await Context.Interaction.DisableComponentsAsync(allComponents: true);
 
             // Remove any storage component data
             ComponentStorage storage = ComponentStorage.GetInstance();
-            storage.ComponentDatas.Remove(msg.Id);
+            storage.MessageDatas.TryRemove(msg.Id, out string[] _);
 
-            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
-
-            await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.ActionCanceledByButton);
+            await FollowupAsync(generalResponses.ActionCanceledByButton, ephemeral: true);
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -94,13 +126,13 @@ namespace Wp.Bot.Modules.ComponentCommands
             // Checks if user is elligible for interaction
             if (Context.User.Id != userId)
             {
-                Task response = RespondAsync(interactionText.UserNotAllowedToSelect, ephemeral: true);
+                Task response = RespondAsync(interactionText.UserNotAllowedToInteract, ephemeral: true);
                 response.Wait();
 
                 return false;
             }
 
-            componentStorage.Buttons.Remove(key);
+            componentStorage.Buttons.TryRemove(key, out ulong _);
 
             return true;
         }

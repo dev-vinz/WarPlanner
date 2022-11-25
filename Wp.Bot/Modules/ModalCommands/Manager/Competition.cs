@@ -1,17 +1,17 @@
-﻿using ClashOfClans.Models;
-using Discord;
-using Discord.Interactions;
-using Wp.Api;
+﻿using Discord.Interactions;
+using Discord.Rest;
+using Discord.WebSocket;
 using Wp.Bot.Modules.ModalCommands.Modals;
 using Wp.Bot.Services;
 using Wp.Common.Models;
 using Wp.Database.Services;
-using Wp.Database.Settings;
+using Wp.Discord.ComponentInteraction;
+using Wp.Discord.Extensions;
 using Wp.Language;
 
-namespace Wp.Bot.Modules.ModalCommands.Global
+namespace Wp.Bot.Modules.ModalCommands.Manager
 {
-    public class Player : InteractionModuleBase<SocketInteractionContext>
+    public class Competition : InteractionModuleBase<SocketInteractionContext>
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
@@ -35,7 +35,7 @@ namespace Wp.Bot.Modules.ModalCommands.Global
         |*                            CONSTRUCTORS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public Player(CommandHandler handler)
+        public Competition(CommandHandler handler)
         {
             this.handler = handler;
         }
@@ -50,82 +50,66 @@ namespace Wp.Bot.Modules.ModalCommands.Global
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        [ModalInteraction(PlayerClaimModal.ID, runMode: RunMode.Async)]
-        public async Task ClaimAccount(PlayerClaimModal modal)
+        [ModalInteraction(CompetitionEditNameModal.ID, runMode: RunMode.Async)]
+        public async Task EditName(CompetitionEditNameModal modal)
         {
-            await DeferAsync();
+            await DeferAsync(true);
 
-            // Loads databases infos
-            DbGuilds guilds = Database.Context.Guilds;
-            DbPlayers players = Database.Context.Players;
+            // Get SocketMessageComponent and original message
+            SocketModal socket = (Context.Interaction as SocketModal)!;
+            RestInteractionMessage originalMessage = await socket.GetOriginalResponseAsync();
 
-            // Gets current guild
-            Guild dbGuild = guilds
+            // Disable all components
+            await originalMessage.DisableAllComponentsAsync();
+
+            // Gets guild and interaction text
+            DbCompetitions competitions = Database.Context.Competitions;
+            Guild dbGuild = Database.Context
+                .Guilds
                 .First(g => g.Id == Context.Guild.Id);
 
-            // Gets general responses
+            IManager interactionText = dbGuild.ManagerText;
             IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
-            ClashOfClans.Models.Player? cPlayer = await ClashOfClansApi.Players.GetByTagAsync(modal.Tag);
-
-            if (cPlayer is null)
+            // Gets component datas and remove then instantly
+            ComponentStorage storage = ComponentStorage.GetInstance();
+            if (!storage.MessageDatas.TryRemove(originalMessage.Id, out string[]? datas) && datas?.Length != 1)
             {
-                await FollowupAsync(generalResponses.ClashOfClansError);
+                await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.FailToGetStorageComponentData);
 
                 return;
             }
 
-            // Gets modal responses
-            IGlobal commandText = dbGuild.GlobalText;
+            // Recovers data
+            ulong competitionId = ulong.Parse(datas[0]);
 
-            VerifyTokenResponse? verifyToken = await ClashOfClansApi.Players.VerifyTokenAsync(cPlayer.Tag, modal.Token);
+            Common.Models.Competition dbCompetition = competitions
+                .First(c => c.Id == competitionId && c.Guild == dbGuild);
 
-            if (verifyToken?.Status != Status.Ok)
-            {
-                await FollowupAsync(commandText.TokenInvalid(cPlayer.Name));
+            string oldName = dbCompetition.Name;
 
-                return;
-            }
+            // Updates competition's name
+            dbCompetition.Name = modal.Name;
+            competitions.Update(dbCompetition);
 
-            // Gets any account
-            IEnumerable<Common.Models.Player?> anyPlayers = players
-                .Where(p => p.Tag == cPlayer.Tag);
+            // Gets environment
+            SocketCategoryChannel category = Context.Guild.GetCategoryChannel(dbCompetition.Id);
 
-            // Checks if it's a global account
-            if (anyPlayers.Any() && anyPlayers.First()?.Guild?.Id == Configurations.DEV_GUILD_ID)
-            {
-                ButtonBuilder supportButton = new ButtonBuilder()
-                    .WithUrl(Configurations.SUPPORT_GUILD_INVITATION)
-                    .WithLabel(generalResponses.SupportServer)
-                    .WithStyle(ButtonStyle.Link)
-                    .WithDisabled(false)
-                    .WithEmote(new Emoji("⚙️"));
+            // Updates environment
+            string categName = category.Name.Replace(oldName, modal.Name);
 
-                ActionRowBuilder rowBuilder = new ActionRowBuilder()
-                    .WithButton(supportButton);
+            await category.ModifyAsync(categ => categ.Name = categName);
+            Context.Guild.Roles
+                .Where(r => r.Name.Contains(oldName))
+                .ToList()
+                .ForEach(async r =>
+                {
+                    string roleName = r.Name.Replace(oldName, modal.Name);
 
-                ComponentBuilder componentBuilder = new ComponentBuilder()
-                    .AddRow(rowBuilder);
+                    await r.ModifyAsync(gR => gR.Name = roleName);
+                });
 
-                await FollowupAsync(commandText.AccountAlreadyClaimed(cPlayer.Name), components: componentBuilder.Build());
-
-                return;
-            }
-
-            // Remove local accounts
-            anyPlayers
-                .AsParallel()
-                    .ForAll(p => players.Remove(p!));
-
-            Guild devGuild = guilds
-                .First(g => g.Id == Configurations.DEV_GUILD_ID);
-
-            Common.Models.Player dbPlayer = new(devGuild, Context.User.Id, cPlayer.Tag);
-
-            // Register new global account
-            players.Add(dbPlayer);
-
-            await FollowupAsync(commandText.AccountClaimed(cPlayer.Name));
+            await FollowupAsync(interactionText.EditCompetitionNameUpdated(modal.Name), ephemeral: true);
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

@@ -1,4 +1,6 @@
-﻿namespace Wp.Discord.ComponentInteraction
+﻿using System.Collections.Concurrent;
+
+namespace Wp.Discord.ComponentInteraction
 {
     public class ComponentStorage
     {
@@ -22,12 +24,12 @@
         /// <summary>
         /// Gets all the buttons id that are waiting for interaction, with the user id as value
         /// </summary>
-        public Dictionary<string, ulong> Buttons { get; }
+        public ConcurrentDictionary<string, ulong> Buttons { get; }
 
         /// <summary>
         /// Gets some datas informations, associated by the message id key
         /// </summary>
-        public Dictionary<ulong, string[]> ComponentDatas { get; }
+        public ConcurrentDictionary<ulong, string[]> MessageDatas { get; }
 
         /* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
@@ -42,8 +44,8 @@
         private ComponentStorage()
         {
             Selects = new HashSet<string>();
-            Buttons = new Dictionary<string, ulong>();
-            ComponentDatas = new Dictionary<ulong, string[]>();
+            Buttons = new ConcurrentDictionary<string, ulong>();
+            MessageDatas = new ConcurrentDictionary<ulong, string[]>();
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

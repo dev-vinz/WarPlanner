@@ -7,7 +7,7 @@
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         public string SelectDontContainsOption => "Une erreur s'est produite, veuillez réessayer la commande";
-        public string UserNotAllowedToSelect => "Vous n'êtes pas autorisé à réagir à cette interaction";
+        public string UserNotAllowedToInteract => "Vous n'êtes pas autorisé à réagir à cette interaction";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          CLAN ADD COMMAND                         *|
@@ -35,6 +35,25 @@
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         public string ChooseCompetitionMainClan => "Veuillez choisir le clan principal utilisé lors de ce tournoi";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                      COMPETITION EDIT COMMAND                     *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string EditCompetitionName => "Nom";
+        public string EditCompetitionResultChannel => "Salon d'annonce des résultats";
+        public string EditCompetitionMainClan => "Clan Principal";
+        public string EditCompetitionSecondClan => "Clan Secondaire";
+        public string EditCompetitionChooseEdition(string competitionName) => $"Choisissez la modification à faire au tournoi **{competitionName}**";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                       COMPETITION EDIT MODEL                      *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string EditCompetitionNameModalTitle => "Modification du nom de compétition";
+        public string EditCompetitionNameModalField => "Nom de la competition";
+        public string EditCompetitionNameUpdated(string name) => $"Le nom de la compétition a été changé en : **{name}**" +
+            $"\nL'environnement a également été changé";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                       COMPETITION ADD SELECT                      *|
