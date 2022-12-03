@@ -14,11 +14,14 @@ namespace Wp.Database.Services
         |*                            CONSTRUCTORS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public DbClans(IEnumerable<Clan> clans)
+        public DbClans(Clan[] clans)
         {
-            clans
-                .AsParallel()
-                .ForAll(c => base.Add(c));
+            lock (_lock)
+            {
+                clans
+                    .ToList()
+                    .ForEach(c => base.Add(c));
+            }
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -37,9 +40,9 @@ namespace Wp.Database.Services
 
                 ctx.Clans.Add(clan.ToEFModel());
                 ctx.SaveChanges();
-            }
 
-            base.Add(clan);
+                base.Add(clan);
+            }
         }
 
         /// <summary>
@@ -56,9 +59,9 @@ namespace Wp.Database.Services
                 EFModels.Clan dbClan = ctx.Clans.GetEFModel(clan);
                 ctx.Clans.Remove(dbClan);
                 ctx.SaveChanges();
-            }
 
-            return base.Remove(clan);
+                return base.Remove(clan);
+            }
         }
 
         /// <summary>

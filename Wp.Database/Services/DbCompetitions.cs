@@ -14,11 +14,14 @@ namespace Wp.Database.Services
         |*                            CONSTRUCTORS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public DbCompetitions(IEnumerable<Competition> competitions)
+        public DbCompetitions(Competition[] competitions)
         {
-            competitions
-                .AsParallel()
-                .ForAll(c => base.Add(c));
+            lock (_lock)
+            {
+                competitions
+                    .ToList()
+                    .ForEach(c => base.Add(c));
+            }
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -37,9 +40,9 @@ namespace Wp.Database.Services
 
                 ctx.Competitions.Add(competition.ToEFModel());
                 ctx.SaveChanges();
-            }
 
-            base.Add(competition);
+                base.Add(competition);
+            }
         }
 
         /// <summary>
@@ -56,9 +59,9 @@ namespace Wp.Database.Services
                 EFModels.Competition dbCompetition = ctx.Competitions.GetEFModel(competition);
                 ctx.Competitions.Remove(dbCompetition);
                 ctx.SaveChanges();
-            }
 
-            return base.Remove(competition);
+                return base.Remove(competition);
+            }
         }
 
         /// <summary>
@@ -92,10 +95,10 @@ namespace Wp.Database.Services
 
                 ctx.Competitions.Update(dbCompetition);
                 ctx.SaveChanges();
-            }
 
-            base.Remove(competition);
-            base.Add(competition);
+                base.Remove(competition);
+                base.Add(competition);
+            }
         }
     }
 }

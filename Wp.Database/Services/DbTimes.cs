@@ -14,11 +14,14 @@ namespace Wp.Database.Services
 		|*                            CONSTRUCTORS                           *|
 		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public DbTimes(IEnumerable<Time> times)
+		public DbTimes(Time[] times)
 		{
-			times
-				.AsParallel()
-				.ForAll(t => base.Add(t));
+			lock (_lock)
+			{
+				times
+					.ToList()
+					.ForEach(t => base.Add(t));
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -37,9 +40,9 @@ namespace Wp.Database.Services
 
 				ctx.Times.Add(time.ToEFModel());
 				ctx.SaveChanges();
-			}
 
-			base.Add(time);
+				base.Add(time);
+			}
 		}
 
 		/// <summary>
@@ -56,9 +59,9 @@ namespace Wp.Database.Services
 				EFModels.Time dbTime = ctx.Times.GetEFModel(time);
 				ctx.Times.Remove(dbTime);
 				ctx.SaveChanges();
-			}
 
-			return base.Remove(time);
+				return base.Remove(time);
+			}
 		}
 
 		/// <summary>
@@ -91,10 +94,10 @@ namespace Wp.Database.Services
 
 				ctx.Times.Update(dbTime);
 				ctx.SaveChanges();
-			}
 
-			base.Remove(time);
-			base.Add(time);
+				base.Remove(time);
+				base.Add(time);
+			}
 		}
 	}
 }

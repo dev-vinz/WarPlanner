@@ -14,11 +14,14 @@ namespace Wp.Database.Services
 		|*                            CONSTRUCTORS                           *|
 		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public DbPlayers(IEnumerable<Player> players)
+		public DbPlayers(Player[] players)
 		{
-			players
-				.AsParallel()
-				.ForAll(p => base.Add(p));
+			lock (_lock)
+			{
+				players
+					.ToList()
+					.ForEach(p => base.Add(p));
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -37,9 +40,9 @@ namespace Wp.Database.Services
 
 				ctx.Players.Add(player.ToEFModel());
 				ctx.SaveChanges();
-			}
 
-			base.Add(player);
+				base.Add(player);
+			}
 		}
 
 		/// <summary>
@@ -56,9 +59,9 @@ namespace Wp.Database.Services
 				EFModels.Player dbPlayer = ctx.Players.GetEFModel(player);
 				ctx.Players.Remove(dbPlayer);
 				ctx.SaveChanges();
-			}
 
-			return base.Remove(player);
+				return base.Remove(player);
+			}
 		}
 
 		/// <summary>

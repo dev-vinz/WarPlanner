@@ -14,11 +14,14 @@ namespace Wp.Database.Services
 		|*                            CONSTRUCTORS                           *|
 		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public DbCalendars(IEnumerable<Calendar> calendars)
+		public DbCalendars(Calendar[] calendars)
 		{
-			calendars
-				.AsParallel()
-				.ForAll(c => base.Add(c));
+			lock (_lock)
+			{
+				calendars
+					.ToList()
+					.ForEach(c => base.Add(c));
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -37,9 +40,9 @@ namespace Wp.Database.Services
 
 				ctx.Calendars.Add(calendar.ToEFModel());
 				ctx.SaveChanges();
-			}
 
-			base.Add(calendar);
+				base.Add(calendar);
+			}
 		}
 
 		/// <summary>
@@ -56,9 +59,9 @@ namespace Wp.Database.Services
 				EFModels.Calendar dbCalendar = ctx.Calendars.GetEFModel(calendar);
 				ctx.Calendars.Remove(dbCalendar);
 				ctx.SaveChanges();
-			}
 
-			return base.Remove(calendar);
+				return base.Remove(calendar);
+			}
 		}
 
 		/// <summary>
@@ -91,10 +94,10 @@ namespace Wp.Database.Services
 
 				ctx.Calendars.Update(dbCalendar);
 				ctx.SaveChanges();
-			}
 
-			base.Remove(calendar);
-			base.Add(calendar);
+				base.Remove(calendar);
+				base.Add(calendar);
+			}
 		}
 	}
 }

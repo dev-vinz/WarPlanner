@@ -37,6 +37,13 @@
         public string ChooseCompetitionMainClan { get; }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                     COMPETITION DELETE COMMAND                    *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string NoCompetitionToDelete { get; }
+        public string ChooseCompetitionToDelete { get; }
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                      COMPETITION EDIT COMMAND                     *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -55,19 +62,27 @@
         public string EditCompetitionNameUpdated(string name);
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-        |*                       COMPETITION EDIT SELECT                     *|
-        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-        public string EditCompetitionSelectMainClan { get; }
-        public string EditCompetitionSelectMainClanUpdated(string competition, string name);
-
-        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                       COMPETITION ADD SELECT                      *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         public string CompetitionNoSecondClanButton { get; }
         public string ChooseCompetitionSecondClan { get; }
         public string CompetitionAdded(string name, string main, string? second = null);
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                      COMPETITION DELETE SELECT                    *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string CompetitionDeleted(string name);
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                       COMPETITION EDIT SELECT                     *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string EditCompetitionSelectMainClan { get; }
+        public string EditCompetitionSelectMainClanUpdated(string competition, string name);
+        public string EditCompetitionSelectSecondClan { get; }
+        public string EditCompetitionSelectSecondClanUpdated(string competition, string name);
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                       COMPETITION ENVIRONMENT                     *|

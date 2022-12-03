@@ -14,11 +14,14 @@ namespace Wp.Database.Services
 		|*                            CONSTRUCTORS                           *|
 		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public DbPlayerStatistics(IEnumerable<PlayerStatistic> playerStatistics)
+		public DbPlayerStatistics(PlayerStatistic[] playerStatistics)
 		{
-			playerStatistics
-				.AsParallel()
-				.ForAll(ps => base.Add(ps));
+			lock (_lock)
+			{
+				playerStatistics
+					.ToList()
+					.ForEach(ps => base.Add(ps));
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -37,9 +40,9 @@ namespace Wp.Database.Services
 
 				ctx.PlayerStatistics.Add(playerStatistic.ToEFModel());
 				ctx.SaveChanges();
-			}
 
-			base.Add(playerStatistic);
+				base.Add(playerStatistic);
+			}
 		}
 
 		/// <summary>
@@ -56,9 +59,9 @@ namespace Wp.Database.Services
 				EFModels.PlayerStatistic dbPlayerStatistic = ctx.PlayerStatistics.GetEFModel(playerStatistic);
 				ctx.PlayerStatistics.Remove(dbPlayerStatistic);
 				ctx.SaveChanges();
-			}
 
-			return base.Remove(playerStatistic);
+				return base.Remove(playerStatistic);
+			}
 		}
 
 		/// <summary>

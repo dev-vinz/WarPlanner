@@ -14,11 +14,14 @@ namespace Wp.Database.Services
 		|*                            CONSTRUCTORS                           *|
 		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public DbRoles(IEnumerable<Role> roles)
+		public DbRoles(Role[] roles)
 		{
-			roles
-				.AsParallel()
-				.ForAll(r => base.Add(r));
+			lock (_lock)
+			{
+				roles
+					.ToList()
+					.ForEach(r => base.Add(r));
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -37,9 +40,9 @@ namespace Wp.Database.Services
 
 				ctx.Roles.Add(role.ToEFModel());
 				ctx.SaveChanges();
-			}
 
-			base.Add(role);
+				base.Add(role);
+			}
 		}
 
 		/// <summary>
@@ -56,9 +59,9 @@ namespace Wp.Database.Services
 				EFModels.Role dbRole = ctx.Roles.GetEFModel(role);
 				ctx.Roles.Remove(dbRole);
 				ctx.SaveChanges();
-			}
 
-			return base.Remove(role);
+				return base.Remove(role);
+			}
 		}
 
 		/// <summary>

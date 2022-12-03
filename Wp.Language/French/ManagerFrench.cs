@@ -37,6 +37,13 @@
         public string ChooseCompetitionMainClan => "Veuillez choisir le clan principal utilisé lors de ce tournoi";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                     COMPETITION DELETE COMMAND                    *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string NoCompetitionToDelete => "Désolé, mais il n'y a aucune compétition à supprimer";
+        public string ChooseCompetitionToDelete => "Veuillez choisir la compétition à supprimer";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                      COMPETITION EDIT COMMAND                     *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -56,14 +63,6 @@
             $"\nL'environnement a également été changé";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-        |*                       COMPETITION EDIT SELECT                     *|
-        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-        public string EditCompetitionSelectMainClan => "Choisissez votre nouveau clan principal";
-
-        public string EditCompetitionSelectMainClanUpdated(string competition, string name) => $"Le clan principal utilisé en **{competition}** sera dorénavant **{name}**";
-
-        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                       COMPETITION ADD SELECT                      *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -73,6 +72,22 @@
             $"\nNom : **{name}**" +
             $"\nClan Principal : **{main}**" +
             $"\nClan Secondaire : **{second ?? "Aucun"}**";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                      COMPETITION DELETE SELECT                    *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string CompetitionDeleted(string name) => $"La compétition **{name}**, ainsi que son environnement, a été supprimée";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                       COMPETITION EDIT SELECT                     *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string EditCompetitionSelectMainClan => "Choisissez votre nouveau clan principal";
+
+        public string EditCompetitionSelectMainClanUpdated(string competition, string name) => $"Le clan principal utilisé en **{competition}** sera dorénavant **{name}**";
+        public string EditCompetitionSelectSecondClan => "Choisissez votre nouveau clan secondaire";
+        public string EditCompetitionSelectSecondClanUpdated(string competition, string name) => $"Le clan secondaire utilisé en **{competition}** sera dorénavant **{name}**";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                       COMPETITION ENVIRONMENT                     *|

@@ -14,11 +14,14 @@ namespace Wp.Database.Services
 		|*                            CONSTRUCTORS                           *|
 		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public DbGuilds(IEnumerable<Guild> guilds)
+		public DbGuilds(Guild[] guilds)
 		{
-			guilds
-				.AsParallel()
-				.ForAll(g => base.Add(g));
+			lock (_lock)
+			{
+				guilds
+					.ToList()
+					.ForEach(g => base.Add(g));
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -37,9 +40,9 @@ namespace Wp.Database.Services
 
 				ctx.Guilds.Add(guild.ToEFModel());
 				ctx.SaveChanges();
-			}
 
-			base.Add(guild);
+				base.Add(guild);
+			}
 		}
 
 		/// <summary>
@@ -56,9 +59,9 @@ namespace Wp.Database.Services
 				EFModels.Guild dbGuild = ctx.Guilds.GetEFModel(guild);
 				ctx.Guilds.Remove(dbGuild);
 				ctx.SaveChanges();
-			}
 
-			return base.Remove(guild);
+				return base.Remove(guild);
+			}
 		}
 
 		/// <summary>
@@ -92,10 +95,10 @@ namespace Wp.Database.Services
 
 				ctx.Guilds.Update(dbGuild);
 				ctx.SaveChanges();
-			}
 
-			base.Remove(guild);
-			base.Add(guild);
+				base.Remove(guild);
+				base.Add(guild);
+			}
 		}
 	}
 }

@@ -12,582 +12,684 @@ using Wp.Language;
 
 namespace Wp.Bot.Modules.ComponentCommands.Manager
 {
-    public class Competition : InteractionModuleBase<SocketInteractionContext>
-    {
-        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+	public class Competition : InteractionModuleBase<SocketInteractionContext>
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        private readonly CommandHandler handler;
+		private readonly CommandHandler handler;
 
-        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                             PROPERTIES                            *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public InteractionService? Commands { get; set; }
+		public InteractionService? Commands { get; set; }
 
-        /* * * * * * * * * * * * * * * * * *\
+		/* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
         \* * * * * * * * * * * * * * * * * */
 
 
 
-        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                            CONSTRUCTORS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public Competition(CommandHandler handler)
-        {
-            this.handler = handler;
-        }
+		public Competition(CommandHandler handler)
+		{
+			this.handler = handler;
+		}
 
-        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          BUTTON COMMANDS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        [ComponentInteraction("test_click_me")]
-        public async Task Test()
-        {
-            await DeferAsync();
+		[ComponentInteraction(IdProvider.COMPETITION_ADD_BUTTON_NO_SECOND_CLAN, runMode: RunMode.Async)]
+		public async Task AddSkipSecondClan()
+		{
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
 
-            await FollowupAsync("Ok", ephemeral: true);
-        }
+			// Get SocketMessageComponent and original message
+			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+			SocketUserMessage msg = socket.Message;
 
-        [ComponentInteraction(IdProvider.COMPETITION_ADD_BUTTON_NO_SECOND_CLAN, runMode: RunMode.Async)]
-        public async Task AddSkipSecondClan()
-        {
-            if (!TryDecodeButtonInteraction(IdProvider.COMPETITION_ADD_BUTTON_NO_SECOND_CLAN, out ButtonSerializer buttonSerializer)) return;
+			// Loads databases infos
+			DbClans clans = Database.Context.Clans;
+			DbCompetitions competitions = Database.Context.Competitions;
+			DbRoles roles = Database.Context.Roles;
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
 
-            await DeferAsync();
+			// Gets interaction texts
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
-            // Get SocketMessageComponent and original message
-            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
-            SocketUserMessage msg = socket.Message;
+			// Gets component datas
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 2)
+			{
+				await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
 
-            // Loads databases infos
-            DbClans clans = Database.Context.Clans;
-            DbCompetitions competitions = Database.Context.Competitions;
-            DbRoles roles = Database.Context.Roles;
-            Guild dbGuild = Database.Context
-                .Guilds
-                .First(g => g.Id == Context.Guild.Id);
+				return;
+			}
 
-            // Gets interaction texts
-            IManager interactionText = dbGuild.ManagerText;
-            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+			// Recovers datas
+			string competitionName = datas[0];
+			string mainTag = datas[1];
 
-            // Gets component datas
-            ComponentStorage storage = ComponentStorage.GetInstance();
-            if (!storage.MessageDatas.TryGetValue(msg.Id, out string[]? datas) && datas?.Length != 2)
-            {
-                await FollowupAsync(generalResponses.FailToGetStorageComponentData);
+			// Guild roles
+			IReadOnlyCollection<IRole> guildRoles = roles
+				.AsParallel()
+				.Where(r => r.Guild == dbGuild && r.Type == RoleType.PLAYER)
+				.Select(r => Context.Guild.GetRole(r.Id))
+				.ToArray();
 
-                return;
-            }
+			// Create environment
+			if (!TryCreateEnvironment(competitionName, guildRoles, out ulong? categoryId, out ulong? resultId, out IRole? refRole))
+			{
+				await FollowupAsync(interactionText.CouldntCreateCompetitionEnvironment, ephemeral: true);
 
-            // Remove datas from storage
-            storage.MessageDatas.TryRemove(msg.Id, out string[] _);
+				return;
+			}
 
-            // Guild roles
-            IReadOnlyCollection<IRole> guildRoles = roles
-                .AsParallel()
-                .Where(r => r.Guild == dbGuild && r.Type == RoleType.PLAYER)
-                .Select(r => Context.Guild.GetRole(r.Id))
-                .ToArray();
+			// Register competition
+			Common.Models.Competition dbCompetition = new(dbGuild, categoryId!.Value, resultId!.Value, competitionName, mainTag);
+			competitions.Add(dbCompetition);
 
-            // Recovers datas
-            string competitionName = datas[0];
-            string clanTag = datas[1];
+			await FollowupAsync(interactionText.CompetitionAdded(competitionName, dbCompetition.MainClan.Name), ephemeral: true);
+		}
 
-            // Create environment
-            if (!TryCreateEnvironment(competitionName, guildRoles, out ulong? categoryId, out ulong? resultId, out IRole? refRole))
-            {
-                await FollowupAsync(interactionText.CouldntCreateCompetitionEnvironment);
+		[ComponentInteraction(IdProvider.COMPETITION_EDIT_BUTTON_MAIN_CLAN, runMode: RunMode.Async)]
+		public async Task EditMainClan()
+		{
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
 
-                return;
-            }
+			// Get SocketMessageComponent and original message
+			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+			SocketUserMessage msg = socket.Message;
 
-            // Register competition
-            Common.Models.Competition dbCompetition = new(dbGuild, categoryId!.Value, resultId!.Value, competitionName, clanTag);
-            competitions.Add(dbCompetition);
+			// Gets guild and interaction text
+			DbClans clans = Database.Context.Clans;
+			DbCompetitions competitions = Database.Context.Competitions;
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
 
-            await FollowupAsync(interactionText.CompetitionAdded(competitionName, dbCompetition.MainClan.Name));
-        }
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
-        [ComponentInteraction(IdProvider.COMPETITION_EDIT_BUTTON_MAIN_CLAN, runMode: RunMode.Async)]
-        public async Task EditMainClan()
-        {
-            await Context.Interaction.DisableComponentsAsync(allComponents: true);
+			// Filters for guild
+			Common.Models.Clan[] dbClans = clans
+				.AsParallel()
+				.Where(c => c.Guild == dbGuild)
+				.ToArray();
 
-            // Get SocketMessageComponent and original message
-            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
-            SocketUserMessage msg = socket.Message;
+			// Gets component datas
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
+			{
+				await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
 
-            // Gets guild and interaction text
-            DbClans clans = Database.Context.Clans;
-            DbCompetitions competitions = Database.Context.Competitions;
-            Guild dbGuild = Database.Context
-                .Guilds
-                .First(g => g.Id == Context.Guild.Id);
+				return;
+			}
 
-            IManager interactionText = dbGuild.ManagerText;
-            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+			// Recovers data
+			ulong competitionId = ulong.Parse(datas[0]);
 
-            // Filters for guild
-            Common.Models.Clan[] dbClans = clans.AsParallel().Where(c => c.Guild == dbGuild).ToArray();
+			// Build select menu
+			SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+				.WithCustomId(IdProvider.COMPETITION_EDIT_SELECT_MAIN_CLAN);
 
-            // Gets component datas
-            ComponentStorage storage = ComponentStorage.GetInstance();
-            if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
-            {
-                await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+			dbClans
+				.AsParallel()
+				.ForAll(c =>
+				{
+					menuBuilder.AddOption(c.Profile.Name, c.Tag, c.Tag);
+				});
 
-                return;
-            }
+			// Sort options by name
+			menuBuilder.Options = menuBuilder.Options
+				.AsParallel()
+				.OrderBy(o => o.Label)
+				.ToList();
 
-            // Recovers data
-            ulong competitionId = ulong.Parse(datas[0]);
+			// Cancel button
+			ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+				.WithLabel(generalResponses.CancelButton)
+				.WithStyle(ButtonStyle.Danger)
+				.WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
 
-            // Build select menu
-            SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
-                .WithCustomId(IdProvider.COMPETITION_EDIT_SELECT_MAIN_CLAN);
+			// Build component
+			ComponentBuilder componentBuilder = new ComponentBuilder()
+				.WithSelectMenu(menuBuilder)
+				.WithButton(cancelButtonBuilder);
 
-            dbClans
-                .AsParallel()
-                .ForAll(c =>
-                {
-                    menuBuilder.AddOption(c.Profile.Name, c.Tag, c.Tag);
-                });
+			IUserMessage message = await FollowupAsync(interactionText.EditCompetitionSelectMainClan, components: componentBuilder.Build(), ephemeral: true);
 
-            // Sort options by name
-            menuBuilder.Options = menuBuilder.Options
-                .AsParallel()
-                .OrderBy(o => o.Label)
-                .ToList();
+			// Adds datas to new message
+			storage.MessageDatas.TryAdd(message.Id, datas);
+		}
 
-            // Cancel button
-            ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
-                .WithLabel(generalResponses.CancelButton)
-                .WithStyle(ButtonStyle.Danger)
-                .WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+		[ComponentInteraction(IdProvider.COMPETITION_EDIT_BUTTON_SECOND_CLAN, runMode: RunMode.Async)]
+		public async Task EditSecondClan()
+		{
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
 
-            // Build component
-            ComponentBuilder componentBuilder = new ComponentBuilder()
-                .WithSelectMenu(menuBuilder)
-                .WithButton(cancelButtonBuilder);
+			// Get SocketMessageComponent and original message
+			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+			SocketUserMessage msg = socket.Message;
 
-            IUserMessage message = await FollowupAsync(interactionText.EditCompetitionSelectMainClan, components: componentBuilder.Build(), ephemeral: true);
+			// Gets guild and interaction text
+			DbClans clans = Database.Context.Clans;
+			DbCompetitions competitions = Database.Context.Competitions;
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
 
-            // Adds datas to new message
-            storage.MessageDatas.TryAdd(message.Id, datas);
-        }
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
-        [ComponentInteraction(IdProvider.COMPETITION_EDIT_BUTTON_NAME, runMode: RunMode.Async)]
-        public async Task EditName()
-        {
-            // Get SocketMessageComponent and original message
-            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
-            SocketUserMessage msg = socket.Message;
+			// Filters for guild
+			Common.Models.Clan[] dbClans = clans
+				.AsParallel()
+				.Where(c => c.Guild == dbGuild)
+				.ToArray();
 
-            // Gets guild and interaction text
-            DbCompetitions competitions = Database.Context.Competitions;
-            Guild dbGuild = Database.Context
-                .Guilds
-                .First(g => g.Id == Context.Guild.Id);
+			// Gets component datas
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
+			{
+				await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
 
-            IManager interactionText = dbGuild.ManagerText;
-            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+				return;
+			}
 
-            // Gets component datas
-            ComponentStorage storage = ComponentStorage.GetInstance();
-            if (!storage.MessageDatas.TryGetValue(msg.Id, out string[]? datas) && datas?.Length != 1)
-            {
-                await RespondAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+			// Recovers data
+			ulong competitionId = ulong.Parse(datas[0]);
 
-                return;
-            }
+			// Build select menu
+			SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+				.WithCustomId(IdProvider.COMPETITION_EDIT_SELECT_SECOND_CLAN);
 
-            // Recovers data
-            ulong competitionId = ulong.Parse(datas[0]);
+			dbClans
+				.AsParallel()
+				.ForAll(c =>
+				{
+					menuBuilder.AddOption(c.Profile.Name, c.Tag, c.Tag);
+				});
 
-            Common.Models.Competition dbCompetition = competitions
-                .First(c => c.Id == competitionId && c.Guild == dbGuild);
+			// Sort options by name
+			menuBuilder.Options = menuBuilder.Options
+				.AsParallel()
+				.OrderBy(o => o.Label)
+				.ToList();
 
-            ModalBuilder modalBuilder = new ModalBuilder()
-                .WithTitle(interactionText.EditCompetitionNameModalTitle)
-                .WithCustomId(CompetitionEditNameModal.ID)
-                .AddTextInput(interactionText.EditCompetitionNameModalField, CompetitionEditNameModal.NAME_ID, value: dbCompetition.Name);
+			// Cancel button
+			ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+				.WithLabel(generalResponses.CancelButton)
+				.WithStyle(ButtonStyle.Danger)
+				.WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
 
-            await RespondWithModalAsync(modalBuilder.Build());
-        }
+			// Build component
+			ComponentBuilder componentBuilder = new ComponentBuilder()
+				.WithSelectMenu(menuBuilder)
+				.WithButton(cancelButtonBuilder);
 
-        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+			IUserMessage message = await FollowupAsync(interactionText.EditCompetitionSelectSecondClan, components: componentBuilder.Build(), ephemeral: true);
+
+			// Adds datas to new message
+			storage.MessageDatas.TryAdd(message.Id, datas);
+		}
+
+		[ComponentInteraction(IdProvider.COMPETITION_EDIT_BUTTON_NAME, runMode: RunMode.Async)]
+		public async Task EditName()
+		{
+			// Get SocketMessageComponent and original message
+			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+			SocketUserMessage msg = socket.Message;
+
+			// Gets guild and interaction text
+			DbCompetitions competitions = Database.Context.Competitions;
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
+
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			// Gets component datas
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryGetValue(msg.Id, out string[]? datas) && datas?.Length != 1)
+			{
+				await RespondAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+				return;
+			}
+
+			// Recovers data
+			ulong competitionId = ulong.Parse(datas[0]);
+
+			Common.Models.Competition dbCompetition = competitions
+				.First(c => c.Id == competitionId && c.Guild == dbGuild);
+
+			ModalBuilder modalBuilder = new ModalBuilder()
+				.WithTitle(interactionText.EditCompetitionNameModalTitle)
+				.WithCustomId(CompetitionEditNameModal.ID)
+				.AddTextInput(interactionText.EditCompetitionNameModalField, CompetitionEditNameModal.NAME_ID, value: dbCompetition.Name);
+
+			await RespondWithModalAsync(modalBuilder.Build());
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          SELECT COMMANDS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        [ComponentInteraction(IdProvider.COMPETITION_ADD_SELECT_MAIN_CLAN, runMode: RunMode.Async)]
-        public async Task AddMainClanSelect(string[] selections)
-        {
-            if (!TryDecodeSelectInteraction(selections, IdProvider.COMPETITION_ADD_SELECT_MAIN_CLAN, out SelectSerializer selectSerializer, out SelectOptionSerializer[] optionsSerializer)) return;
+		[ComponentInteraction(IdProvider.COMPETITION_ADD_SELECT_MAIN_CLAN, runMode: RunMode.Async)]
+		public async Task AddMainClanSelect(string[] selections)
+		{
+			string clanTag = selections.First();
 
-            await DeferAsync();
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
 
-            SelectOptionSerializer option = optionsSerializer.First();
+			// Loads databases infos
+			DbClans clans = Database.Context.Clans;
+			DbCompetitions competitions = Database.Context.Competitions;
+			DbRoles roles = Database.Context.Roles;
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
 
-            // Loads databases infos
-            DbClans clans = Database.Context.Clans;
-            DbCompetitions competitions = Database.Context.Competitions;
-            DbRoles roles = Database.Context.Roles;
-            Guild dbGuild = Database.Context
-                .Guilds
-                .First(g => g.Id == Context.Guild.Id);
+			// Filters for guild
+			Common.Models.Clan[] dbClans = clans
+				.AsParallel()
+				.Where(c => c.Guild == dbGuild)
+				.ToArray();
 
-            // Filters for guild
-            Common.Models.Clan[] dbClans = clans.AsParallel().Where(c => c.Guild == dbGuild).ToArray();
-            Common.Models.Competition[] dbCompetitions = competitions.AsParallel().Where(c => c.Guild == dbGuild).ToArray();
+			Common.Models.Competition[] dbCompetitions = competitions
+				.AsParallel()
+				.Where(c => c.Guild == dbGuild)
+				.ToArray();
 
-            // Gets interaction texts
-            IManager interactionText = dbGuild.ManagerText;
-            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+			// Gets interaction texts
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
-            string competitionName = option.Datas[0];
+			// Checks Clash Of Clans API
+			if (!await ClashOfClansApi.TryAccessApiAsync())
+			{
+				await FollowupAsync(generalResponses.ClashOfClansError, ephemeral: true);
 
-            // Checks Clash Of Clans API
-            if (!await ClashOfClansApi.TryAccessApiAsync())
-            {
-                await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.ClashOfClansError);
+				return;
+			}
 
-                return;
-            }
+			// Get SocketMessageComponent and original message
+			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+			SocketUserMessage msg = socket.Message;
 
-            // Build select menu
-            SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
-                .WithCustomId(IdProvider.COMPETITION_ADD_SELECT_SECOND_CLAN);
+			// Gets component datas
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
+			{
+				await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
 
-            dbClans
-                .AsParallel()
-                .ForAll(c =>
-                {
-                    SelectOptionSerializer optionSerializer = new(dbGuild.Id, Context.User.Id, c.Tag, competitionName, option.Value);
-                    menuBuilder.AddOption(c.Profile.Name, optionSerializer.ToString(), c.Tag);
-                });
+				return;
+			}
 
-            // Sort options by name
-            menuBuilder.Options = menuBuilder.Options
-                .AsParallel()
-                .OrderBy(o => o.Label)
-                .ToList();
+			// Recovers data
+			string competitionName = datas[0];
 
-            // Cancel button
-            ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
-                .WithLabel(generalResponses.CancelButton)
-                .WithStyle(ButtonStyle.Danger)
-                .WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+			// Build select menu
+			SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+				.WithCustomId(IdProvider.COMPETITION_ADD_SELECT_SECOND_CLAN);
 
-            // None button
-            ButtonBuilder noneButtonBuilder = new ButtonBuilder()
-                .WithLabel(interactionText.CompetitionNoSecondClanButton)
-                .WithStyle(ButtonStyle.Secondary)
-                .WithCustomId(IdProvider.COMPETITION_ADD_BUTTON_NO_SECOND_CLAN);
+			dbClans
+				.AsParallel()
+				.ForAll(c =>
+				{
+					menuBuilder.AddOption(c.Profile.Name, c.Tag, c.Tag);
+				});
 
-            // Build component
-            ComponentBuilder componentBuilder = new ComponentBuilder()
-                .WithSelectMenu(menuBuilder)
-                .WithButton(cancelButtonBuilder)
-                .WithButton(noneButtonBuilder);
+			// Sort options by name
+			menuBuilder.Options = menuBuilder.Options
+				.AsParallel()
+				.OrderBy(o => o.Label)
+				.ToList();
 
-            // Let's go for second clan
-            IUserMessage message = await FollowupAsync(interactionText.ChooseCompetitionSecondClan, components: componentBuilder.Build());
+			// Cancel button
+			ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+				.WithLabel(generalResponses.CancelButton)
+				.WithStyle(ButtonStyle.Danger)
+				.WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
 
-            // Registers informations into storage
-            ComponentStorage storage = ComponentStorage.GetInstance();
+			// None button
+			ButtonBuilder noneButtonBuilder = new ButtonBuilder()
+				.WithLabel(interactionText.CompetitionNoSecondClanButton)
+				.WithStyle(ButtonStyle.Secondary)
+				.WithCustomId(IdProvider.COMPETITION_ADD_BUTTON_NO_SECOND_CLAN);
 
-            string[] datas = new[] { competitionName, option.Value };
-            storage.MessageDatas.TryAdd(message.Id, datas);
+			// Build component
+			ComponentBuilder componentBuilder = new ComponentBuilder()
+				.WithSelectMenu(menuBuilder)
+				.WithButton(cancelButtonBuilder)
+				.WithButton(noneButtonBuilder);
 
-            //message.DeleteAllComponentsAfterButtonClick(cancelButtonBuilder.CustomId, Context.User.Id);
-            message.DisableButtonAfterClick(noneButtonBuilder.CustomId, Context.User.Id, disableAllComponents: true);
-            message.DisableSelectAfterSelection(menuBuilder.CustomId, Context.User.Id, removeButtons: true);
-        }
+			// Let's go for second clan
+			IUserMessage message = await FollowupAsync(interactionText.ChooseCompetitionSecondClan, components: componentBuilder.Build(), ephemeral: true);
 
-        [ComponentInteraction(IdProvider.COMPETITION_ADD_SELECT_SECOND_CLAN, runMode: RunMode.Async)]
-        public async Task AddSecondClanSelect(string[] selections)
-        {
-            if (!TryDecodeSelectInteraction(selections, IdProvider.COMPETITION_ADD_SELECT_SECOND_CLAN, out SelectSerializer selectSerializer, out SelectOptionSerializer[] optionsSerializer)) return;
+			// Registers informations into storage
+			datas = new[] { competitionName, clanTag };
+			storage.MessageDatas.TryAdd(message.Id, datas);
+		}
 
-            await DeferAsync();
+		[ComponentInteraction(IdProvider.COMPETITION_ADD_SELECT_SECOND_CLAN, runMode: RunMode.Async)]
+		public async Task AddSecondClanSelect(string[] selections)
+		{
+			string secondTag = selections.First();
 
-            // Get SocketMessageComponent and original message
-            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
-            SocketUserMessage msg = socket.Message;
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
 
-            SelectOptionSerializer option = optionsSerializer.First();
+			// Loads databases infos
+			DbClans clans = Database.Context.Clans;
+			DbCompetitions competitions = Database.Context.Competitions;
+			DbRoles roles = Database.Context.Roles;
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
 
-            // Loads databases infos
-            DbClans clans = Database.Context.Clans;
-            DbCompetitions competitions = Database.Context.Competitions;
-            DbRoles roles = Database.Context.Roles;
-            Guild dbGuild = Database.Context
-                .Guilds
-                .First(g => g.Id == Context.Guild.Id);
+			// Gets interaction texts
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
-            // Gets interaction texts
-            IManager interactionText = dbGuild.ManagerText;
-            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+			// Guild roles
+			IReadOnlyCollection<IRole> guildRoles = roles
+				.AsParallel()
+				.Where(r => r.Guild == dbGuild && r.Type == RoleType.PLAYER)
+				.Select(r => Context.Guild.GetRole(r.Id))
+				.ToArray();
 
-            // Guild roles
-            IReadOnlyCollection<IRole> guildRoles = roles
-                .AsParallel()
-                .Where(r => r.Guild == dbGuild && r.Type == RoleType.PLAYER)
-                .Select(r => Context.Guild.GetRole(r.Id))
-                .ToArray();
+			// Get SocketMessageComponent and original message
+			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+			SocketUserMessage msg = socket.Message;
 
-            // Recovers datas
-            string competitionName = option.Datas[0];
-            string clanTag = option.Datas[1];
-            string secondTag = option.Value;
+			// Gets component datas
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 2)
+			{
+				await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
 
-            // Create environment
-            if (!TryCreateEnvironment(competitionName, guildRoles, out ulong? categoryId, out ulong? resultId, out IRole? refRole))
-            {
-                await FollowupAsync(interactionText.CouldntCreateCompetitionEnvironment);
+				return;
+			}
 
-                return;
-            }
+			// Recovers datas
+			string competitionName = datas[0];
+			string mainTag = datas[1];
 
-            // Register competition
-            Common.Models.Competition dbCompetition = new(dbGuild, categoryId!.Value, resultId!.Value, competitionName, clanTag)
-            {
-                SecondTag = secondTag,
-            };
-            competitions.Add(dbCompetition);
+			// Creates environment
+			if (!TryCreateEnvironment(competitionName, guildRoles, out ulong? categoryId, out ulong? resultId, out IRole? refRole))
+			{
+				await FollowupAsync(interactionText.CouldntCreateCompetitionEnvironment, ephemeral: true);
 
+				return;
+			}
 
-            // Remove datas from storage
-            ComponentStorage storage = ComponentStorage.GetInstance();
-            storage.MessageDatas.TryRemove(msg.Id, out string[] _);
+			// Register competition
+			Common.Models.Competition dbCompetition = new(dbGuild, categoryId!.Value, resultId!.Value, competitionName, mainTag)
+			{
+				SecondTag = secondTag,
+			};
+			competitions.Add(dbCompetition);
 
-            await FollowupAsync(interactionText.CompetitionAdded(competitionName, dbCompetition.MainClan.Name, dbCompetition.SecondClan?.Name));
-        }
+			await FollowupAsync(interactionText.CompetitionAdded(competitionName, dbCompetition.MainClan.Name, dbCompetition.SecondClan?.Name), ephemeral: true);
+		}
 
-        [ComponentInteraction(IdProvider.COMPETITION_EDIT_SELECT_MAIN_CLAN, runMode: RunMode.Async)]
-        public async Task EditMainClan(string[] selections)
-        {
-            string clanTag = selections.First();
+		[ComponentInteraction(IdProvider.COMPETITION_DELETE_SELECT, runMode: RunMode.Async)]
+		public async Task Delete(string[] selections)
+		{
+			ulong competitionId = ulong.Parse(selections.First());
 
-            await Context.Interaction.DisableComponentsAsync(allComponents: true);
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
 
-            // Loads databases infos
-            DbClans clans = Database.Context.Clans;
-            DbCompetitions competitions = Database.Context.Competitions;
-            Guild dbGuild = Database.Context
-                .Guilds
-                .First(g => g.Id == Context.Guild.Id);
+			// Loads databases infos
+			DbCompetitions competitions = Database.Context.Competitions;
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
 
-            // Gets interaction texts
-            IManager interactionText = dbGuild.ManagerText;
-            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+			// Filters for guild
+			Common.Models.Competition dbCompetition = competitions
+				.First(c => c.Id == competitionId && c.Guild == dbGuild);
 
-            // Get SocketMessageComponent and original message
-            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
-            SocketUserMessage msg = socket.Message;
+			// Gets interaction texts
+			IManager interactionText = dbGuild.ManagerText;
 
-            // Gets component datas
-            ComponentStorage storage = ComponentStorage.GetInstance();
-            if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
-            {
-                await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+			// Gets environment
+			IReadOnlyList<SocketTextChannel> channels = Context.Guild.Channels
+				.Where(c => c.GetChannelType() == ChannelType.Text)
+				.Select(c => c as SocketTextChannel)
+				.Where(c => c is not null && c.CategoryId == dbCompetition.Id)
+				.ToList()!;
 
-                return;
-            }
+			IReadOnlyList<SocketVoiceChannel> voices = Context.Guild.Channels
+				.Where(c => c.GetChannelType() == ChannelType.Text)
+				.Select(c => c as SocketVoiceChannel)
+				.Where(c => c is not null && c.CategoryId == dbCompetition.Id)
+				.ToList()!;
 
-            // Recovers data
-            ulong competitionId = ulong.Parse(datas[0]);
+			SocketGuildChannel category = Context.Guild.GetChannel(dbCompetition.Id);
 
-            // Updates competition
-            Common.Models.Competition dbCompetition = competitions.First(c => c.Id == competitionId && c.Guild == dbGuild);
-            dbCompetition.MainTag = clanTag;
+			IReadOnlyList<SocketRole> roles = Context.Guild.Roles
+				.Where(c => c.Name.Contains(dbCompetition.Name))
+				.ToList();
 
-            competitions.Update(dbCompetition);
+			// Deletes environment
+			channels
+				.AsParallel()
+				.ForAll(async c => await c.DeleteAsync());
 
-            await FollowupAsync(interactionText.EditCompetitionSelectMainClanUpdated(dbCompetition.Name, dbCompetition.MainClan.Name), ephemeral: true);
-        }
+			voices
+				.AsParallel()
+				.ForAll(async c => await c.DeleteAsync());
 
-        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+			await category.DeleteAsync();
+
+			roles
+				.AsParallel()
+				.ForAll(async r => await r.DeleteAsync());
+
+			// Deletes from DB
+			competitions.Remove(dbCompetition);
+
+			await FollowupAsync(interactionText.CompetitionDeleted(dbCompetition.Name), ephemeral: true);
+		}
+
+		[ComponentInteraction(IdProvider.COMPETITION_EDIT_SELECT_MAIN_CLAN, runMode: RunMode.Async)]
+		public async Task EditMainClan(string[] selections)
+		{
+			string clanTag = selections.First();
+
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+			// Loads databases infos
+			DbClans clans = Database.Context.Clans;
+			DbCompetitions competitions = Database.Context.Competitions;
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
+
+			// Gets interaction texts
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			// Get SocketMessageComponent and original message
+			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+			SocketUserMessage msg = socket.Message;
+
+			// Gets component datas
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
+			{
+				await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+				return;
+			}
+
+			// Recovers data
+			ulong competitionId = ulong.Parse(datas[0]);
+
+			// Updates competition
+			Common.Models.Competition dbCompetition = competitions.First(c => c.Id == competitionId && c.Guild == dbGuild);
+			dbCompetition.MainTag = clanTag;
+
+			competitions.Update(dbCompetition);
+
+			await FollowupAsync(interactionText.EditCompetitionSelectMainClanUpdated(dbCompetition.Name, dbCompetition.MainClan.Name), ephemeral: true);
+		}
+
+		[ComponentInteraction(IdProvider.COMPETITION_EDIT_SELECT_SECOND_CLAN, runMode: RunMode.Async)]
+		public async Task EditSecondClan(string[] selections)
+		{
+			string clanTag = selections.First();
+
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+			// Loads databases infos
+			DbClans clans = Database.Context.Clans;
+			DbCompetitions competitions = Database.Context.Competitions;
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
+
+			// Gets interaction texts
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			// Get SocketMessageComponent and original message
+			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+			SocketUserMessage msg = socket.Message;
+
+			// Gets component datas
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
+			{
+				await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+				return;
+			}
+
+			// Recovers data
+			ulong competitionId = ulong.Parse(datas[0]);
+
+			// Updates competition
+			Common.Models.Competition dbCompetition = competitions.First(c => c.Id == competitionId && c.Guild == dbGuild);
+			dbCompetition.SecondTag = clanTag;
+
+			competitions.Update(dbCompetition);
+
+			await FollowupAsync(interactionText.EditCompetitionSelectSecondClanUpdated(dbCompetition.Name, dbCompetition.MainClan.Name), ephemeral: true);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          PRIVATE METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        private bool TryCreateEnvironment(string competitionName, IReadOnlyCollection<IRole> playerRoles, out ulong? categoryId, out ulong? resultId, out IRole? refRole)
-        {
-            try
-            {
-                // Gets main datas
-                IGuild guild = Context.Guild;
-                Guild dbGuild = Database.Context
-                    .Guilds
-                    .First(g => g.Id == Context.Guild.Id);
+		private bool TryCreateEnvironment(string competitionName, IReadOnlyCollection<IRole> playerRoles, out ulong? categoryId, out ulong? resultId, out IRole? refRole)
+		{
+			try
+			{
+				// Gets main datas
+				IGuild guild = Context.Guild;
+				Guild dbGuild = Database.Context
+					.Guilds
+					.First(g => g.Id == Context.Guild.Id);
 
-                // Gets interaction texts
-                IManager interactionText = dbGuild.ManagerText;
+				// Gets interaction texts
+				IManager interactionText = dbGuild.ManagerText;
 
-                // Gets bot as a member
-                IGuildUser botMember = guild.GetCurrentUserAsync().Result;
+				// Gets bot as a member
+				IGuildUser botMember = guild.GetCurrentUserAsync().Result;
 
-                /* * * * * * * * * * * * * * * *\
+				/* * * * * * * * * * * * * * * *\
                 |*        ROLE CREATION        *|
                 \* * * * * * * * * * * * * * * */
 
-                refRole = guild.CreateRoleAsync(interactionText.CompetitionEnvironmentReferentRoleName(competitionName), GuildPermissions.None, isMentionable: true).Result;
-                IRole tournamentRole = guild.CreateRoleAsync(competitionName, GuildPermissions.None, isMentionable: true).Result;
+				IRole referentRole = guild.CreateRoleAsync(interactionText.CompetitionEnvironmentReferentRoleName(competitionName), GuildPermissions.None, isMentionable: true).Result;
+				IRole tournamentRole = guild.CreateRoleAsync(competitionName, GuildPermissions.None, isMentionable: true).Result;
 
-                /* * * * * * * * * * * * * * * *\
+				/* * * * * * * * * * * * * * * *\
                 |*      CHANNELS CREATION      *|
                 \* * * * * * * * * * * * * * * */
 
-                IGuildChannel category = guild.CreateCategoryAsync($"🏆 {competitionName}").Result;
-                IGuildChannel informations = guild.CreateTextChannelAsync(interactionText.CompetitionEnvironmentInformationChannel, c => c.CategoryId = category.Id).Result;
-                IGuildChannel flood = guild.CreateTextChannelAsync(interactionText.CompetitionEnvironmentFloodChannel, c => c.CategoryId = category.Id).Result;
-                IGuildChannel result = guild.CreateTextChannelAsync(interactionText.CompetitionenvironmentResultChannel, c => c.CategoryId = category.Id).Result;
-                IGuildChannel voice = guild.CreateVoiceChannelAsync(interactionText.CompetitionEnvironmentVoiceChannel, c => c.CategoryId = category.Id).Result;
+				IGuildChannel category = guild.CreateCategoryAsync($"🏆 {competitionName}").Result;
+				IGuildChannel informations = guild.CreateTextChannelAsync(interactionText.CompetitionEnvironmentInformationChannel, c => c.CategoryId = category.Id).Result;
+				IGuildChannel flood = guild.CreateTextChannelAsync(interactionText.CompetitionEnvironmentFloodChannel, c => c.CategoryId = category.Id).Result;
+				IGuildChannel result = guild.CreateTextChannelAsync(interactionText.CompetitionenvironmentResultChannel, c => c.CategoryId = category.Id).Result;
+				IGuildChannel voice = guild.CreateVoiceChannelAsync(interactionText.CompetitionEnvironmentVoiceChannel, c => c.CategoryId = category.Id).Result;
 
-                /* * * * * * * * * * * * * * * *\
+				/* * * * * * * * * * * * * * * *\
                 |*     CHANNELS PERMISSION     *|
                 \* * * * * * * * * * * * * * * */
 
-                category.AddPermissionOverwriteAsync(botMember, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow)).Wait();
-                category.AddPermissionOverwriteAsync(refRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, manageMessages: PermValue.Allow, sendMessages: PermValue.Allow)).Wait();
-                category.AddPermissionOverwriteAsync(tournamentRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow)).Wait();
-                category.AddPermissionOverwriteAsync(guild.EveryoneRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Deny)).Wait();
+				category.AddPermissionOverwriteAsync(botMember, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow)).Wait();
+				category.AddPermissionOverwriteAsync(referentRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, manageMessages: PermValue.Allow, sendMessages: PermValue.Allow)).Wait();
+				category.AddPermissionOverwriteAsync(tournamentRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow)).Wait();
+				category.AddPermissionOverwriteAsync(guild.EveryoneRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Deny)).Wait();
 
-                informations.AddPermissionOverwriteAsync(botMember, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow)).Wait();
-                informations.AddPermissionOverwriteAsync(refRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, manageMessages: PermValue.Allow, sendMessages: PermValue.Allow)).Wait();
-                informations.AddPermissionOverwriteAsync(tournamentRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, sendMessages: PermValue.Deny)).Wait();
-                informations.AddPermissionOverwriteAsync(guild.EveryoneRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Deny)).Wait();
+				informations.AddPermissionOverwriteAsync(botMember, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow)).Wait();
+				informations.AddPermissionOverwriteAsync(referentRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, manageMessages: PermValue.Allow, sendMessages: PermValue.Allow)).Wait();
+				informations.AddPermissionOverwriteAsync(tournamentRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, sendMessages: PermValue.Deny)).Wait();
+				informations.AddPermissionOverwriteAsync(guild.EveryoneRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Deny)).Wait();
 
-                result.AddPermissionOverwriteAsync(botMember, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, sendMessages: PermValue.Allow)).Wait();
-                result.AddPermissionOverwriteAsync(refRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, manageMessages: PermValue.Allow, sendMessages: PermValue.Allow)).Wait();
-                result.AddPermissionOverwriteAsync(guild.EveryoneRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Deny, sendMessages: PermValue.Deny)).Wait();
+				result.AddPermissionOverwriteAsync(botMember, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, sendMessages: PermValue.Allow)).Wait();
+				result.AddPermissionOverwriteAsync(referentRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, manageMessages: PermValue.Allow, sendMessages: PermValue.Allow)).Wait();
+				result.AddPermissionOverwriteAsync(guild.EveryoneRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Deny, sendMessages: PermValue.Deny)).Wait();
 
-                voice.AddPermissionOverwriteAsync(botMember, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow)).Wait();
-                voice.AddPermissionOverwriteAsync(refRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, useVoiceActivation: PermValue.Allow, speak: PermValue.Allow)).Wait();
-                voice.AddPermissionOverwriteAsync(tournamentRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, useVoiceActivation: PermValue.Allow, speak: PermValue.Allow)).Wait();
-                voice.AddPermissionOverwriteAsync(guild.EveryoneRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Deny)).Wait();
+				voice.AddPermissionOverwriteAsync(botMember, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow)).Wait();
+				voice.AddPermissionOverwriteAsync(referentRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, useVoiceActivation: PermValue.Allow, speak: PermValue.Allow)).Wait();
+				voice.AddPermissionOverwriteAsync(tournamentRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, useVoiceActivation: PermValue.Allow, speak: PermValue.Allow)).Wait();
+				voice.AddPermissionOverwriteAsync(guild.EveryoneRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Deny)).Wait();
 
-                /* * * * * * * * * * * * * * * *\
+				/* * * * * * * * * * * * * * * *\
                 |*      RESULT PERMISSION      *|
                 \* * * * * * * * * * * * * * * */
 
-                playerRoles
-                    .AsParallel()
-                    .ForAll(async role => await result.AddPermissionOverwriteAsync(role, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, sendMessages: PermValue.Deny)));
+				playerRoles
+					.AsParallel()
+					.ForAll(async role => await result.AddPermissionOverwriteAsync(role, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, sendMessages: PermValue.Deny)));
 
-                /* * * * * * * * * * * * * * * *\
+				/* * * * * * * * * * * * * * * *\
+                |*         ADD REF ROLE        *|
+                \* * * * * * * * * * * * * * * */
+
+				Task<IReadOnlyCollection<IGuildUser>> users = guild.GetUsersAsync();
+
+				users.Wait();
+
+				users.Result
+					.AsParallel()
+					.Where(u => u.IsAManager())
+					.ForAll(async u => await u.AddRoleAsync(referentRole));
+
+
+				/* * * * * * * * * * * * * * * *\
                 |*          RETURN IDS         *|
                 \* * * * * * * * * * * * * * * */
 
-                categoryId = category.Id;
-                resultId = result.Id;
+				categoryId = category.Id;
+				resultId = result.Id;
+				refRole = referentRole;
 
-                return true;
-            }
-            catch (Exception)
-            {
-                categoryId = null;
-                resultId = null;
-                refRole = null;
+				return true;
+			}
+			catch (Exception)
+			{
+				categoryId = null;
+				resultId = null;
+				refRole = null;
 
-                return false;
-            }
-        }
-
-        private bool TryDecodeButtonInteraction(string buttonId, out ButtonSerializer buttonSerializer)
-        {
-            // Get SocketMessageComponent and original message
-            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
-            SocketUserMessage msg = socket.Message;
-
-            buttonSerializer = new(Context.User.Id, msg.Id, buttonId);
-
-            // Gets guild and interaction text
-            Guild dbGuild = Database.Context
-                .Guilds
-                .First(g => g.Id == Context.Guild.Id);
-
-            IManager interactionText = dbGuild.ManagerText;
-
-            // Encodes key
-            string key = buttonSerializer.Encode();
-
-            // Gets user id associated
-            ComponentStorage componentStorage = ComponentStorage.GetInstance();
-            ulong userId = componentStorage.Buttons.GetValueOrDefault(key);
-
-            // Checks if user is elligible for interaction
-            if (Context.User.Id != userId)
-            {
-                Task response = RespondAsync(interactionText.UserNotAllowedToInteract, ephemeral: true);
-                response.Wait();
-
-                return false;
-            }
-
-            componentStorage.Buttons.TryRemove(key, out ulong _);
-
-            return true;
-        }
-
-        private bool TryDecodeSelectInteraction(string[] selections, string selectId, out SelectSerializer selectSerializer, out SelectOptionSerializer[] optionsSerializer)
-        {
-            // Get SocketMessageComponent and original message
-            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
-            SocketUserMessage msg = socket.Message;
-
-            // Decodes all options
-            List<SelectOptionSerializer?> options = new();
-
-            selections
-                .AsParallel()
-                .ForAll(s => options.Add(SelectOptionSerializer.Decode(s)));
-
-            selectSerializer = new(Context.User.Id, msg.Id, selectId);
-            optionsSerializer = options
-                .AsParallel()
-                .Where(o => o != null)
-                .ToArray()!;
-
-            // Gets guild and interaction text
-            Guild dbGuild = Database.Context
-                .Guilds
-                .First(g => g.Id == Context.Guild.Id);
-
-            IManager interactionText = dbGuild.ManagerText;
-
-            // Checks if there's options in the interaction
-            if (optionsSerializer.Length < 1)
-            {
-                Task response = RespondAsync(interactionText.SelectDontContainsOption, ephemeral: true);
-                response.Wait();
-
-                return false;
-            }
-
-            // Checks if user is elligible for interaction
-            if (Context.User.Id != optionsSerializer.First().UserId)
-            {
-                Task response = RespondAsync(interactionText.UserNotAllowedToInteract, ephemeral: true);
-                response.Wait();
-
-                return false;
-            }
-
-            ComponentStorage componentStorage = ComponentStorage.GetInstance();
-
-            // Encodes key
-            string key = selectSerializer.Encode();
-
-            componentStorage.Selects.Remove(key);
-
-            return true;
-        }
-    }
+				return false;
+			}
+		}
+	}
 }

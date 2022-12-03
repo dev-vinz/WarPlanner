@@ -99,6 +99,7 @@ namespace Wp.Bot.Modules.ModalCommands.Manager
             string categName = category.Name.Replace(oldName, modal.Name);
 
             await category.ModifyAsync(categ => categ.Name = categName);
+
             Context.Guild.Roles
                 .Where(r => r.Name.Contains(oldName))
                 .ToList()

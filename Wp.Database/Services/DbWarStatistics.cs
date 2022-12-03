@@ -14,11 +14,14 @@ namespace Wp.Database.Services
 		|*                            CONSTRUCTORS                           *|
 		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public DbWarStatistics(IEnumerable<WarStatistic> warStatistics)
+		public DbWarStatistics(WarStatistic[] warStatistics)
 		{
-			warStatistics
-				.AsParallel()
-				.ForAll(ws => base.Add(ws));
+			lock (_lock)
+			{
+				warStatistics
+					.ToList()
+					.ForEach(ws => base.Add(ws));
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -37,9 +40,9 @@ namespace Wp.Database.Services
 
 				ctx.WarStatistics.Add(warStatistic.ToEFModel());
 				ctx.SaveChanges();
-			}
 
-			base.Add(warStatistic);
+				base.Add(warStatistic);
+			}
 		}
 
 		/// <summary>
@@ -56,9 +59,9 @@ namespace Wp.Database.Services
 				EFModels.WarStatistic dbWarStatistic = ctx.WarStatistics.GetEFModel(warStatistic);
 				ctx.WarStatistics.Remove(dbWarStatistic);
 				ctx.SaveChanges();
-			}
 
-			return base.Remove(warStatistic);
+				return base.Remove(warStatistic);
+			}
 		}
 
 		/// <summary>
