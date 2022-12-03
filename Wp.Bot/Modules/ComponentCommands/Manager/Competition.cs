@@ -50,7 +50,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 		{
 			await Context.Interaction.DisableComponentsAsync(allComponents: true);
 
-			// Get SocketMessageComponent and original message
+			// Gets SocketMessageComponent and original message
 			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
 			SocketUserMessage msg = socket.Message;
 
@@ -106,7 +106,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 		{
 			await Context.Interaction.DisableComponentsAsync(allComponents: true);
 
-			// Get SocketMessageComponent and original message
+			// Gets SocketMessageComponent and original message
 			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
 			SocketUserMessage msg = socket.Message;
 
@@ -177,7 +177,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 		{
 			await Context.Interaction.DisableComponentsAsync(allComponents: true);
 
-			// Get SocketMessageComponent and original message
+			// Gets SocketMessageComponent and original message
 			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
 			SocketUserMessage msg = socket.Message;
 
@@ -246,7 +246,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 		[ComponentInteraction(IdProvider.COMPETITION_EDIT_BUTTON_NAME, runMode: RunMode.Async)]
 		public async Task EditName()
 		{
-			// Get SocketMessageComponent and original message
+			// Gets SocketMessageComponent and original message
 			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
 			SocketUserMessage msg = socket.Message;
 
@@ -324,7 +324,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 				return;
 			}
 
-			// Get SocketMessageComponent and original message
+			// Gets SocketMessageComponent and original message
 			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
 			SocketUserMessage msg = socket.Message;
 
@@ -409,7 +409,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 				.Select(r => Context.Guild.GetRole(r.Id))
 				.ToArray();
 
-			// Get SocketMessageComponent and original message
+			// Gets SocketMessageComponent and original message
 			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
 			SocketUserMessage msg = socket.Message;
 
@@ -522,7 +522,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 			IManager interactionText = dbGuild.ManagerText;
 			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
-			// Get SocketMessageComponent and original message
+			// Gets SocketMessageComponent and original message
 			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
 			SocketUserMessage msg = socket.Message;
 
@@ -565,7 +565,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 			IManager interactionText = dbGuild.ManagerText;
 			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
-			// Get SocketMessageComponent and original message
+			// Gets SocketMessageComponent and original message
 			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
 			SocketUserMessage msg = socket.Message;
 

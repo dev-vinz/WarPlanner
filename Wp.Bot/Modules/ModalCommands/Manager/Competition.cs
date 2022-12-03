@@ -55,7 +55,7 @@ namespace Wp.Bot.Modules.ModalCommands.Manager
         {
             await DeferAsync(true);
 
-            // Get SocketMessageComponent and original message
+            // Gets SocketMessageComponent and original message
             SocketModal socket = (Context.Interaction as SocketModal)!;
             RestInteractionMessage originalMessage = await socket.GetOriginalResponseAsync();
 

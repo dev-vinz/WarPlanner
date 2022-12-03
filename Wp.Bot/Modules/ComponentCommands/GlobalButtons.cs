@@ -44,7 +44,7 @@ namespace Wp.Bot.Modules.ComponentCommands
         [ComponentInteraction(IdProvider.GLOBAL_CANCEL_BUTTON, runMode: RunMode.Async)]
         public async Task CancelButton()
         {
-            // Get SocketMessageComponent and original message
+            // Gets SocketMessageComponent and original message
             SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
             SocketUserMessage msg = socket.Message;
 

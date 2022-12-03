@@ -10,7 +10,7 @@ namespace Wp.Discord.Extensions
         {
             await interaction.DeferAsync(ephemeral);
 
-            // Get SocketMessageComponent and original message
+            // Gets SocketMessageComponent and original message
             SocketMessageComponent socket = (interaction as SocketMessageComponent)!;
             SocketUserMessage originalMessage = socket.Message;
 

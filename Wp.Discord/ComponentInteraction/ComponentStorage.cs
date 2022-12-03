@@ -17,16 +17,6 @@ namespace Wp.Discord.ComponentInteraction
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         /// <summary>
-        /// Gets all the select ids that are waiting for interaction
-        /// </summary>
-        public HashSet<string> Selects { get; }
-
-        /// <summary>
-        /// Gets all the buttons id that are waiting for interaction, with the user id as value
-        /// </summary>
-        public ConcurrentDictionary<string, ulong> Buttons { get; }
-
-        /// <summary>
         /// Gets some datas informations, associated by the message id key
         /// </summary>
         public ConcurrentDictionary<ulong, string[]> MessageDatas { get; }
@@ -43,8 +33,6 @@ namespace Wp.Discord.ComponentInteraction
 
         private ComponentStorage()
         {
-            Selects = new HashSet<string>();
-            Buttons = new ConcurrentDictionary<string, ulong>();
             MessageDatas = new ConcurrentDictionary<ulong, string[]>();
         }
 
