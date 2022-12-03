@@ -21,12 +21,6 @@ namespace Wp.Discord.Extensions
             // Gets the component interaction storage
             ComponentStorage storage = ComponentStorage.GetInstance();
 
-            if (allComponents)
-            {
-                // In doubt, remove all component datas associated at this message
-                storage.MessageDatas.TryRemove(originalMessage.Id, out string[] _);
-            }
-
             List<ActionRowBuilder> actionRows = new();
 
             // Gets all action rows with components inside

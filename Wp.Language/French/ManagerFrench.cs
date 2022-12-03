@@ -42,8 +42,8 @@
 
         public string EditCompetitionName => "Nom";
         public string EditCompetitionResultChannel => "Salon d'annonce des résultats";
-        public string EditCompetitionMainClan => "Clan Principal";
-        public string EditCompetitionSecondClan => "Clan Secondaire";
+        public string EditCompetitionMainClan => "Clan principal";
+        public string EditCompetitionSecondClan => "Clan secondaire";
         public string EditCompetitionChooseEdition(string competitionName) => $"Choisissez la modification à faire au tournoi **{competitionName}**";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -54,6 +54,14 @@
         public string EditCompetitionNameModalField => "Nom de la competition";
         public string EditCompetitionNameUpdated(string name) => $"Le nom de la compétition a été changé en : **{name}**" +
             $"\nL'environnement a également été changé";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                       COMPETITION EDIT SELECT                     *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string EditCompetitionSelectMainClan => "Choisissez votre nouveau clan principal";
+
+        public string EditCompetitionSelectMainClanUpdated(string competition, string name) => $"Le clan principal utilisé en **{competition}** sera dorénavant **{name}**";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                       COMPETITION ADD SELECT                      *|

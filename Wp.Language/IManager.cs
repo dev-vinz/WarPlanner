@@ -55,6 +55,13 @@
         public string EditCompetitionNameUpdated(string name);
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                       COMPETITION EDIT SELECT                     *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string EditCompetitionSelectMainClan { get; }
+        public string EditCompetitionSelectMainClanUpdated(string competition, string name);
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                       COMPETITION ADD SELECT                      *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

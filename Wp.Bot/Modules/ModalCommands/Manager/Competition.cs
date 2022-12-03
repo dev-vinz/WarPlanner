@@ -75,7 +75,7 @@ namespace Wp.Bot.Modules.ModalCommands.Manager
             ComponentStorage storage = ComponentStorage.GetInstance();
             if (!storage.MessageDatas.TryRemove(originalMessage.Id, out string[]? datas) && datas?.Length != 1)
             {
-                await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.FailToGetStorageComponentData);
+                await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
 
                 return;
             }

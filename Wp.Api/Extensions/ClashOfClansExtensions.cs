@@ -15,7 +15,7 @@ namespace Wp.Api.Extensions
         /// <returns>A read-only collection containing all the attacks</returns>
         public static IReadOnlyCollection<ClanWarAttack> GetAllAttacks(this ClanWar cWar)
         {
-            List<ClanWarAttack> attacks = new List<ClanWarAttack>();
+            List<ClanWarAttack> attacks = new();
 
             // Clan attacks
             cWar.Clan?

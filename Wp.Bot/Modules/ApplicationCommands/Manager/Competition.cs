@@ -204,12 +204,6 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
 
             string[] datas = new[] { competition };
             storage.MessageDatas.TryAdd(message.Id, datas);
-
-            //message.DeleteAllComponentsAfterButtonClick(cancelButtonBuilder.CustomId, Context.User.Id);
-            //message.DisableButtonAfterClick(nameButtonBuilder.CustomId, Context.User.Id, disableAll: true);
-            //message.DisableButtonAfterClick(resultButtonBuilder.CustomId, Context.User.Id, disableAll: true);
-            //message.DisableButtonAfterClick(mainButtonBuilder.CustomId, Context.User.Id, disableAll: true);
-            //message.DisableButtonAfterClick(secondButtonBuilder.CustomId, Context.User.Id, disableAll: true);
         }
 
         [SlashCommand("test", "Test ephemeral")]

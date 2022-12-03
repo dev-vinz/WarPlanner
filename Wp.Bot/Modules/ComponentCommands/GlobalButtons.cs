@@ -70,7 +70,7 @@ namespace Wp.Bot.Modules.ComponentCommands
             SocketUserMessage msg = socket.Message;
 
             // Gets original user
-            ulong userId = msg.Interaction.User.Id;
+            //ulong userId = msg.Interaction.User.Id;
 
             // Gets guild and interaction text
             Guild dbGuild = Database.Context
@@ -81,12 +81,12 @@ namespace Wp.Bot.Modules.ComponentCommands
             IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
             // Checks if user is elligible for interaction
-            if (Context.User.Id != userId)
-            {
-                await RespondAsync(interactionText.UserNotAllowedToInteract, ephemeral: true);
+            //if (Context.User.Id != userId)
+            //{
+            //    await RespondAsync(interactionText.UserNotAllowedToInteract, ephemeral: true);
 
-                return;
-            }
+            //    return;
+            //}
 
             await Context.Interaction.DisableComponentsAsync(allComponents: true);
 

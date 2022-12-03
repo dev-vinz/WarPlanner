@@ -28,10 +28,9 @@ namespace Wp.Database
                     using EFModels.HEARC_P3Context ctx = new();
 
                     Common.Models.Calendar[] calendars = ctx.Calendars
-                            .Include(c => c.GuildNavigation)
-                            .AsParallel()
-                            .Select(c => c.ToModel())
-                            .ToArray();
+                        .Include(c => c.GuildNavigation)
+                        .Select(c => c.ToModel())
+                        .ToArray();
 
                     return new DbCalendars(calendars.Copy());
                 }
@@ -50,10 +49,9 @@ namespace Wp.Database
                     using EFModels.HEARC_P3Context ctx = new();
 
                     Common.Models.Clan[] clans = ctx.Clans
-                            .Include(c => c.GuildNavigation)
-                            .AsParallel()
-                            .Select(c => c.ToModel())
-                            .ToArray();
+                        .Include(c => c.GuildNavigation)
+                        .Select(c => c.ToModel())
+                        .ToArray();
 
                     return new DbClans(clans.Copy());
                 }
@@ -72,10 +70,9 @@ namespace Wp.Database
                     using EFModels.HEARC_P3Context ctx = new();
 
                     Common.Models.Competition[] competitions = ctx.Competitions
-                            .Include(c => c.GuildNavigation)
-                            .AsParallel()
-                            .Select(c => c.ToModel())
-                            .ToArray();
+                        .Include(c => c.GuildNavigation)
+                        .Select(c => c.ToModel())
+                        .ToArray();
 
                     return new DbCompetitions(competitions.Copy());
                 }
@@ -94,9 +91,8 @@ namespace Wp.Database
                     using EFModels.HEARC_P3Context ctx = new();
 
                     Common.Models.Guild[] guilds = ctx.Guilds
-                            .AsParallel()
-                            .Select(g => g.ToModel())
-                            .ToArray();
+                        .Select(c => c.ToModel())
+                        .ToArray();
 
                     return new DbGuilds(guilds.Copy());
                 }
@@ -115,10 +111,9 @@ namespace Wp.Database
                     using EFModels.HEARC_P3Context ctx = new();
 
                     Common.Models.Player[] players = ctx.Players
-                            .Include(p => p.GuildNavigation)
-                            .AsParallel()
-                            .Select(p => p.ToModel())
-                            .ToArray();
+                        .Include(p => p.GuildNavigation)
+                        .Select(c => c.ToModel())
+                        .ToArray();
 
                     return new DbPlayers(players.Copy());
                 }
@@ -137,10 +132,9 @@ namespace Wp.Database
                     using EFModels.HEARC_P3Context ctx = new();
 
                     Common.Models.PlayerStatistic[] playerStatistics = ctx.PlayerStatistics
-                            .Include(ps => ps.GuildNavigation)
-                            .AsParallel()
-                            .Select(ps => ps.ToModel())
-                            .ToArray();
+                        .Include(ps => ps.GuildNavigation)
+                        .Select(c => c.ToModel())
+                        .ToArray();
 
                     return new DbPlayerStatistics(playerStatistics.Copy());
                 }
@@ -159,10 +153,9 @@ namespace Wp.Database
                     using EFModels.HEARC_P3Context ctx = new();
 
                     Common.Models.Role[] roles = ctx.Roles
-                            .Include(r => r.GuildNavigation)
-                            .AsParallel()
-                            .Select(r => r.ToModel())
-                            .ToArray();
+                        .Include(r => r.GuildNavigation)
+                        .Select(c => c.ToModel())
+                        .ToArray();
 
                     return new DbRoles(roles.Copy());
                 }
@@ -181,10 +174,9 @@ namespace Wp.Database
                     using EFModels.HEARC_P3Context ctx = new();
 
                     Common.Models.Time[] times = ctx.Times
-                            .Include(t => t.GuildNavigation)
-                            .AsParallel()
-                            .Select(t => t.ToModel())
-                            .ToArray();
+                        .Include(t => t.GuildNavigation)
+                        .Select(c => c.ToModel())
+                        .ToArray();
 
                     return new DbTimes(times.Copy());
                 }
@@ -202,12 +194,10 @@ namespace Wp.Database
                 {
                     using EFModels.HEARC_P3Context ctx = new();
 
-                    Common.Models.WarStatistic[] warStatistics =
-                        ctx.WarStatistics
-                            .Include(ws => ws.GuildNavigation)
-                            .AsParallel()
-                            .Select(ws => ws.ToModel())
-                            .ToArray();
+                    Common.Models.WarStatistic[] warStatistics = ctx.WarStatistics
+                        .Include(ws => ws.GuildNavigation)
+                        .Select(c => c.ToModel())
+                        .ToArray();
 
                     return new DbWarStatistics(warStatistics.Copy());
                 }

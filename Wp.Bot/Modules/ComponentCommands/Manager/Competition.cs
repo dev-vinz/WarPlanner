@@ -114,15 +114,80 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             await FollowupAsync(interactionText.CompetitionAdded(competitionName, dbCompetition.MainClan.Name));
         }
 
+        [ComponentInteraction(IdProvider.COMPETITION_EDIT_BUTTON_MAIN_CLAN, runMode: RunMode.Async)]
+        public async Task EditMainClan()
+        {
+            await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+            // Get SocketMessageComponent and original message
+            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+            SocketUserMessage msg = socket.Message;
+
+            // Gets guild and interaction text
+            DbClans clans = Database.Context.Clans;
+            DbCompetitions competitions = Database.Context.Competitions;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
+
+            IManager interactionText = dbGuild.ManagerText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+            // Filters for guild
+            Common.Models.Clan[] dbClans = clans.AsParallel().Where(c => c.Guild == dbGuild).ToArray();
+
+            // Gets component datas
+            ComponentStorage storage = ComponentStorage.GetInstance();
+            if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
+            {
+                await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+                return;
+            }
+
+            // Recovers data
+            ulong competitionId = ulong.Parse(datas[0]);
+
+            // Build select menu
+            SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+                .WithCustomId(IdProvider.COMPETITION_EDIT_SELECT_MAIN_CLAN);
+
+            dbClans
+                .AsParallel()
+                .ForAll(c =>
+                {
+                    menuBuilder.AddOption(c.Profile.Name, c.Tag, c.Tag);
+                });
+
+            // Sort options by name
+            menuBuilder.Options = menuBuilder.Options
+                .AsParallel()
+                .OrderBy(o => o.Label)
+                .ToList();
+
+            // Cancel button
+            ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+                .WithLabel(generalResponses.CancelButton)
+                .WithStyle(ButtonStyle.Danger)
+                .WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+
+            // Build component
+            ComponentBuilder componentBuilder = new ComponentBuilder()
+                .WithSelectMenu(menuBuilder)
+                .WithButton(cancelButtonBuilder);
+
+            IUserMessage message = await FollowupAsync(interactionText.EditCompetitionSelectMainClan, components: componentBuilder.Build(), ephemeral: true);
+
+            // Adds datas to new message
+            storage.MessageDatas.TryAdd(message.Id, datas);
+        }
+
         [ComponentInteraction(IdProvider.COMPETITION_EDIT_BUTTON_NAME, runMode: RunMode.Async)]
         public async Task EditName()
         {
             // Get SocketMessageComponent and original message
             SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
             SocketUserMessage msg = socket.Message;
-
-            // Gets original user
-            ulong userId = msg.Interaction.User.Id;
 
             // Gets guild and interaction text
             DbCompetitions competitions = Database.Context.Competitions;
@@ -132,14 +197,6 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 
             IManager interactionText = dbGuild.ManagerText;
             IGeneralResponse generalResponses = dbGuild.GeneralResponses;
-
-            // Checks if user is elligible for interaction
-            if (Context.User.Id != userId)
-            {
-                await RespondAsync(interactionText.UserNotAllowedToInteract, ephemeral: true);
-
-                return;
-            }
 
             // Gets component datas
             ComponentStorage storage = ComponentStorage.GetInstance();
@@ -311,6 +368,49 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             storage.MessageDatas.TryRemove(msg.Id, out string[] _);
 
             await FollowupAsync(interactionText.CompetitionAdded(competitionName, dbCompetition.MainClan.Name, dbCompetition.SecondClan?.Name));
+        }
+
+        [ComponentInteraction(IdProvider.COMPETITION_EDIT_SELECT_MAIN_CLAN, runMode: RunMode.Async)]
+        public async Task EditMainClan(string[] selections)
+        {
+            string clanTag = selections.First();
+
+            await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+            // Loads databases infos
+            DbClans clans = Database.Context.Clans;
+            DbCompetitions competitions = Database.Context.Competitions;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
+
+            // Gets interaction texts
+            IManager interactionText = dbGuild.ManagerText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+            // Get SocketMessageComponent and original message
+            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+            SocketUserMessage msg = socket.Message;
+
+            // Gets component datas
+            ComponentStorage storage = ComponentStorage.GetInstance();
+            if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
+            {
+                await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+                return;
+            }
+
+            // Recovers data
+            ulong competitionId = ulong.Parse(datas[0]);
+
+            // Updates competition
+            Common.Models.Competition dbCompetition = competitions.First(c => c.Id == competitionId && c.Guild == dbGuild);
+            dbCompetition.MainTag = clanTag;
+
+            competitions.Update(dbCompetition);
+
+            await FollowupAsync(interactionText.EditCompetitionSelectMainClanUpdated(dbCompetition.Name, dbCompetition.MainClan.Name), ephemeral: true);
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
