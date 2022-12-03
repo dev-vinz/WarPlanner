@@ -2,6 +2,7 @@
 using Discord.Interactions;
 using Discord.WebSocket;
 using System.Reflection;
+using Wp.Bot.Services.Logger;
 
 namespace Wp.Bot.Services
 {
@@ -14,12 +15,13 @@ namespace Wp.Bot.Services
         private readonly DiscordSocketClient client;
         private readonly InteractionService commands;
         private readonly IServiceProvider services;
+        private readonly CommandLogger logger;
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                             PROPERTIES                            *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
+        public CommandLogger Logger { get => logger; }
 
         /* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
@@ -38,6 +40,11 @@ namespace Wp.Bot.Services
                 this.client = client;
                 this.commands = commands;
                 this.services = services;
+            }
+
+            // Tools
+            {
+                logger = new CommandLogger(client);
             }
         }
 
@@ -75,60 +82,20 @@ namespace Wp.Bot.Services
         |*                          PRIVATE METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        private Task ComponentCommandExecuted(ComponentCommandInfo info, IInteractionContext ctx, IResult result)
+        private async Task ComponentCommandExecuted(ComponentCommandInfo info, IInteractionContext ctx, IResult result)
         {
             if (!result.IsSuccess)
             {
-                switch (result.Error)
-                {
-                    case InteractionCommandError.UnknownCommand:
-                        break;
-                    case InteractionCommandError.ConvertFailed:
-                        break;
-                    case InteractionCommandError.BadArgs:
-                        break;
-                    case InteractionCommandError.Exception:
-                        break;
-                    case InteractionCommandError.Unsuccessful:
-                        break;
-                    case InteractionCommandError.UnmetPrecondition:
-                        break;
-                    case InteractionCommandError.ParseFailed:
-                        break;
-                    default:
-                        break;
-                }
+                await logger.LogComponentCommandAsync(info, ctx, result);
             }
-
-            return Task.CompletedTask;
         }
 
-        private Task ModalCommandExecuted(ModalCommandInfo info, IInteractionContext ctx, IResult result)
+        private async Task ModalCommandExecuted(ModalCommandInfo info, IInteractionContext ctx, IResult result)
         {
             if (!result.IsSuccess)
             {
-                switch (result.Error)
-                {
-                    case InteractionCommandError.UnknownCommand:
-                        break;
-                    case InteractionCommandError.ConvertFailed:
-                        break;
-                    case InteractionCommandError.BadArgs:
-                        break;
-                    case InteractionCommandError.Exception:
-                        break;
-                    case InteractionCommandError.Unsuccessful:
-                        break;
-                    case InteractionCommandError.UnmetPrecondition:
-                        break;
-                    case InteractionCommandError.ParseFailed:
-                        break;
-                    default:
-                        break;
-                }
+                await logger.LogModalCommandAsync(info, ctx, result);
             }
-
-            return Task.CompletedTask;
         }
 
         private async Task HandleInteraction(SocketInteraction socket)
@@ -154,32 +121,12 @@ namespace Wp.Bot.Services
             }
         }
 
-        private Task SlashCommandExecuted(SlashCommandInfo info, IInteractionContext ctx, IResult result)
+        private async Task SlashCommandExecuted(SlashCommandInfo info, IInteractionContext ctx, IResult result)
         {
             if (!result.IsSuccess)
             {
-                switch (result.Error)
-                {
-                    case InteractionCommandError.UnknownCommand:
-                        break;
-                    case InteractionCommandError.ConvertFailed:
-                        break;
-                    case InteractionCommandError.BadArgs:
-                        break;
-                    case InteractionCommandError.Exception:
-                        break;
-                    case InteractionCommandError.Unsuccessful:
-                        break;
-                    case InteractionCommandError.UnmetPrecondition:
-                        break;
-                    case InteractionCommandError.ParseFailed:
-                        break;
-                    default:
-                        break;
-                }
+                await logger.LogSlashCommandAsync(info, ctx, result);
             }
-
-            return Task.CompletedTask;
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
