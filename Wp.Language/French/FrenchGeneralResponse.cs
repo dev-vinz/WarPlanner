@@ -17,6 +17,12 @@
 
         public string GoogleCannotAccessCalendar => "Je n'ai pas accès à ce calendrier\nÊtes-vous sûr.e de m'avoir ajouté correctement ?";
 
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                           SOCKET CHANNELS                         *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string ChannelNotText => "Le salon spécifié n'est pas un salon textuel";
+        public string NotThePermissionToWrite => "Je n'ai pas la permission de parler dans ce salon";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           GLOBAL BUTTONS                          *|

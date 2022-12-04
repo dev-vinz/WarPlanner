@@ -614,8 +614,8 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
                 |*        ROLE CREATION        *|
                 \* * * * * * * * * * * * * * * */
 
-				IRole referentRole = guild.CreateRoleAsync(interactionText.CompetitionEnvironmentReferentRoleName(competitionName), GuildPermissions.None, isMentionable: true).Result;
-				IRole tournamentRole = guild.CreateRoleAsync(competitionName, GuildPermissions.None, isMentionable: true).Result;
+				IRole referentRole = guild.CreateRoleAsync(interactionText.CompetitionEnvironmentReferentRoleName(competitionName), GuildPermissions.None, isMentionable: false).Result;
+				IRole tournamentRole = guild.CreateRoleAsync(competitionName, GuildPermissions.None, isMentionable: false).Result;
 
 				/* * * * * * * * * * * * * * * *\
                 |*      CHANNELS CREATION      *|

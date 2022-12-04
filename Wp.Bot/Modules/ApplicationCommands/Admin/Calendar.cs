@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
+using Discord.Rest;
 using Discord.WebSocket;
 using Wp.Api;
 using Wp.Bot.Services;
@@ -54,7 +55,74 @@ namespace Wp.Bot.Modules.ApplicationCommands.Admin
         [SlashCommand("channel", "Set or replace the channel where the calendar is displayed", runMode: RunMode.Async)]
         public async Task Channel([Summary("channel", "The channel where the calendar is displayed")] SocketChannel channel)
         {
-            await RespondAsync(channel.ToString(), ephemeral: true);
+            await DeferAsync(true);
+
+            // Loads databases infos
+            DbCalendars calendars = Database.Context.Calendars;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
+
+            // Gets command responses
+            IAdmin commandText = dbGuild.AdminText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+            if (channel is not SocketTextChannel guildChannel)
+            {
+                await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.ChannelNotText);
+
+                return;
+            }
+
+            // Filters for guild
+            Common.Models.Calendar? dbCalendar = calendars
+                .AsParallel()
+                .Where(c => c.Guild == dbGuild)
+                .FirstOrDefault();
+
+            if (dbCalendar is null)
+            {
+                await ModifyOriginalResponseAsync(msg => msg.Content = commandText.CalendarIdNotSet);
+
+                return;
+            }
+
+            RestUserMessage? restUserMessage = null;
+
+            try
+            {
+                restUserMessage = await guildChannel.SendMessageAsync(commandText.CalendarWillBeDisplayedHere(Context.User.Mention));
+            }
+            catch (Exception)
+            {
+                await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.NotThePermissionToWrite);
+
+                return;
+            }
+
+            bool isAdd = dbCalendar.ChannelId is null;
+
+            // Change dbCalendar values
+            dbCalendar.ChannelId = guildChannel.Id;
+            dbCalendar.MessageId = restUserMessage.Id;
+
+            // Update object
+            calendars.Update(dbCalendar);
+
+            if (isAdd)
+            {
+                // Add time object corresponding to calendar announcement
+
+                Time displayTime = new(dbGuild, TimeAction.DISPLAY_CALENDAR, DateTimeOffset.UtcNow, Time.CALENDAR_INTERVAL, DefaultParameters.DEFAULT_TIME_ADDITIONAL)
+                {
+                    // Number of display per day
+                    Optional = DefaultParameters.NUMBER_CALENDAR_DISPLAY_PER_DAY.ToString(),
+                };
+
+                Database.Context.Times.Add(displayTime);
+            }
+
+            await ModifyOriginalResponseAsync(msg => msg.Content = commandText.CalendarChannelChanged(guildChannel.Mention));
         }
 
         [SlashCommand("options", "Change some options of the calendar", runMode: RunMode.Async)]

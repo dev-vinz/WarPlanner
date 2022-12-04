@@ -32,6 +32,13 @@ namespace Wp.Language
         public string GoogleCannotAccessCalendar { get; }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                           SOCKET CHANNELS                         *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string ChannelNotText { get; }
+        public string NotThePermissionToWrite { get; }
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           GLOBAL BUTTONS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -2,8 +2,8 @@
 {
     public class Time
     {
-        public static readonly int CALENDAR_INTERVAL = 60;
-        public static readonly int REMIND_INTERVAL = 60;
+        public static readonly TimeSpan CALENDAR_INTERVAL = TimeSpan.FromSeconds(60);
+        public static readonly TimeSpan REMIND_INTERVAL = TimeSpan.FromSeconds(60);
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|

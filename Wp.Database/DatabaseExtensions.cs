@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Wp.Common.Models;
+using Wp.Common.Services.Extensions;
 
 namespace Wp.Database
 {
@@ -177,7 +178,7 @@ namespace Wp.Database
 		{
 			Guild = time.Guild.Id,
 			Action = (int)time.Action,
-			Date = time.Date.UtcDateTime,
+			Date = time.Date.UtcDateTime.TruncSeconds(),
 			Interval = (int)time.Interval.TotalSeconds,
 			Additional = time.Additional,
 			Optional = time.Optional,
