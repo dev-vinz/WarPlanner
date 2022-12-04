@@ -56,13 +56,6 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
 		{
 			await DeferAsync(true);
 
-			if (Encoding.UTF8.GetByteCount(name) != name.Length)
-			{
-				await ModifyOriginalResponseAsync(msg => msg.Content = "TODO: Pas d'emojis");
-
-				return;
-			}
-
 			// Loads databases infos
 			DbClans clans = Database.Context.Clans;
 			DbCompetitions competitions = Database.Context.Competitions;
@@ -79,6 +72,13 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
 			// Gets command responses
 			IManager commandText = dbGuild.ManagerText;
 			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			if (Encoding.UTF8.GetByteCount(name) != name.Length)
+			{
+				await ModifyOriginalResponseAsync(msg => msg.Content = commandText.CompetitionNameContainsEmoji);
+
+				return;
+			}
 
 			// Checks if there's at least one clan registered
 			if (!dbClans.Any())

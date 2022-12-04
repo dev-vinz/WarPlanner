@@ -89,7 +89,7 @@
 
         public override bool Equals(object? obj)
         {
-            //Check for null and compare run-time types.
+            // Check for null and compare run-time types.
             if ((obj == null) || !GetType().Equals(obj.GetType()))
             {
                 return false;

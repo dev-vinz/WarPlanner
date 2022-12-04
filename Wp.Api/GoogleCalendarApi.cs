@@ -21,7 +21,7 @@ namespace Wp.Api
 
         static GoogleCalendarApi()
         {
-            ServiceAccountCredential credential = new ServiceAccountCredential(
+            ServiceAccountCredential credential = new(
                 new ServiceAccountCredential.Initializer(email)
                 {
                     Scopes = new string[] { CalendarService.Scope.Calendar, CalendarService.Scope.CalendarEvents }
@@ -38,8 +38,16 @@ namespace Wp.Api
         |*                          CALENDAR METHODS                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        /// <summary>
+        /// Accesses to calendars methods
+        /// </summary>
         public static class Calendars
         {
+            /// <summary>
+            /// Gets a Google Calendar by its id
+            /// </summary>
+            /// <param name="calendarId">A Google Calendar id</param>
+            /// <returns>A Google Calendar</returns>
             public static async Task<Calendar?> GetAsync(string calendarId)
             {
                 Calendar? calendar = null;

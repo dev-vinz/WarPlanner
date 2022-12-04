@@ -26,11 +26,18 @@ namespace Wp.Language
         };
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                         GOOGLE CALENDAR API                       *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string GoogleCannotAccessCalendar { get; }
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           GLOBAL BUTTONS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public string SupportServer { get; }
         public string CancelButton { get; }
+        public string Documentation { get; }
+        public string SupportServer { get; }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                     GLOBAL BUTTONS INTERACTION                    *|

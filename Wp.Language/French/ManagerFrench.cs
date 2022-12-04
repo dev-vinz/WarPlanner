@@ -34,6 +34,7 @@
         |*                      COMPETITION ADD COMMAND                      *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        public string CompetitionNameContainsEmoji => "Le nom de la compétition ne doit pas contenir d'émoji";
         public string ChooseCompetitionMainClan => "Veuillez choisir le clan principal utilisé lors de ce tournoi";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

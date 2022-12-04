@@ -34,6 +34,7 @@
         |*                      COMPETITION ADD COMMAND                      *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        public string CompetitionNameContainsEmoji { get; }
         public string ChooseCompetitionMainClan { get; }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

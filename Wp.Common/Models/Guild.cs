@@ -55,6 +55,15 @@ namespace Wp.Common.Models
         public DateTimeOffset Now => new NodaConverter().ConvertNowTo(timeZone);
 
         /// <summary>
+        /// Gets the admin commands texts, depending on the guild's language
+        /// </summary>
+        public IAdmin AdminText => language switch
+        {
+            Language.FRENCH => new AdminFrench(),
+            _ => throw new ArgumentOutOfRangeException(nameof(language), language, null),
+        };
+
+        /// <summary>
         /// Gets the general responses text, depending on the guild's language
         /// </summary>
         public IGeneralResponse GeneralResponses => language switch
@@ -136,7 +145,7 @@ namespace Wp.Common.Models
 
         public override bool Equals(object? obj)
         {
-            //Check for null and compare run-time types.
+            // Check for null and compare run-time types.
             if ((obj == null) || !GetType().Equals(obj.GetType()))
             {
                 return false;
