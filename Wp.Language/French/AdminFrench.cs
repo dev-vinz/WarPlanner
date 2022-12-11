@@ -26,6 +26,14 @@
         public string CalendarChooseOption => "Cliquez sur un des boutons ci-dessous pour changer les paramètres du calendrier";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                   CALENDAR OPTIONS DISPLAY BUTTON                 *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string CalendarOptionChanneNotSet => $"Veuillez d'abord paramétrer le salon d'affichage en utilisant </calendar channel:1048881562772582440>";
+        public string CalendarOptionsDisplayEnabled(string channel) => $"L'affichage calendrier a été activé dans {channel}";
+        public string CalendarOptionsDisplayDisabled => "L'affichage calendrier a été désactivé";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                        CALENDAR SET COMMAND                       *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

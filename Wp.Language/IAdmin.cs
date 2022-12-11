@@ -26,6 +26,14 @@
 		public string CalendarChooseOption { get; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                   CALENDAR OPTIONS DISPLAY BUTTON                 *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string CalendarOptionChanneNotSet { get; }
+		public string CalendarOptionsDisplayEnabled(string channel);
+		public string CalendarOptionsDisplayDisabled { get; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                        CALENDAR SET COMMAND                       *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

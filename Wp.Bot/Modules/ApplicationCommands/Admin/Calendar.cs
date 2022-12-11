@@ -172,7 +172,7 @@ namespace Wp.Bot.Modules.ApplicationCommands.Admin
             ButtonBuilder frequencyButtonBuilder = new ButtonBuilder()
                 .WithLabel(commandText.CalendarOptionsFrequency(display?.Optional))
                 .WithStyle(ButtonStyle.Secondary)
-                .WithDisabled(dbGuild.PremiumLevel < premiumRequired)
+                .WithDisabled(dbGuild.PremiumLevel < premiumRequired || display is null)
                 .WithCustomId(IdProvider.CALENDAR_OPTIONS_BUTTON_DISPLAY_FREQUENCY);
 
             // (Dis)activate remind war button
@@ -186,7 +186,7 @@ namespace Wp.Bot.Modules.ApplicationCommands.Admin
             ButtonBuilder nbRemindsButtonBuilder = new ButtonBuilder()
                 .WithLabel(commandText.CalendarOptionsChooseRemind(remind?.Optional))
                 .WithStyle(ButtonStyle.Secondary)
-                .WithDisabled(dbGuild.PremiumLevel < premiumRequired)
+                .WithDisabled(dbGuild.PremiumLevel < premiumRequired || remind is null)
                 .WithCustomId(IdProvider.CALENDAR_OPTIONS_BUTTON_CHOOSE_REMIND_WAR);
 
             // Build component
