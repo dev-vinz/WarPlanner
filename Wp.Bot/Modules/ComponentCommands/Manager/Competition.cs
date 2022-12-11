@@ -472,7 +472,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 				.ToList()!;
 
 			IReadOnlyList<SocketVoiceChannel> voices = Context.Guild.Channels
-				.Where(c => c.GetChannelType() == ChannelType.Text)
+				.Where(c => c.GetChannelType() == ChannelType.Voice)
 				.Select(c => c as SocketVoiceChannel)
 				.Where(c => c is not null && c.CategoryId == dbCompetition.Id)
 				.ToList()!;

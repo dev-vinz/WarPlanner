@@ -16,6 +16,16 @@
 		public string CalendarChannelChanged(string channel);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                      CALENDAR OPTIONS COMMAND                     *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string CalendarOptionsDisplayed(bool enabled);
+		public string CalendarOptionsFrequency(string? frequency);
+		public string CalendarOptionsRemind(bool enabled);
+		public string CalendarOptionsChooseRemind(string? reminds);
+		public string CalendarChooseOption { get; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                        CALENDAR SET COMMAND                       *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

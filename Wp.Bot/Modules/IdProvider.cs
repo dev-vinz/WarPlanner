@@ -9,6 +9,15 @@
         public const string GLOBAL_CANCEL_BUTTON = "global_cancel_button";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                         CALENDAR COMMANDS                         *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public const string CALENDAR_OPTIONS_BUTTON_DISPLAY = "calendar_options_button_display";
+        public const string CALENDAR_OPTIONS_BUTTON_DISPLAY_FREQUENCY = "calendar_options_button_display_frequency";
+        public const string CALENDAR_OPTIONS_BUTTON_REMIND_WAR = "calendar_options_button_remind_war";
+        public const string CALENDAR_OPTIONS_BUTTON_CHOOSE_REMIND_WAR = "calendar_options_button_choose_remind_war";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           CLAN COMMANDS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
