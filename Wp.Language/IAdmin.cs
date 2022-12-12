@@ -34,6 +34,21 @@
 		public string CalendarOptionsDisplayDisabled { get; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*             CALENDAR OPTIONS DISPLAY FREQUENCY BUTTON             *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string CalendarOptionDisplayNotEnabled { get; }
+		public string CalendarOptionDisplayFrequencyPerDayLabel(int option);
+		public string CalendarOptionDisplayFrequencyPerDayDescription(int option);
+		public string CalendarOptionDisplayFrequencyChoose { get; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*             CALENDAR OPTIONS DISPLAY FREQUENCY SELECT             *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string CalendarOptionDisplayFrequencyUpdated(string nbPerDay);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                        CALENDAR SET COMMAND                       *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

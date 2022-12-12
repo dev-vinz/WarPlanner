@@ -261,7 +261,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 
 			// Gets component datas
 			ComponentStorage storage = ComponentStorage.GetInstance();
-			if (!storage.MessageDatas.TryGetValue(msg.Id, out string[]? datas) && datas?.Length != 1)
+			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
 			{
 				await RespondAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
 
@@ -316,14 +316,6 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 			IManager interactionText = dbGuild.ManagerText;
 			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
-			// Checks Clash Of Clans API
-			if (!await ClashOfClansApi.TryAccessApiAsync())
-			{
-				await FollowupAsync(generalResponses.ClashOfClansError, ephemeral: true);
-
-				return;
-			}
-
 			// Gets SocketMessageComponent and original message
 			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
 			SocketUserMessage msg = socket.Message;
@@ -333,6 +325,14 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
 			{
 				await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+				return;
+			}
+
+			// Checks Clash Of Clans API
+			if (!await ClashOfClansApi.TryAccessApiAsync())
+			{
+				await FollowupAsync(generalResponses.ClashOfClansError, ephemeral: true);
 
 				return;
 			}

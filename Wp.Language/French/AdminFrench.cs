@@ -34,6 +34,21 @@
         public string CalendarOptionsDisplayDisabled => "L'affichage calendrier a été désactivé";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*             CALENDAR OPTIONS DISPLAY FREQUENCY BUTTON             *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string CalendarOptionDisplayNotEnabled => "Veuillez d'abord activer l'affichage du calendrier";
+        public string CalendarOptionDisplayFrequencyPerDayLabel(int option) => $"{option} fois par jour";
+        public string CalendarOptionDisplayFrequencyPerDayDescription(int option) => $"Toutes les {Math.Round(24.0 / option, 2)} heures";
+        public string CalendarOptionDisplayFrequencyChoose => "Choisissez la fréquence d'affichage du calendrier";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*             CALENDAR OPTIONS DISPLAY FREQUENCY SELECT             *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string CalendarOptionDisplayFrequencyUpdated(string nbPerDay) => $"La fréquence d'affichage a été définie sur **{nbPerDay} fois par jour**";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                        CALENDAR SET COMMAND                       *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

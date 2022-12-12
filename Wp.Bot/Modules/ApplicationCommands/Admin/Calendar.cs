@@ -116,7 +116,7 @@ namespace Wp.Bot.Modules.ApplicationCommands.Admin
                 Time displayTime = new(dbGuild, TimeAction.DISPLAY_CALENDAR, DateTimeOffset.UtcNow, Time.CALENDAR_INTERVAL, DefaultParameters.DEFAULT_TIME_ADDITIONAL)
                 {
                     // Number of display per day
-                    Optional = DefaultParameters.NUMBER_CALENDAR_DISPLAY_PER_DAY.ToString(),
+                    Optional = DefaultParameters.DEFAULT_NUMBER_CALENDAR_DISPLAY_PER_DAY.ToString(),
                 };
 
                 Database.Context.Times.Add(displayTime);

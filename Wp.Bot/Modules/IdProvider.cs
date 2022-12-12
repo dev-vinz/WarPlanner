@@ -17,6 +17,8 @@
         public const string CALENDAR_OPTIONS_BUTTON_REMIND_WAR = "calendar_options_button_remind_war";
         public const string CALENDAR_OPTIONS_BUTTON_CHOOSE_REMIND_WAR = "calendar_options_button_choose_remind_war";
 
+        public const string CALENDAR_OPTIONS_DISPLAY_SELECT_DISPLAY_FREQUENCY = "calendar_options_display_select_display_frequency";
+
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           CLAN COMMANDS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

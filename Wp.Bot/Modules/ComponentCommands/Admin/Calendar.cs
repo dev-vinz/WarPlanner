@@ -1,4 +1,5 @@
-﻿using Discord.Interactions;
+﻿using Discord;
+using Discord.Interactions;
 using Discord.WebSocket;
 using Wp.Bot.Services;
 using Wp.Common.Models;
@@ -109,7 +110,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Admin
                 displayTime = new(dbGuild, TimeAction.DISPLAY_CALENDAR, DateTimeOffset.UtcNow, Time.CALENDAR_INTERVAL, DefaultParameters.DEFAULT_TIME_ADDITIONAL)
                 {
                     // Number of display per day
-                    Optional = DefaultParameters.NUMBER_CALENDAR_DISPLAY_PER_DAY.ToString(),
+                    Optional = DefaultParameters.DEFAULT_NUMBER_CALENDAR_DISPLAY_PER_DAY.ToString(),
                 };
 
                 times.Add(displayTime);
@@ -123,7 +124,71 @@ namespace Wp.Bot.Modules.ComponentCommands.Admin
         {
             await Context.Interaction.DisableComponentsAsync(allComponents: true);
 
-            await FollowupAsync("Display frequency", ephemeral: true);
+            // Loads databases infos
+            DbCalendars calendars = Database.Context.Calendars;
+            DbTimes times = Database.Context.Times;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
+
+            // Filters for guild
+            Common.Models.Calendar? dbCalendar = calendars
+                .AsParallel()
+                .FirstOrDefault(c => c.Guild == dbGuild);
+
+            Time[] dbTimes = times
+                .AsParallel()
+                .Where(t => t.Guild == dbGuild)
+                .ToArray();
+
+            Time? displayTime = dbTimes.FirstOrDefault(t => t.Action == TimeAction.DISPLAY_CALENDAR);
+
+            // Gets interaction responses
+            IAdmin interactionText = dbGuild.AdminText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+            if (dbCalendar is null)
+            {
+                await FollowupAsync(interactionText.CalendarIdNotSet, ephemeral: true);
+
+                return;
+            }
+
+            if (dbCalendar.ChannelId is null)
+            {
+                await FollowupAsync(interactionText.CalendarOptionChanneNotSet, ephemeral: true);
+
+                return;
+            }
+
+            if (displayTime is null)
+            {
+                await FollowupAsync(interactionText.CalendarOptionDisplayNotEnabled, ephemeral: true);
+
+                return;
+            }
+
+            // Build select menu
+            SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+                .WithCustomId(IdProvider.CALENDAR_OPTIONS_DISPLAY_SELECT_DISPLAY_FREQUENCY);
+
+            Enumerable.Range(1, Settings.MAX_CALENDAR_DISPLAY_PER_DAY)
+                .Reverse()
+                .ToList()
+                .ForEach(i => menuBuilder.AddOption(interactionText.CalendarOptionDisplayFrequencyPerDayLabel(i), i.ToString(), interactionText.CalendarOptionDisplayFrequencyPerDayDescription(i)));
+
+            // Cancel button
+            ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+                .WithLabel(generalResponses.CancelButton)
+                .WithStyle(ButtonStyle.Danger)
+                .WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+
+            // Build component
+            ComponentBuilder componentBuilder = new ComponentBuilder()
+                .WithSelectMenu(menuBuilder)
+                .WithButton(cancelButtonBuilder);
+
+            await FollowupAsync(interactionText.CalendarOptionDisplayFrequencyChoose, components: componentBuilder.Build(), ephemeral: true);
         }
 
         [ComponentInteraction(IdProvider.CALENDAR_OPTIONS_BUTTON_REMIND_WAR, runMode: RunMode.Async)]
@@ -137,5 +202,37 @@ namespace Wp.Bot.Modules.ComponentCommands.Admin
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          SELECT COMMANDS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        [ComponentInteraction(IdProvider.CALENDAR_OPTIONS_DISPLAY_SELECT_DISPLAY_FREQUENCY, runMode: RunMode.Async)]
+        public async Task ChooseFrequency(string[] selections)
+        {
+            string option = selections.First();
+
+            await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+            // Loads databases infos
+            DbTimes times = Database.Context.Times;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
+
+            // Filters for guild
+            Time[] dbTimes = times
+                .AsParallel()
+                .Where(t => t.Guild == dbGuild)
+                .ToArray();
+
+            Time displayTime = dbTimes.First(t => t.Action == TimeAction.DISPLAY_CALENDAR);
+
+            // Update and save
+            displayTime.Optional = option;
+            times.Update(displayTime);
+
+            // Gets interaction responses
+            IAdmin interactionText = dbGuild.AdminText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+            await FollowupAsync(interactionText.CalendarOptionDisplayFrequencyUpdated(option), ephemeral: true);
+        }
     }
 }

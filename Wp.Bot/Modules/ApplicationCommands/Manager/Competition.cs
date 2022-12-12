@@ -230,6 +230,14 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
 			IManager commandText = dbGuild.ManagerText;
 			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
+			// Checks Clash Of Clans API
+			if (!await ClashOfClansApi.TryAccessApiAsync())
+			{
+				await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.ClashOfClansError);
+
+				return;
+			}
+
 			// Edit name button
 			ButtonBuilder nameButtonBuilder = new ButtonBuilder()
 				.WithLabel(commandText.EditCompetitionName)

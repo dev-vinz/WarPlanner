@@ -120,6 +120,15 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
 
 			// Gets command responses
 			IManager commandText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			// Checks Clash Of Clans API
+			if (!await ClashOfClansApi.TryAccessApiAsync())
+			{
+				await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.ClashOfClansError);
+
+				return;
+			}
 
 			if (!dbClans.Any())
 			{
