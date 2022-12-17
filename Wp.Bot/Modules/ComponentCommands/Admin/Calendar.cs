@@ -88,7 +88,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Admin
 
             if (dbCalendar.ChannelId is null)
             {
-                await FollowupAsync(interactionText.CalendarOptionChanneNotSet, ephemeral: true);
+                await FollowupAsync(interactionText.CalendarOptionChannelNotSet, ephemeral: true);
 
                 return;
             }
@@ -99,7 +99,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Admin
 
                 times.Remove(displayTime);
 
-                await FollowupAsync(interactionText.CalendarOptionsDisplayDisabled, ephemeral: true);
+                await FollowupAsync(interactionText.CalendarOptionDisplayDisabled, ephemeral: true);
             }
             else
             {
@@ -115,7 +115,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Admin
 
                 times.Add(displayTime);
 
-                await FollowupAsync(interactionText.CalendarOptionsDisplayEnabled(channel.Mention), ephemeral: true);
+                await FollowupAsync(interactionText.CalendarOptionDisplayEnabled(channel.Mention), ephemeral: true);
             }
         }
 
@@ -156,7 +156,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Admin
 
             if (dbCalendar.ChannelId is null)
             {
-                await FollowupAsync(interactionText.CalendarOptionChanneNotSet, ephemeral: true);
+                await FollowupAsync(interactionText.CalendarOptionChannelNotSet, ephemeral: true);
 
                 return;
             }
@@ -196,7 +196,58 @@ namespace Wp.Bot.Modules.ComponentCommands.Admin
         {
             await Context.Interaction.DisableComponentsAsync(allComponents: true);
 
-            await FollowupAsync("Enable / Disable remind war", ephemeral: true);
+            // Loads databases infos
+            DbCalendars calendars = Database.Context.Calendars;
+            DbTimes times = Database.Context.Times;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
+
+            // Filters for guild
+            Common.Models.Calendar? dbCalendar = calendars
+                .AsParallel()
+                .FirstOrDefault(c => c.Guild == dbGuild);
+
+            Time[] dbTimes = times
+                .AsParallel()
+                .Where(t => t.Guild == dbGuild)
+                .ToArray();
+
+            Time? remindTime = dbTimes.FirstOrDefault(t => t.Action == TimeAction.REMIND_WAR);
+
+            // Gets interaction responses
+            IAdmin interactionText = dbGuild.AdminText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+            if (dbCalendar is null)
+            {
+                await FollowupAsync(interactionText.CalendarIdNotSet, ephemeral: true);
+
+                return;
+            }
+
+            if (remindTime is not null)
+            {
+                // Disable
+
+                times.Remove(remindTime);
+
+                await FollowupAsync(interactionText.CalendarOptionRemindDisabled, ephemeral: true);
+            }
+            else
+            {
+                // Enable
+
+                remindTime = new(dbGuild, TimeAction.REMIND_WAR, DateTimeOffset.UtcNow, Time.CALENDAR_INTERVAL, DefaultParameters.DEFAULT_TIME_ADDITIONAL)
+                {
+                    // Number of display per day
+                    Optional = DefaultParameters.DEFAULT_NUMBER_REMIND.ToString(),
+                };
+
+                times.Add(remindTime);
+
+                await FollowupAsync(interactionText.CalendarOptionRemindEnabled, ephemeral: true);
+            }
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

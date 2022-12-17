@@ -29,9 +29,9 @@
 		|*                   CALENDAR OPTIONS DISPLAY BUTTON                 *|
 		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public string CalendarOptionChanneNotSet => $"Veuillez d'abord paramétrer le salon d'affichage en utilisant </calendar channel:1048881562772582440>";
-        public string CalendarOptionsDisplayEnabled(string channel) => $"L'affichage calendrier a été activé dans {channel}";
-        public string CalendarOptionsDisplayDisabled => "L'affichage calendrier a été désactivé";
+        public string CalendarOptionChannelNotSet => $"Veuillez d'abord paramétrer le salon d'affichage en utilisant </calendar channel:1048881562772582440>";
+        public string CalendarOptionDisplayEnabled(string channel) => $"L'affichage calendrier a été activé dans {channel}";
+        public string CalendarOptionDisplayDisabled => "L'affichage calendrier a été désactivé";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
 		|*             CALENDAR OPTIONS DISPLAY FREQUENCY BUTTON             *|
@@ -47,6 +47,13 @@
 		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         public string CalendarOptionDisplayFrequencyUpdated(string nbPerDay) => $"La fréquence d'affichage a été définie sur **{nbPerDay} fois par jour**";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                   CALENDAR OPTIONS REMIND BUTTON                  *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string CalendarOptionRemindEnabled => "Le rappel des matchs aux joueurs a été activé. Par défaut, le nombre de rappel est `1`";
+        public string CalendarOptionRemindDisabled => "Le rappel des matchs aux joueurs a été désactivé";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                        CALENDAR SET COMMAND                       *|
