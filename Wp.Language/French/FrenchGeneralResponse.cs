@@ -39,6 +39,12 @@
         public string ActionCanceledByButton => "Très bien, j'annule";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                           GLOBAL SELECT                           *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string SelectOptionsAreEmpty => "Vous n'avez séléctionné aucun élément";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          STORAGE COMPONENT                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

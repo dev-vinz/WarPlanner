@@ -184,7 +184,7 @@ namespace Wp.Bot.Modules.ApplicationCommands.Admin
 
             // Choose reminds before war button
             ButtonBuilder nbRemindsButtonBuilder = new ButtonBuilder()
-                .WithLabel(commandText.CalendarOptionsChooseRemind(remind?.Optional))
+                .WithLabel(commandText.CalendarOptionsChooseRemind(remind?.Optional?.ToCharArray()?.Length.ToString()))
                 .WithStyle(ButtonStyle.Secondary)
                 .WithDisabled(dbGuild.PremiumLevel < premiumRequired || remind is null)
                 .WithCustomId(IdProvider.CALENDAR_OPTIONS_BUTTON_CHOOSE_REMIND_WAR);

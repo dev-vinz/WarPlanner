@@ -52,8 +52,23 @@
 		|*                   CALENDAR OPTIONS REMIND BUTTON                  *|
 		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public string CalendarOptionRemindEnabled => "Le rappel des matchs aux joueurs a été activé. Par défaut, le nombre de rappel est `1`";
+        public string CalendarOptionRemindEnabled => "Le rappel des matchs aux joueurs a été activé. Par défaut, le rappel est fixé sur `2 heures avant`";
         public string CalendarOptionRemindDisabled => "Le rappel des matchs aux joueurs a été désactivé";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*              CALENDAR OPTIONS REMIND FREQUENCY BUTTON             *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string CalendarOptionRemindNotEnabled => "Veuillez d'abord activer les rappels";
+        public string CalendarOptionRemindFrequencyLabel(int option) => $"{(option / 60 >= 1 ? $"{option / 60} heure(s)" : $"{option} minute(s)")} avant";
+        public string CalendarOptionRemindFrequencyChoose => "Sélectionnez les rappels de match que vous souhaitez";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*              CALENDAR OPTIONS REMIND FREQUENCY BUTTON             *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string CalendarOptionRemindFrequencyUpdated(int[] options) => $"Les rappels seront désormais les suivants :\n" +
+            $"• {string.Join("\n• ", options.Select(o => o / 60 >= 1 ? $"{o / 60} heure(s) avant" : $"{o} minute(s) avant"))}";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                        CALENDAR SET COMMAND                       *|

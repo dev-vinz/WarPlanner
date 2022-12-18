@@ -56,6 +56,20 @@
         public string CalendarOptionRemindDisabled { get; }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*              CALENDAR OPTIONS REMIND FREQUENCY BUTTON             *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string CalendarOptionRemindNotEnabled { get; }
+        public string CalendarOptionRemindFrequencyLabel(int option);
+        public string CalendarOptionRemindFrequencyChoose { get; }
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*              CALENDAR OPTIONS REMIND FREQUENCY BUTTON             *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string CalendarOptionRemindFrequencyUpdated(int[] options);
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                        CALENDAR SET COMMAND                       *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

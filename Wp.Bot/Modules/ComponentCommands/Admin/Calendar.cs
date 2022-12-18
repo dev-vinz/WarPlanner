@@ -48,7 +48,65 @@ namespace Wp.Bot.Modules.ComponentCommands.Admin
         {
             await Context.Interaction.DisableComponentsAsync(allComponents: true);
 
-            await FollowupAsync("Choose remind", ephemeral: true);
+            // Loads databases infos
+            DbCalendars calendars = Database.Context.Calendars;
+            DbTimes times = Database.Context.Times;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
+
+            // Filters for guild
+            Common.Models.Calendar? dbCalendar = calendars
+                .AsParallel()
+                .FirstOrDefault(c => c.Guild == dbGuild);
+
+            Time[] dbTimes = times
+                .AsParallel()
+                .Where(t => t.Guild == dbGuild)
+                .ToArray();
+
+            Time? remindTime = dbTimes.FirstOrDefault(t => t.Action == TimeAction.REMIND_WAR);
+
+            // Gets interaction responses
+            IAdmin interactionText = dbGuild.AdminText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+            if (dbCalendar is null)
+            {
+                await FollowupAsync(interactionText.CalendarIdNotSet, ephemeral: true);
+
+                return;
+            }
+
+            if (remindTime is null)
+            {
+                await FollowupAsync(interactionText.CalendarOptionRemindNotEnabled, ephemeral: true);
+
+                return;
+            }
+
+            // Build select menu
+            SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+                .WithMinValues(1)
+                .WithMaxValues(Settings.CALENDAR_REMIND_WAR.Count)
+                .WithCustomId(IdProvider.CALENDAR_OPTIONS_REMIND_WAR_SELECT_NUMBER_REMINDS);
+
+            Settings.CALENDAR_REMIND_WAR
+                .ToList()
+                .ForEach(kvp => menuBuilder.AddOption(interactionText.CalendarOptionRemindFrequencyLabel(kvp.Value), kvp.Key.ToString()));
+
+            // Cancel button
+            ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+                .WithLabel(generalResponses.CancelButton)
+                .WithStyle(ButtonStyle.Danger)
+                .WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+
+            // Build component
+            ComponentBuilder componentBuilder = new ComponentBuilder()
+                .WithSelectMenu(menuBuilder)
+                .WithButton(cancelButtonBuilder);
+
+            await FollowupAsync(interactionText.CalendarOptionRemindFrequencyChoose, components: componentBuilder.Build(), ephemeral: true);
         }
 
         [ComponentInteraction(IdProvider.CALENDAR_OPTIONS_BUTTON_DISPLAY, runMode: RunMode.Async)]
@@ -284,6 +342,42 @@ namespace Wp.Bot.Modules.ComponentCommands.Admin
             IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
             await FollowupAsync(interactionText.CalendarOptionDisplayFrequencyUpdated(option), ephemeral: true);
+        }
+
+        [ComponentInteraction(IdProvider.CALENDAR_OPTIONS_REMIND_WAR_SELECT_NUMBER_REMINDS, runMode: RunMode.Async)]
+        public async Task ChooseRemind(string[] selections)
+        {
+            await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+            // Transforms into options
+            int[] options = selections
+                .Select(s => int.Parse(s))
+                .OrderBy(o => o)
+                .ToArray();
+
+            // Loads databases infos
+            DbTimes times = Database.Context.Times;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
+
+            // Filters for guild
+            Time[] dbTimes = times
+                .AsParallel()
+                .Where(t => t.Guild == dbGuild)
+                .ToArray();
+
+            Time remindTime = dbTimes.First(t => t.Action == TimeAction.REMIND_WAR);
+
+            // Update and save
+            remindTime.Optional = string.Join("", options);
+            times.Update(remindTime);
+
+            // Gets interaction responses
+            IAdmin interactionText = dbGuild.AdminText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+            await FollowupAsync(interactionText.CalendarOptionRemindFrequencyUpdated(options.Select(o => Settings.CALENDAR_REMIND_WAR.GetValueOrDefault(o)).ToArray()), ephemeral: true);
         }
     }
 }
