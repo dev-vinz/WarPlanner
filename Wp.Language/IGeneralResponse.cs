@@ -59,6 +59,19 @@ namespace Wp.Language
         public string SelectOptionsAreEmpty { get; }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                            GLOBAL TIMES                           *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string Second { get; }
+        public string Seconds { get; }
+        public string Minute { get; }
+        public string Minutes { get; }
+        public string Hour { get; }
+        public string Hours { get; }
+        public string Day { get; }
+        public string Days { get; }
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          STORAGE COMPONENT                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

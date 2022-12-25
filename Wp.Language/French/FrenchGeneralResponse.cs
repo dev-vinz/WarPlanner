@@ -45,6 +45,19 @@
         public string SelectOptionsAreEmpty => "Vous n'avez séléctionné aucun élément";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                            GLOBAL TIMES                           *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string Second => "seconde";
+        public string Seconds => "secondes";
+        public string Minute => "minute";
+        public string Minutes => "minutes";
+        public string Hour => "heure";
+        public string Hours => "heures";
+        public string Day => "jour";
+        public string Days => "jours";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          STORAGE COMPONENT                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

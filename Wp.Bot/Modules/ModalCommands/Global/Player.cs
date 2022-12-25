@@ -115,7 +115,7 @@ namespace Wp.Bot.Modules.ModalCommands.Global
             // Remove local accounts
             anyPlayers
                 .AsParallel()
-                    .ForAll(p => players.Remove(p!));
+                .ForAll(p => players.Remove(p!));
 
             Guild devGuild = guilds
                 .First(g => g.Id == Configurations.DEV_GUILD_ID);
