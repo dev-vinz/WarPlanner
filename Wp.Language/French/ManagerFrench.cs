@@ -100,5 +100,19 @@
         public string CompetitionEnvironmentFloodChannel => "flood";
         public string CompetitionenvironmentResultChannel => "résultats-match";
         public string CompetitionEnvironmentVoiceChannel => "Vocal";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                          WAR ADD COMMAND                          *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarAddNoCompetition => "Vous n'avez aucune compétition en cours";
+        public string WarAddNoPlayers(uint minTh) => $"Vous ne possédez aucun joueur enregistré possèdant un rôle `Joueur`, et ayant un HDV supérieur ou égal à {minTh}";
+        public string WarAddChooseHour(string opponent, string date) => $"À quelle heure est prévu le match contre **{opponent}**, le *{date}* ?";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                        WAR ADD HOUR SELECT                        *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarAddHourSelectMinutes(string date) => $"Pouvez-vous être à peine plus précis-e que **{date}** ?";
     }
 }

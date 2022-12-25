@@ -15,7 +15,7 @@
         |*                         GOOGLE CALENDAR API                       *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public string GoogleCannotAccessCalendar => "Je n'ai pas accès à ce calendrier\nÊtes-vous sûr.e de m'avoir ajouté correctement ?";
+        public string GoogleCannotAccessCalendar => "Je n'ai pas accès à ce calendrier\nÊtes-vous sûr-e de m'avoir ajouté correctement ?";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           SOCKET CHANNELS                         *|

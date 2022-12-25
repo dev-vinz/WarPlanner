@@ -42,5 +42,12 @@
         public const string COMPETITION_EDIT_BUTTON_SECOND_CLAN = "competition_edit_button_second_clan";
         public const string COMPETITION_EDIT_SELECT_MAIN_CLAN = "competition_edit_select_main_clan";
         public const string COMPETITION_EDIT_SELECT_SECOND_CLAN = "competition_edit_select_second_clan";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                            WAR COMMANDS                           *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public const string WAR_ADD_SELECT_HOUR = "war_add_select_hour";
+        public const string WAR_ADD_SELECT_MINUTES = "war_add_select_minutes";
     }
 }

@@ -8,12 +8,15 @@
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         private readonly string name;
+        private readonly string cultureInfo;
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                             PROPERTIES                            *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         public string Name { get => name; }
+
+        public string CultureInfo { get => cultureInfo; }
 
         /* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
@@ -25,9 +28,10 @@
         |*                            CONSTRUCTORS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public LanguageAttribute(string name)
+        public LanguageAttribute(string name, string cultureInfo)
         {
             this.name = name;
+            this.cultureInfo = cultureInfo;
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

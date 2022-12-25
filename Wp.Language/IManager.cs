@@ -95,5 +95,19 @@
         public string CompetitionEnvironmentFloodChannel { get; }
         public string CompetitionenvironmentResultChannel { get; }
         public string CompetitionEnvironmentVoiceChannel { get; }
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                          WAR ADD COMMAND                          *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarAddNoCompetition { get; }
+        public string WarAddNoPlayers(uint minTh);
+        public string WarAddChooseHour(string opponent, string date);
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                        WAR ADD HOUR SELECT                        *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarAddHourSelectMinutes(string date);
     }
 }
