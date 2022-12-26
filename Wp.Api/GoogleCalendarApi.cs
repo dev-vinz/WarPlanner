@@ -2,6 +2,7 @@
 using Google.Apis.Calendar.v3;
 using Google.Apis.Calendar.v3.Data;
 using Google.Apis.Services;
+using Wp.Api.Models;
 using Wp.Api.Settings;
 
 namespace Wp.Api
@@ -68,9 +69,41 @@ namespace Wp.Api
         |*                           EVENTS METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        /// <summary>
+        /// Accesses to events methods
+        /// </summary>
         public static class Events
         {
+            public static async Task<Event?> InsertAsync(CalendarEvent calendarEvent, string zoneId, string calendarId)
+            {
+                Event? result = null;
+                Event matchEvent = new()
+                {
+                    Summary = calendarEvent.CompetitionName,
+                    Location = calendarEvent.OpponentTag,
+                    Start = new EventDateTime
+                    {
+                        DateTime = calendarEvent.Start.UtcDateTime,
+                        TimeZone = zoneId,
+                    },
+                    End = new EventDateTime
+                    {
+                        DateTime = calendarEvent.End.UtcDateTime,
+                        TimeZone = zoneId,
+                    },
+                    Description = string.Join("\n", calendarEvent.Players),
+                };
 
+                try
+                {
+                    result = await service.Events.Insert(matchEvent, calendarId).ExecuteAsync();
+                }
+                catch (Exception)
+                {
+                }
+
+                return result;
+            }
         }
     }
 }

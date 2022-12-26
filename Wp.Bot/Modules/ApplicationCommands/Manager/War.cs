@@ -170,7 +170,7 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
             // Registers informations into storage
             ComponentStorage storage = ComponentStorage.GetInstance();
 
-            string[] datas = new[] { opponentTag, totalTime.ToString(), date };
+            string[] datas = new[] { cOpponent.Tag, totalTime.ToString(), date };
             storage.MessageDatas.TryAdd(message.Id, datas);
         }
 

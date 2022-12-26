@@ -105,9 +105,36 @@
         public string WarAddChooseHour(string opponent, string date);
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                     WAR ADD COMPETITION SELECT                    *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarAddCompetitionNextPlayers { get; }
+        public string WarAddCompetitionSelectPlayers(string competition, int nbPages);
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                        WAR ADD HOUR SELECT                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         public string WarAddHourSelectMinutes(string date);
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                       WAR ADD MINUTES SELECT                      *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarAddMinutesSelectCompetition(string date);
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                       WAR ADD PLAYERS SELECT                      *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarAddPlayersEnd { get; }
+        public string WarAddPlayersSelectPlayers(int currentPage, int nbPages, int nbPlayers);
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                    WAR ADD LAST PLAYERS SELECT                    *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarAddLastPlayersMatchAdded(string date, string opponent);
+        public string WarAddLastPlayersMatchProblem { get; }
     }
 }

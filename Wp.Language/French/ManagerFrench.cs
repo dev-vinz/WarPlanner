@@ -7,7 +7,7 @@
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         public string SelectDontContainsOption => "Une erreur s'est produite, veuillez réessayer la commande";
-        public string UserNotAllowedToInteract => "Vous n'êtes pas autorisé à réagir à cette interaction";
+        public string UserNotAllowedToInteract => "Vous n'êtes pas autorisé–e à réagir à cette interaction";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          CLAN ADD COMMAND                         *|
@@ -98,7 +98,7 @@
         public string CompetitionEnvironmentReferentRoleName(string competition) => $"Référent {competition}";
         public string CompetitionEnvironmentInformationChannel => "informations";
         public string CompetitionEnvironmentFloodChannel => "flood";
-        public string CompetitionenvironmentResultChannel => "résultats-match";
+        public string CompetitionenvironmentResultChannel => "résultats–match";
         public string CompetitionEnvironmentVoiceChannel => "Vocal";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -106,13 +106,43 @@
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         public string WarAddNoCompetition => "Vous n'avez aucune compétition en cours";
-        public string WarAddNoPlayers(uint minTh) => $"Vous ne possédez aucun joueur enregistré possèdant un rôle `Joueur`, et ayant un HDV supérieur ou égal à {minTh}";
+        public string WarAddNoPlayers(uint minTh) => $"Vous ne possédez aucun joueur–se enregistré possèdant un rôle `Joueur`, et ayant un HDV supérieur ou égal à {minTh}";
         public string WarAddChooseHour(string opponent, string date) => $"À quelle heure est prévu le match contre **{opponent}**, le *{date}* ?";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                     WAR ADD COMPETITION SELECT                    *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarAddCompetitionNextPlayers => "Joueur–se–s suivant–e–s";
+        public string WarAddCompetitionSelectPlayers(string competition, int nbPages) => $"Veuillez sélectionner les joueur–se–s qui joueront en **{competition}**\n" +
+            $"\nPage 1/{nbPages}";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                        WAR ADD HOUR SELECT                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public string WarAddHourSelectMinutes(string date) => $"Pouvez-vous être à peine plus précis-e que **{date}** ?";
+        public string WarAddHourSelectMinutes(string date) => $"Pouvez–vous être à peine plus précis–e que **{date}** ?";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                       WAR ADD MINUTES SELECT                      *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarAddMinutesSelectCompetition(string date) => $"Veuillez sélectionner la compétition dans laquelle vous jouerez à **{date}**";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                       WAR ADD PLAYERS SELECT                      *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarAddPlayersEnd => "Terminer";
+        public string WarAddPlayersSelectPlayers(int currentPage, int nbPages, int nbPlayers) => $"Sélectionnez les joueur–se–s qui joueront le match\nActuellement, il y a **{nbPlayers}** joueur–se–s sélectionné–e–s\n" +
+            $"\nPage {currentPage}/{nbPages}";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                    WAR ADD LAST PLAYERS SELECT                    *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarAddLastPlayersMatchAdded(string date, string opponent) => $"Votre match du **{date}** contre **{opponent}** a été ajouté à votre calendrier" +
+            $"\nBonne chance !";
+        public string WarAddLastPlayersMatchProblem => "Hmm... il y a eu un problème lors de l'ajout du match. Êtes-vous sûr–e que je possède encore les droits requis, et que le calendrier existe toujours ?";
     }
 }
