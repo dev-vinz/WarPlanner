@@ -3,9 +3,12 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using System.Globalization;
 using Wp.Api;
+using Wp.Api.Models;
 using Wp.Bot.Modules.ApplicationCommands.AutoCompletion;
 using Wp.Bot.Services;
 using Wp.Common.Models;
+using Wp.Common.Services.NodaTime;
+using Wp.Common.Settings;
 using Wp.Database.Services;
 using Wp.Database.Settings;
 using Wp.Discord.ComponentInteraction;
@@ -172,6 +175,83 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
 
             string[] datas = new[] { cOpponent.Tag, totalTime.ToString(), date };
             storage.MessageDatas.TryAdd(message.Id, datas);
+        }
+
+        [SlashCommand("delete", "Delete a registered war from the calendar", runMode: RunMode.Async)]
+        public async Task Delete()
+        {
+            await DeferAsync(true);
+
+            // Loads databases infos
+            DbCalendars calendars = Database.Context.Calendars;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
+
+            // Filters for guild
+            Calendar dbCalendar = calendars
+                .AsParallel()
+                .First(c => c.Guild == dbGuild);
+
+            // Gets command responses
+            IAdmin adminResponses = dbGuild.AdminText;
+            IManager commandText = dbGuild.ManagerText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+            if (dbCalendar is null)
+            {
+                await ModifyOriginalResponseAsync(msg => msg.Content = adminResponses.CalendarIdNotSet);
+
+                return;
+            }
+
+            // Gets all calendar events
+            CalendarEvent[] events = await GoogleCalendarApi.Events.ListAsync(dbCalendar.Id);
+
+            if (!events.Any())
+            {
+                await ModifyOriginalResponseAsync(msg => msg.Content = commandText.WarDeleteNoEvents);
+
+                return;
+            }
+
+            // Filters only next events for select menu
+            events = events.Take(Settings.MAX_OPTION_PER_SELECT_MENU).ToArray();
+
+            // Instances our time converter
+            NodaConverter nodaConverter = new();
+            CultureInfo cultureInfo = dbGuild.Language.GetCultureInfo();
+
+            // Build select menu
+            SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+                .WithCustomId(IdProvider.WAR_DELETE_SELECT_EVENT);
+
+            events
+                .ToList()
+                .ForEach(e =>
+                {
+                    DateTimeOffset start = nodaConverter.ConvertDateTo(e.Start, dbGuild.TimeZone);
+                    DateTimeOffset end = nodaConverter.ConvertDateTo(e.End, dbGuild.TimeZone);
+
+                    menuBuilder.AddOption($"{e.CompetitionName} : {e.OpponentClan.Name}", e.Id, commandText.WarDeleteMatchFromTo(start.ToString("dd/MM", cultureInfo), start.ToString("HH:mm", cultureInfo), end.ToString("HH:mm", cultureInfo)));
+                });
+
+            // Cancel button
+            ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+                .WithLabel(generalResponses.CancelButton)
+                .WithStyle(ButtonStyle.Danger)
+                .WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+
+            // Build component
+            ComponentBuilder componentBuilder = new ComponentBuilder()
+                .WithSelectMenu(menuBuilder)
+                .WithButton(cancelButtonBuilder);
+
+            await ModifyOriginalResponseAsync(msg =>
+            {
+                msg.Content = commandText.WarDeleteChooseMatch;
+                msg.Components = new(componentBuilder.Build());
+            });
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

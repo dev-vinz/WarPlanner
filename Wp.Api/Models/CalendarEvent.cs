@@ -107,7 +107,16 @@ namespace Wp.Api.Models
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
+		/// <summary>
+		/// Indicates if this instance is valid
+		/// </summary>
+		/// <returns>true if this instance is valid; false otherwise</returns>
+		public bool IsValid()
+		{
+			return competitionName is not null &&
+				opponentTag is not null &&
+				players.Any();
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         PROTECTED METHODS                         *|

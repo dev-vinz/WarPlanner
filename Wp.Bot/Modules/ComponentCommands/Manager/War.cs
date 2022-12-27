@@ -473,5 +473,41 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 			datas = new[] { opponentTag, totalTime.ToString(), warDate, competitionId, currentPage.ToString() }.Concat(playersTag).ToArray();
 			storage.MessageDatas.TryAdd(message.Id, datas);
 		}
+
+		[ComponentInteraction(IdProvider.WAR_DELETE_SELECT_EVENT, runMode: RunMode.Async)]
+		public async Task Delete(string[] selections)
+		{
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+			// Recovers option
+			string eventId = selections.First();
+
+			// Loads databases infos
+			DbCalendars calendars = Database.Context.Calendars;
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
+
+			// Filters for guild
+			Common.Models.Calendar dbCalendar = calendars
+				.AsParallel()
+				.First(c => c.Guild == dbGuild);
+
+			// Gets interaction texts
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			// Deletes from google calendar
+			bool isDeleted = await GoogleCalendarApi.Events.DeleteAsync(dbCalendar.Id, eventId);
+
+			if (!isDeleted)
+			{
+				await FollowupAsync(interactionText.WarDeleteCannotDelete, ephemeral: true);
+
+				return;
+			}
+
+			await FollowupAsync(interactionText.WarDeleteMatchDeleted, ephemeral: true);
+		}
 	}
 }

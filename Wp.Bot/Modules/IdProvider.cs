@@ -52,8 +52,9 @@
         public const string WAR_ADD_SELECT_COMPETITION = "war_add_select_competition";
         public const string WAR_ADD_SELECT_PLAYERS = "war_add_select_players";
         public const string WAR_ADD_SELECT_LAST_PLAYERS = "war_add_select_last_players";
-
         public const string WAR_ADD_BUTTON_LAST_NEXT_PLAYERS = "war_add_button_last_next_players";
         public const string WAR_ADD_BUTTON_NEXT_PLAYERS = "war_add_button_next_players";
+
+        public const string WAR_DELETE_SELECT_EVENT = "war_delete_select_event";
     }
 }

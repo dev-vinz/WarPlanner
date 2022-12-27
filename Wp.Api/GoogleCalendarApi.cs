@@ -74,6 +74,64 @@ namespace Wp.Api
         /// </summary>
         public static class Events
         {
+            /// <summary>
+            /// Deletes an event from a Google Calendar
+            /// </summary>
+            /// <param name="calendarId">A Google Calendar id</param>
+            /// <param name="eventId">A Google Calendar event id</param>
+            /// <returns>A confirmation that the event has been deleted. true if it is; false otherwise</returns>
+            public static async Task<bool> DeleteAsync(string calendarId, string eventId)
+            {
+                string? result = null;
+
+                try
+                {
+                    result = await service.Events.Delete(calendarId, eventId).ExecuteAsync();
+                }
+                catch (Exception)
+                {
+                }
+
+                return result is not null;
+            }
+
+            /// <summary>
+            /// Gets a calendar event from a Google Calendar
+            /// </summary>
+            /// <param name="calendarId">A Google Calendar id</param>
+            /// <param name="eventId">A Google Calendar event id</param>
+            /// <returns>A calendar event from a Google Calendar</returns>
+            public static async Task<CalendarEvent?> GetAsync(string calendarId, string eventId)
+            {
+                CalendarEvent? calendarEvent = null;
+
+                try
+                {
+                    Event? result = await service.Events.Get(calendarId, eventId).ExecuteAsync();
+
+                    if (result != null)
+                    {
+                        string[] playersTag = result.Description?
+                            .Split("\n", StringSplitOptions.RemoveEmptyEntries)?
+                            .ToArray() ?? Array.Empty<string>();
+
+                        calendarEvent = new(result.Id, result.Summary, result.Location, DateTimeOffset.Parse(result.Start.DateTimeRaw), DateTimeOffset.Parse(result.End.DateTimeRaw), playersTag);
+                    }
+                }
+                catch (Exception)
+                {
+                }
+
+                return calendarEvent;
+            }
+
+            /// <summary>
+            /// Inserts a new calendar event into a Google Calendar
+            /// </summary>
+            /// <param name="calendarEvent">A calendar event</param>
+            /// <param name="zoneId">A TimeZone id</param>
+            /// <param name="calendarId">A calendar id, where the event has to be inserted</param>
+            /// <returns>A confirmation of the successful insertion of event</returns>
             public static async Task<Event?> InsertAsync(CalendarEvent calendarEvent, string zoneId, string calendarId)
             {
                 Event? result = null;
@@ -103,6 +161,41 @@ namespace Wp.Api
                 }
 
                 return result;
+            }
+
+            /// <summary>
+            /// Gets all the calendar events from a Google Calendar
+            /// </summary>
+            /// <param name="calendarId">A Google Calendar id</param>
+            /// <param name="fromNow">A flag that indicates if we have to take only next events from now</param>
+            /// <returns>An array containing all the calendar events from a Google Calendar</returns>
+            public static async Task<CalendarEvent[]> ListAsync(string calendarId, bool fromNow = true)
+            {
+                List<CalendarEvent> list = new();
+
+                // If fromNow is false, take only 1 month before
+                DateTimeOffset dateUtc = !fromNow ? DateTimeOffset.UtcNow.AddMonths(-1) : DateTimeOffset.UtcNow;
+
+                try
+                {
+                    Google.Apis.Calendar.v3.Data.Events? result = await service.Events.List(calendarId).ExecuteAsync();
+                    Event[]? items = result.Items.Where(i => i.Start?.DateTimeRaw != null && DateTimeOffset.Parse(i.Start.DateTimeRaw).UtcDateTime > dateUtc).ToArray();
+
+                    foreach (Event @event in items)
+                    {
+                        DateTimeOffset date = DateTimeOffset.Parse(@event.Start.DateTimeRaw);
+
+                        CalendarEvent? calendarEvent = await GetAsync(calendarId, @event.Id);
+
+                        if (calendarEvent != null)
+                            list.Add(calendarEvent);
+                    }
+                }
+                catch (Exception)
+                {
+                }
+
+                return list.OrderBy(e => e.Start).ToArray();
             }
         }
     }

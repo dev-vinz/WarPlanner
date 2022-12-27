@@ -144,5 +144,20 @@
         public string WarAddLastPlayersMatchAdded(string date, string opponent) => $"Votre match du **{date}** contre **{opponent}** a été ajouté à votre calendrier" +
             $"\nBonne chance !";
         public string WarAddLastPlayersMatchProblem => "Hmm... il y a eu un problème lors de l'ajout du match. Êtes-vous sûr–e que je possède encore les droits requis, et que le calendrier existe toujours ?";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                        WAR DELETE COMMAND                         *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarDeleteNoEvents => "Vous n'avez aucun match prévu ces prochains jours";
+        public string WarDeleteMatchFromTo(string date, string start, string end) => $"Le {date}, de {start} à {end}";
+        public string WarDeleteChooseMatch => "Sélectionnez le match que vous voulez supprimer";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                        WAR DELETE SELECT                          *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarDeleteCannotDelete => "Hmm... il y a eu un problème lors de la suppression du match. Êtes-vous sûr–e que je possède encore les droits requis, et que le calendrier existe toujours ?";
+        public string WarDeleteMatchDeleted => "Le match a été supprimé de votre calendrier";
     }
 }

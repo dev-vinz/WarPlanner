@@ -136,5 +136,20 @@
 
         public string WarAddLastPlayersMatchAdded(string date, string opponent);
         public string WarAddLastPlayersMatchProblem { get; }
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                        WAR DELETE COMMAND                         *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarDeleteNoEvents { get; }
+        public string WarDeleteMatchFromTo(string date, string start, string end);
+        public string WarDeleteChooseMatch { get; }
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                        WAR DELETE SELECT                          *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarDeleteCannotDelete { get; }
+        public string WarDeleteMatchDeleted { get; }
     }
 }
