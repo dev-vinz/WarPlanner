@@ -77,6 +77,9 @@ namespace Wp.Bot
             // We get the CommandHandler class here and call the InitializeAsync method to start things up for the CommandHandler service
             await services.GetRequiredService<CommandHandler>().InitializeAsync();
 
+            // Same for EventHandler
+            await services.GetRequiredService<Services.EventHandler>().InitializeAsync();
+
             await Task.Delay(Timeout.Infinite);
         }
 
@@ -132,6 +135,7 @@ namespace Wp.Bot
                 }))
                 .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
                 .AddSingleton<CommandHandler>()
+                .AddSingleton<Services.EventHandler>()
                 .BuildServiceProvider();
         }
 

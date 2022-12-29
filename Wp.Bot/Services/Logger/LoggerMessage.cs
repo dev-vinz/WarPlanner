@@ -2,7 +2,7 @@
 
 namespace Wp.Bot.Services.Logger
 {
-    public class LogMessage
+    public class LoggerMessage
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
@@ -44,7 +44,7 @@ namespace Wp.Bot.Services.Logger
         |*                            CONSTRUCTORS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public LogMessage(string title, Color color, string guild, string guildThumbnail, string command, string exception, string error)
+        public LoggerMessage(string title, Color color, string guild, string guildThumbnail, string command, string exception, string error)
         {
             // Inputs
             {

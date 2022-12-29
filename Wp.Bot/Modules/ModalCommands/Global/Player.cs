@@ -5,6 +5,7 @@ using Wp.Api;
 using Wp.Bot.Modules.ModalCommands.Modals;
 using Wp.Bot.Services;
 using Wp.Common.Models;
+using Wp.Common.Settings;
 using Wp.Database.Services;
 using Wp.Database.Settings;
 using Wp.Language;
@@ -95,7 +96,7 @@ namespace Wp.Bot.Modules.ModalCommands.Global
             if (anyPlayers.Any() && anyPlayers.First()?.Guild?.Id == Configurations.DEV_GUILD_ID)
             {
                 ButtonBuilder supportButton = new ButtonBuilder()
-                    .WithUrl(Configurations.SUPPORT_GUILD_INVITATION)
+                    .WithUrl(Utilities.SUPPORT_GUILD_INVITATION)
                     .WithLabel(generalResponses.SupportServer)
                     .WithStyle(ButtonStyle.Link)
                     .WithDisabled(false)

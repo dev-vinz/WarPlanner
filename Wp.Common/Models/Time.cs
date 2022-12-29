@@ -3,7 +3,9 @@
     public class Time
     {
         public static readonly TimeSpan CALENDAR_INTERVAL = TimeSpan.FromSeconds(60);
+        public static readonly TimeSpan DETECT_END_WAR_INTERVAL = TimeSpan.FromSeconds(60);
         public static readonly TimeSpan REMIND_INTERVAL = TimeSpan.FromSeconds(60);
+        public static readonly TimeSpan REMIND_WAR_STATUS_INTERVAL = TimeSpan.FromSeconds(60);
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
