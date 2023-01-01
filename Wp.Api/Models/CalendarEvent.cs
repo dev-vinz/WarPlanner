@@ -108,6 +108,18 @@ namespace Wp.Api.Models
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		/// <summary>
+		/// Indicates if this instance is situated between two dates
+		/// </summary>
+		/// <param name="start">The first date to compare</param>
+		/// <param name="end">The second date to compare</param>
+		/// <returns>true if this instance is situated between the two dates; false otherwise</returns>
+		public bool IsBetweenDate(DateTimeOffset start, DateTimeOffset end)
+		{
+			return this.start.UtcDateTime.Date >= start.UtcDateTime.Date &&
+				this.end.UtcDateTime.Date <= end.UtcDateTime.Date;
+		}
+
+		/// <summary>
 		/// Indicates if this instance is valid
 		/// </summary>
 		/// <returns>true if this instance is valid; false otherwise</returns>

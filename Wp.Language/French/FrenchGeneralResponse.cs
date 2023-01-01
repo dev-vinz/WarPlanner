@@ -39,6 +39,18 @@
         public string ActionCanceledByButton => "Très bien, j'annule";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                            GLOBAL DAYS                            *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string Monday => "Lundi";
+        public string Tuesday => "Mardi";
+        public string Wednesday => "Mercredi";
+        public string Thursday => "Jeudi";
+        public string Friday => "Vendredi";
+        public string Saturday => "Samedi";
+        public string Sunday => "Dimanche";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           GLOBAL SELECT                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

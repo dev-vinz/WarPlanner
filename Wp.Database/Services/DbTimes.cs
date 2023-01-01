@@ -1,4 +1,5 @@
 ﻿using Wp.Common.Models;
+using Wp.Common.Services.Extensions;
 
 namespace Wp.Database.Services
 {
@@ -88,7 +89,7 @@ namespace Wp.Database.Services
 
 				EFModels.Time dbTime = ctx.Times.GetEFModel(time);
 
-				dbTime.Date = time.Date.UtcDateTime;
+				dbTime.Date = time.Date.TruncSeconds().UtcDateTime;
 				dbTime.Additional = time.Additional;
 				dbTime.Optional = time.Optional;
 

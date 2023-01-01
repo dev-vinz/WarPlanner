@@ -53,6 +53,18 @@ namespace Wp.Language
         public string ActionCanceledByButton { get; }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                            GLOBAL DAYS                            *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string Monday { get; }
+        public string Tuesday { get; }
+        public string Wednesday { get; }
+        public string Thursday { get; }
+        public string Friday { get; }
+        public string Saturday { get; }
+        public string Sunday { get; }
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           GLOBAL SELECT                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

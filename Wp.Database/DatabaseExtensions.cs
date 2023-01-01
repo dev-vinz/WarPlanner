@@ -178,7 +178,7 @@ namespace Wp.Database
 		{
 			Guild = time.Guild.Id,
 			Action = (int)time.Action,
-			Date = time.Date.UtcDateTime.TruncSeconds(),
+			Date = time.Date.TruncSeconds().UtcDateTime,
 			Interval = (int)time.Interval.TotalSeconds,
 			Additional = time.Additional,
 			Optional = time.Optional,
