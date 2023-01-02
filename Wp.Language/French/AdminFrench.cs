@@ -76,5 +76,51 @@
 
         public string CalendarIdAdded(string id) => $"Le calendrier **{id}** a été lié à ce serveur";
         public string CalendarIdUpdated(string id) => $"Le calendrier sera désormais remplacé par **{id}**";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                      ROLE MANAGER ADD COMMAND                     *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string RoleManagerAddTooManyRoles(int nb) => $"Vous êtes déjà à plus de **{nb}** rôles enregistrés en tant que **Manageur–se**..." +
+            $"\nD'après mon expérience, vous n'en avez pas besoin d'autant, je vous conseille de créer un rôle commun à tous";
+        public string RoleManagerAddRoleAlreadyExists => "Ce rôle est déjà enregistré comme **Manageur–se**";
+        public string RoleManagerAddRoleAdded => "Les membres possédant ce rôle pourront désormais utiliser les commandes nécessitant la permission **Manageur–se**";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                    ROLE MANAGER DELETE COMMAND                    *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string RoleManagerDeleteNoRoles => "Vous n'avez aucun rôle enregistré en tant que **Manageur–se**";
+        public string RoleManagerDeleteSelectRole => "Sélectionnez le rôle auquel vous voulez enlever la permission **Manageur–se**";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                    ROLE MANAGER DELETE SELECT                     *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string RoleManagerDeleteSelectRoleDeleted => "Les membres possédant ce rôle ne pourront plus utiliser les commandes nécessitant la permission **Manageur–se**";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                      ROLE PLAYER ADD COMMAND                      *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string RolePlayerAddTooManyRoles(int nb) => $"Vous êtes déjà à plus de **{nb}** rôles enregistrés en tant que **Joueur–se**..." +
+            $"\nD'après mon expérience, vous n'en avez pas besoin d'autant, je vous conseille de créer un rôle commun à tous";
+        public string RolePlayerAddRoleAlreadyExists => "Ce rôle est déjà enregistré comme **Joueur–se**";
+        public string RolePlayerAddRoleAdded => "Les membres possédant ce rôle pourront désormais utiliser les commandes nécessitant la permission **Joueur–se**" +
+            "\nDe plus, les membres seront dès à présent affichés dans les listes lors d'ajout de match au calendrier";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                     ROLE PLAYER DELETE COMMAND                    *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string RolePlayerDeleteNoRoles => "Vous n'avez aucun rôle enregistré en tant que **Joueur–se**";
+        public string RolePlayerDeleteSelectRole => "Sélectionnez le rôle auquel vous voulez enlever la permission **Joueur–se**";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                     ROLE PLAYER DELETE SELECT                     *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string RolePlayerDeleteSelectRoleDeleted => "Les membres possédant ce rôle ne pourront plus utiliser les commandes nécessitant la permission **Joueur–se**" +
+            "\nDe plus, les membres ne seront plus affichés dans les listes lors d'ajout de match au calendrier";
     }
 }

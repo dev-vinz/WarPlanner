@@ -75,5 +75,47 @@
 
 		public string CalendarIdAdded(string id);
 		public string CalendarIdUpdated(string id);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                      ROLE MANAGER ADD COMMAND                     *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string RoleManagerAddTooManyRoles(int nb);
+		public string RoleManagerAddRoleAlreadyExists { get; }
+		public string RoleManagerAddRoleAdded { get; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                    ROLE MANAGER DELETE COMMAND                    *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string RoleManagerDeleteNoRoles { get; }
+		public string RoleManagerDeleteSelectRole { get; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                    ROLE MANAGER DELETE SELECT                     *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string RoleManagerDeleteSelectRoleDeleted { get; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                      ROLE PLAYER ADD COMMAND                      *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string RolePlayerAddTooManyRoles(int nb);
+		public string RolePlayerAddRoleAlreadyExists { get; }
+		public string RolePlayerAddRoleAdded { get; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                     ROLE PLAYER DELETE COMMAND                    *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string RolePlayerDeleteNoRoles { get; }
+		public string RolePlayerDeleteSelectRole { get; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                     ROLE PLAYER DELETE SELECT                     *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string RolePlayerDeleteSelectRoleDeleted { get; }
 	}
 }

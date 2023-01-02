@@ -44,6 +44,13 @@
         public const string COMPETITION_EDIT_SELECT_SECOND_CLAN = "competition_edit_select_second_clan";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                           ROLE COMMANDS                           *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public const string ROLE_MANAGER_DELETE_SELECT = "role_manager_delete_select";
+        public const string ROLE_PLAYER_DELETE_SELECT = "role_player_delete_select";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                            WAR COMMANDS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

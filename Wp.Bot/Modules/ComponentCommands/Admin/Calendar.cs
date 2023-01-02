@@ -275,7 +275,6 @@ namespace Wp.Bot.Modules.ComponentCommands.Admin
 
             // Gets interaction responses
             IAdmin interactionText = dbGuild.AdminText;
-            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
             if (dbCalendar is null)
             {
@@ -339,7 +338,6 @@ namespace Wp.Bot.Modules.ComponentCommands.Admin
 
             // Gets interaction responses
             IAdmin interactionText = dbGuild.AdminText;
-            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
             await FollowupAsync(interactionText.CalendarOptionDisplayFrequencyUpdated(option), ephemeral: true);
         }
@@ -375,7 +373,6 @@ namespace Wp.Bot.Modules.ComponentCommands.Admin
 
             // Gets interaction responses
             IAdmin interactionText = dbGuild.AdminText;
-            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
             await FollowupAsync(interactionText.CalendarOptionRemindFrequencyUpdated(options.Select(o => Settings.CALENDAR_REMIND_WAR.GetValueOrDefault(o)).ToArray()), ephemeral: true);
         }
