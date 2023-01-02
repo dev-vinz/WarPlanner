@@ -55,7 +55,7 @@
         public string EditCompetitionChooseEdition(string competitionName) => $"Choisissez la modification à faire au tournoi **{competitionName}**";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-        |*                       COMPETITION EDIT MODEL                      *|
+        |*                       COMPETITION EDIT MODAL                      *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         public string EditCompetitionNameModalTitle => "Modification du nom de compétition";

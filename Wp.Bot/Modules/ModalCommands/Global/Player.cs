@@ -1,6 +1,8 @@
 ﻿using ClashOfClans.Models;
 using Discord;
 using Discord.Interactions;
+using Discord.Rest;
+using Discord.WebSocket;
 using Wp.Api;
 using Wp.Bot.Modules.ModalCommands.Modals;
 using Wp.Bot.Services;
@@ -8,6 +10,7 @@ using Wp.Common.Models;
 using Wp.Common.Settings;
 using Wp.Database.Services;
 using Wp.Database.Settings;
+using Wp.Discord.Extensions;
 using Wp.Language;
 
 namespace Wp.Bot.Modules.ModalCommands.Global
@@ -54,7 +57,14 @@ namespace Wp.Bot.Modules.ModalCommands.Global
         [ModalInteraction(PlayerClaimModal.ID, runMode: RunMode.Async)]
         public async Task ClaimAccount(PlayerClaimModal modal)
         {
-            await DeferAsync();
+            await DeferAsync(true);
+
+            // Gets SocketMessageComponent and original message
+            SocketModal socket = (Context.Interaction as SocketModal)!;
+            RestInteractionMessage originalMessage = await socket.GetOriginalResponseAsync();
+
+            // Disable all components
+            await originalMessage.DisableAllComponentsAsync();
 
             // Loads databases infos
             DbGuilds guilds = Database.Context.Guilds;
@@ -71,7 +81,7 @@ namespace Wp.Bot.Modules.ModalCommands.Global
 
             if (cPlayer is null)
             {
-                await FollowupAsync(generalResponses.ClashOfClansError);
+                await FollowupAsync(generalResponses.ClashOfClansError, ephemeral: true);
 
                 return;
             }
@@ -83,7 +93,7 @@ namespace Wp.Bot.Modules.ModalCommands.Global
 
             if (verifyToken?.Status != Status.Ok)
             {
-                await FollowupAsync(commandText.TokenInvalid(cPlayer.Name));
+                await FollowupAsync(commandText.TokenInvalid(cPlayer.Name), ephemeral: true);
 
                 return;
             }
@@ -108,7 +118,7 @@ namespace Wp.Bot.Modules.ModalCommands.Global
                 ComponentBuilder componentBuilder = new ComponentBuilder()
                     .AddRow(rowBuilder);
 
-                await FollowupAsync(commandText.AccountAlreadyClaimed(cPlayer.Name), components: componentBuilder.Build());
+                await FollowupAsync(commandText.AccountAlreadyClaimed(cPlayer.Name), components: componentBuilder.Build(), ephemeral: true);
 
                 return;
             }
@@ -126,7 +136,7 @@ namespace Wp.Bot.Modules.ModalCommands.Global
             // Register new global account
             players.Add(dbPlayer);
 
-            await FollowupAsync(commandText.AccountClaimed(cPlayer.Name));
+            await FollowupAsync(commandText.AccountClaimed(cPlayer.Name), ephemeral: true);
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

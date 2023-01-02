@@ -74,7 +74,7 @@ namespace Wp.Bot.Modules.TimeEvents.War
 				.AsParallel()
 				.Where(e =>
 				{
-					TimeSpan timeSpan = e.Start - e.End;
+					TimeSpan timeSpan = e.Start - dbGuild.Now;
 					int nbMinutes = (int)Math.Ceiling(timeSpan.TotalMinutes);
 					return reminders.Any(r => r == nbMinutes);
 				})
@@ -136,10 +136,6 @@ namespace Wp.Bot.Modules.TimeEvents.War
 			// Checks if members is already in clan
 			if (cClan.MemberList?.Any(m => m.Tag == player.Tag) ?? false) return;
 
-			// Gets remaining time
-			TimeSpan remaining = calendarEvent.Start.UtcDateTime - DateTime.UtcNow;
-			DateTime dateRemaining = new(remaining.Ticks, DateTimeKind.Utc);
-
 			// Creates button
 			ButtonBuilder clanBuilder = new ButtonBuilder()
 				.WithLabel(cClan.Name)
@@ -155,6 +151,10 @@ namespace Wp.Bot.Modules.TimeEvents.War
 			ComponentBuilder componentBuilder = new ComponentBuilder()
 				.WithButton(clanBuilder)
 				.WithButton(opponentBuilder);
+
+			// Gets remaining time
+			TimeSpan remaining = calendarEvent.Start.UtcDateTime - DateTime.UtcNow;
+			DateTime dateRemaining = new(remaining.Ticks, DateTimeKind.Utc);
 
 			// Gets text
 			CultureInfo cultureInfo = player.Guild.CultureInfo;

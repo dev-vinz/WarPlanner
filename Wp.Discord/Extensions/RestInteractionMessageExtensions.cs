@@ -11,6 +11,8 @@ namespace Wp.Discord.Extensions
         /// <param name="msg">The original message interaction</param>
         public static async Task DisableAllComponentsAsync(this RestInteractionMessage msg)
         {
+            if (msg == null) return;
+
             List<ActionRowBuilder> actionRows = new();
 
             // Gets all action rows with components inside

@@ -55,7 +55,7 @@
         public string EditCompetitionChooseEdition(string competitionName);
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-        |*                       COMPETITION EDIT MODEL                      *|
+        |*                       COMPETITION EDIT MODAL                      *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         public string EditCompetitionNameModalTitle { get; }

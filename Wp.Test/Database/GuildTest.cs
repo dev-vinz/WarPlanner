@@ -29,11 +29,11 @@ namespace Wp.Test.Database
 
 			guilds.Update(guild);
 
-			Guild newGuild = DB.Guilds.First(g => g.Id == guild.Id);
+			Guild updatedGuild = DB.Guilds.First(g => g.Id == guild.Id);
 
-			Assert.AreEqual(guild.MinimalTownHallLevel, newGuild.MinimalTownHallLevel);
-			Assert.AreEqual(guild.PremiumLevel, newGuild.PremiumLevel);
-			Assert.IsTrue(guilds.Contains(newGuild));
+			Assert.AreEqual(guild.MinimalTownHallLevel, updatedGuild.MinimalTownHallLevel);
+			Assert.AreEqual(guild.PremiumLevel, updatedGuild.PremiumLevel);
+			Assert.IsTrue(guilds.Contains(updatedGuild));
 		}
 
 		[TestMethod]
