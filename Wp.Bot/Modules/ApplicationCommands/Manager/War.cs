@@ -97,7 +97,7 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
             // Recovers parameters
             int totalTime = warPreparation + warDuration;
             DateTimeOffset warDate = DateTimeOffset.Parse(date);
-            CultureInfo cultureInfo = dbGuild.Language.GetCultureInfo();
+            CultureInfo cultureInfo = dbGuild.CultureInfo;
 
             // Gets Clash of Clans opponent clan
             ClashOfClans.Models.Clan? cOpponent = await ClashOfClansApi.Clans.GetByTagAsync(opponentTag);
@@ -220,7 +220,7 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
 
             // Instances our time converter
             NodaConverter nodaConverter = new();
-            CultureInfo cultureInfo = dbGuild.Language.GetCultureInfo();
+            CultureInfo cultureInfo = dbGuild.CultureInfo;
 
             // Build select menu
             SelectMenuBuilder menuBuilder = new SelectMenuBuilder()

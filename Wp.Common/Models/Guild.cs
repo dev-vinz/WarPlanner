@@ -1,4 +1,5 @@
-﻿using Wp.Common.Services.NodaTime;
+﻿using System.Globalization;
+using Wp.Common.Services.NodaTime;
 using Wp.Language;
 using Wp.Language.French;
 
@@ -50,6 +51,11 @@ namespace Wp.Common.Models
         \* * * * * * * * * * * * * * * * * */
 
         /// <summary>
+        /// Gets the culture info of the guild
+        /// </summary>
+        public CultureInfo CultureInfo => language.GetCultureInfo();
+
+        /// <summary>
         /// Gets the current time and date object with the offset of the server's TimeZone
         /// </summary>
         public DateTimeOffset Now => new NodaConverter().ConvertNowTo(timeZone);
@@ -87,6 +93,15 @@ namespace Wp.Common.Models
         public IManager ManagerText => language switch
         {
             Language.FRENCH => new ManagerFrench(),
+            _ => throw new ArgumentOutOfRangeException(nameof(language), language, null),
+        };
+
+        /// <summary>
+        /// Gets the time events texts, depending on the guild's language
+        /// </summary>
+        public ITime TimeText => language switch
+        {
+            Language.FRENCH => new TimeFrench(),
             _ => throw new ArgumentOutOfRangeException(nameof(language), language, null),
         };
 

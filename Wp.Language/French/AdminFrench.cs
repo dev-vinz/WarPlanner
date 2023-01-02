@@ -16,12 +16,6 @@
         public string CalendarChannelChanged(string channel) => $"Le calendrier apparaîtra désormais dans {channel}";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-        |*                    CALENDAR DISPLAY TIME EVENT                    *|
-        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-        public string CalendarDisplayCannotSend => "Le salon servant à afficher le calendrier a été supprimé";
-
-        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
 		|*                      CALENDAR OPTIONS COMMAND                     *|
 		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

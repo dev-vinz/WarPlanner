@@ -16,12 +16,6 @@
 		public string CalendarChannelChanged(string channel);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-        |*                    CALENDAR DISPLAY TIME EVENT                    *|
-        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		public string CalendarDisplayCannotSend { get; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
 		|*                      CALENDAR OPTIONS COMMAND                     *|
 		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

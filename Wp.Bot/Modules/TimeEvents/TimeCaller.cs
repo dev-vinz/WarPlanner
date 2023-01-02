@@ -21,6 +21,7 @@ namespace Wp.Bot.Modules.TimeEvents
 					Calendar.Display.Execute(guild);
 					break;
 				case TimeAction.REMIND_WAR:
+					War.Remind.Execute(guild);
 					break;
 				case TimeAction.REMIND_WAR_STATUS:
 					break;

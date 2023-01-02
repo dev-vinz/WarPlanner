@@ -205,7 +205,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 			int hours = int.Parse(selections.First());
 			DateTimeOffset warDate = DateTimeOffset.Parse(datas[2]).AddHours(hours);
 
-			CultureInfo cultureInfo = dbGuild.Language.GetCultureInfo();
+			CultureInfo cultureInfo = dbGuild.CultureInfo;
 
 			// Build select menu
 			SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
@@ -274,7 +274,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 			int minutes = int.Parse(selections.First());
 			DateTimeOffset warDate = DateTimeOffset.Parse(datas[2]).AddMinutes(minutes);
 
-			CultureInfo cultureInfo = dbGuild.Language.GetCultureInfo();
+			CultureInfo cultureInfo = dbGuild.CultureInfo;
 
 			// Build select menu
 			SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
@@ -341,7 +341,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 
 			DateTimeOffset warDate = DateTimeOffset.Parse(datas[2]);
 			DateTimeOffset endDate = warDate.AddMinutes(totalTime);
-			CultureInfo cultureInfo = dbGuild.Language.GetCultureInfo();
+			CultureInfo cultureInfo = dbGuild.CultureInfo;
 
 			// Filters for guild
 			Common.Models.Calendar dbCalendar = calendars

@@ -111,7 +111,7 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
 
 			FontFamily fontFamily = SystemFonts.Collection.Get("Quicksand SemiBold");
 
-			CultureInfo cultureInfo = guild.Language.GetCultureInfo();
+			CultureInfo cultureInfo = guild.CultureInfo;
 
 			// Gets general response
 			IGeneralResponse generalResponses = guild.GeneralResponses;
@@ -335,7 +335,7 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
 			if (channel == null)
 			{
 				IUser owner = await guild.GetOwnerAsync();
-				await owner.SendMessageAsync(dbCalendar.Guild.AdminText.CalendarDisplayCannotSend);
+				await owner.SendMessageAsync(dbCalendar.Guild.TimeText.CalendarDisplayCannotSend);
 
 				return;
 			}
