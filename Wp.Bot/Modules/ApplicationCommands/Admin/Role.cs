@@ -131,7 +131,6 @@ namespace Wp.Bot.Modules.ApplicationCommands.Admin
 
 				// Sort options by name
 				menuBuilder.Options = menuBuilder.Options
-					.AsParallel()
 					.OrderBy(o => o.Label)
 					.ToList();
 
@@ -247,7 +246,6 @@ namespace Wp.Bot.Modules.ApplicationCommands.Admin
 
 				// Sort options by name
 				menuBuilder.Options = menuBuilder.Options
-					.AsParallel()
 					.OrderBy(o => o.Label)
 					.ToList();
 

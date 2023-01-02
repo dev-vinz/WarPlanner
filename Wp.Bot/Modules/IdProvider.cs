@@ -9,6 +9,12 @@
         public const string GLOBAL_CANCEL_BUTTON = "global_cancel_button";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                           ADMIN COMMANDS                          *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public const string ADMIN_LANGUAGE_SELECT = "admin_language_select";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         CALENDAR COMMANDS                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -11,22 +11,15 @@ namespace Wp.Common.Models
         /// English language
         /// </summary>
         [Display(Name = "English")]
-        [Language("en", "en-US")]
+        [Language("en", "en-US", "🇬🇧")]
         ENGLISH = 0,
 
         /// <summary>
         /// French language
         /// </summary>
         [Display(Name = "Français")]
-        [Language("fr", "fr-FR")]
+        [Language("fr", "fr-FR", "🇫🇷")]
         FRENCH = 1,
-
-        /// <summary>
-        /// Spanish language
-        /// </summary>
-        [Display(Name = "Español")]
-        [Language("es", "es-ES")]
-        SPANISH = 2,
     }
 
     public static class LanguageExtensions
@@ -61,6 +54,21 @@ namespace Wp.Common.Models
                 .First()?
                 .GetCustomAttribute<DisplayAttribute>()?
                 .Name ?? throw new ArgumentNullException(nameof(language));
+        }
+
+        /// <summary>
+        /// Gets the emoji of this instance
+        /// </summary>
+        /// <param name="language"></param>
+        /// <returns>The emoji of this instance</returns>
+        public static string GetEmoji(this Language language)
+        {
+            return language
+                .GetType()?
+                .GetMember(language.ToString())?
+                .First()?
+                .GetCustomAttribute<LanguageAttribute>()?
+                .Emoji ?? throw new ArgumentNullException(nameof(language));
         }
 
         /// <summary>

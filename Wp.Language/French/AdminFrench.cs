@@ -9,6 +9,18 @@
         public string CalendarIdNotSet => "Vous devez d'abord enregistrer votre ID de calendrier";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                       ADMIN LANGUAGE COMMAND                      *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string AdminLanguageSelectChoose => "Choisissez la langue d'affichage du bot";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                       ADMIN LANGUAGE SELECT                       *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string AdminLanguageChanged => "La langue d'affichage a été changée à : **Français**";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                      CALENDAR CHANNEL COMMAND                     *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
