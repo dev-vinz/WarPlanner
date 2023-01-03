@@ -3,13 +3,6 @@
     public interface IManager
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-        |*                        GLOBAL MANAGER SELECT                      *|
-        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-        public string SelectDontContainsOption { get; }
-        public string UserNotAllowedToInteract { get; }
-
-        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          CLAN ADD COMMAND                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -3,13 +3,6 @@
     public class ManagerFrench : IManager
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-        |*                        GLOBAL MANAGER SELECT                      *|
-        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-        public string SelectDontContainsOption => "Une erreur s'est produite, veuillez réessayer la commande";
-        public string UserNotAllowedToInteract => "Vous n'êtes pas autorisé–e à réagir à cette interaction";
-
-        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          CLAN ADD COMMAND                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -78,7 +71,7 @@
         |*                      COMPETITION DELETE SELECT                    *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public string CompetitionDeleted(string name) => $"La compétition **{name}**, ainsi que son environnement, a été supprimée";
+        public string CompetitionDeleted(string name) => $"La compétition **{name}**, ainsi que son environnement, ont été supprimés";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                       COMPETITION EDIT SELECT                     *|
