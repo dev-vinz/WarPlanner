@@ -109,7 +109,6 @@ namespace Wp.Bot.Modules.ModalCommands.Global
                     .WithUrl(Utilities.SUPPORT_GUILD_INVITATION)
                     .WithLabel(generalResponses.SupportServer)
                     .WithStyle(ButtonStyle.Link)
-                    .WithDisabled(false)
                     .WithEmote(new Emoji("⚙️"));
 
                 ActionRowBuilder rowBuilder = new ActionRowBuilder()

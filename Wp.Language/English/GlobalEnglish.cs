@@ -3,6 +3,15 @@
     public class GlobalEnglish : IGlobal
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                    GLOBAL INFORMATIONS COMMAND                    *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string EmbedInformations => "Informations";
+        public string EmbedDescription => "Project carried out within the Haute-École ARC, during the P3 courses";
+        public string EmbedFieldAuthor => "Author";
+        public string EmbedFieldYear => "Year of achievement";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                      PLAYER CLAIM INTERACTION                     *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -3,6 +3,15 @@
 	public interface IGlobal
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                    GLOBAL INFORMATIONS COMMAND                    *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string EmbedInformations { get; }
+		public string EmbedDescription { get; }
+		public string EmbedFieldAuthor { get; }
+		public string EmbedFieldYear { get; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                      PLAYER CLAIM INTERACTION                     *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

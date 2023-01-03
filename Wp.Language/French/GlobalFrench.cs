@@ -3,6 +3,15 @@
     public class GlobalFrench : IGlobal
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                    GLOBAL INFORMATIONS COMMAND                    *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string EmbedInformations => "Informations";
+        public string EmbedDescription => "Projet réalisé dans le cadre de la Haute-École ARC, lors des cours P3";
+        public string EmbedFieldAuthor => "Auteur";
+        public string EmbedFieldYear => "Année de réalisation";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                      PLAYER CLAIM INTERACTION                     *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

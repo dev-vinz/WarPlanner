@@ -15,4 +15,8 @@
     <ProjectReference Include="..\Wp.Language\Wp.Language.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Images\" />
+  </ItemGroup>
+
 </Project>

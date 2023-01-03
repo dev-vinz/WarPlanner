@@ -44,6 +44,7 @@ namespace Wp.Language
 
         public string CancelButton { get; }
         public string Documentation { get; }
+        public string LinkInvitation { get; }
         public string SupportServer { get; }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

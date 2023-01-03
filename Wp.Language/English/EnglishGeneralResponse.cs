@@ -30,6 +30,7 @@
 
         public string CancelButton => "Cancel";
         public string Documentation => "Documentation";
+        public string LinkInvitation => "Invite link";
         public string SupportServer => "Support guild";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

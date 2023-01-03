@@ -232,7 +232,8 @@ namespace Wp.Bot.Modules.ApplicationCommands.Admin
                 ButtonBuilder docButtonBuilder = new ButtonBuilder()
                     .WithLabel(generalResponses.Documentation)
                     .WithStyle(ButtonStyle.Link)
-                    .WithUrl(Utilities.GITBOOK_DOCUMENTATION);
+                    .WithUrl(Utilities.GITBOOK_DOCUMENTATION)
+                    .WithEmote(new Emoji("📚"));
 
                 // Build component
                 ComponentBuilder componentBuilder = new ComponentBuilder()

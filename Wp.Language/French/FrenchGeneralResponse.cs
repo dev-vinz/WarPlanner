@@ -30,6 +30,7 @@
 
         public string CancelButton => "Annuler";
         public string Documentation => "Documentation";
+        public string LinkInvitation => "Lien d'invitation";
         public string SupportServer => "Serveur support";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
