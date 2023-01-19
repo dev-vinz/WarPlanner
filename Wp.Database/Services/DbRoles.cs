@@ -36,7 +36,7 @@ namespace Wp.Database.Services
 		{
 			lock (_lock)
 			{
-				using EFModels.HEARC_P3Context ctx = new();
+				using EFModels.HeArcP3Context ctx = new();
 
 				ctx.Roles.Add(role.ToEFModel());
 				ctx.SaveChanges();
@@ -54,7 +54,7 @@ namespace Wp.Database.Services
 		{
 			lock (_lock)
 			{
-				using EFModels.HEARC_P3Context ctx = new();
+				using EFModels.HeArcP3Context ctx = new();
 
 				EFModels.Role dbRole = ctx.Roles.GetEFModel(role);
 				ctx.Roles.Remove(dbRole);

@@ -36,7 +36,7 @@ namespace Wp.Database.Services
 		{
 			lock (_lock)
 			{
-				using EFModels.HEARC_P3Context ctx = new();
+				using EFModels.HeArcP3Context ctx = new();
 
 				ctx.Guilds.Add(guild.ToEFModel());
 				ctx.SaveChanges();
@@ -54,7 +54,7 @@ namespace Wp.Database.Services
 		{
 			lock (_lock)
 			{
-				using EFModels.HEARC_P3Context ctx = new();
+				using EFModels.HeArcP3Context ctx = new();
 
 				EFModels.Guild dbGuild = ctx.Guilds.GetEFModel(guild);
 				ctx.Guilds.Remove(dbGuild);
@@ -84,7 +84,7 @@ namespace Wp.Database.Services
 		{
 			lock (_lock)
 			{
-				using EFModels.HEARC_P3Context ctx = new();
+				using EFModels.HeArcP3Context ctx = new();
 
 				EFModels.Guild dbGuild = ctx.Guilds.GetEFModel(guild);
 

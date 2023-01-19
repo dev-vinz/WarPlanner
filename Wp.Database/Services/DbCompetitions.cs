@@ -36,7 +36,7 @@ namespace Wp.Database.Services
         {
             lock (_lock)
             {
-                using EFModels.HEARC_P3Context ctx = new();
+                using EFModels.HeArcP3Context ctx = new();
 
                 ctx.Competitions.Add(competition.ToEFModel());
                 ctx.SaveChanges();
@@ -54,7 +54,7 @@ namespace Wp.Database.Services
         {
             lock (_lock)
             {
-                using EFModels.HEARC_P3Context ctx = new();
+                using EFModels.HeArcP3Context ctx = new();
 
                 EFModels.Competition dbCompetition = ctx.Competitions.GetEFModel(competition);
                 ctx.Competitions.Remove(dbCompetition);
@@ -84,7 +84,7 @@ namespace Wp.Database.Services
         {
             lock (_lock)
             {
-                using EFModels.HEARC_P3Context ctx = new();
+                using EFModels.HeArcP3Context ctx = new();
 
                 EFModels.Competition dbCompetition = ctx.Competitions.GetEFModel(competition);
 

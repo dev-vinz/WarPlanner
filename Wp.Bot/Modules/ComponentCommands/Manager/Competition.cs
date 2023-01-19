@@ -261,7 +261,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 
 			// Gets component datas
 			ComponentStorage storage = ComponentStorage.GetInstance();
-			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
+			if (!storage.MessageDatas.TryGetValue(msg.Id, out string[]? datas) && datas?.Length != 1)
 			{
 				await RespondAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
 

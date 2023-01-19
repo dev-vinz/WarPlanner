@@ -37,7 +37,7 @@ namespace Wp.Database.Services
 		{
 			lock (_lock)
 			{
-				using EFModels.HEARC_P3Context ctx = new();
+				using EFModels.HeArcP3Context ctx = new();
 
 				ctx.Times.Add(time.ToEFModel());
 				ctx.SaveChanges();
@@ -55,7 +55,7 @@ namespace Wp.Database.Services
 		{
 			lock (_lock)
 			{
-				using EFModels.HEARC_P3Context ctx = new();
+				using EFModels.HeArcP3Context ctx = new();
 
 				EFModels.Time dbTime = ctx.Times.GetEFModel(time);
 				ctx.Times.Remove(dbTime);
@@ -85,7 +85,7 @@ namespace Wp.Database.Services
 		{
 			lock (_lock)
 			{
-				using EFModels.HEARC_P3Context ctx = new();
+				using EFModels.HeArcP3Context ctx = new();
 
 				EFModels.Time dbTime = ctx.Times.GetEFModel(time);
 

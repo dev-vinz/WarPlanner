@@ -36,7 +36,7 @@ namespace Wp.Database.Services
 		{
 			lock (_lock)
 			{
-				using EFModels.HEARC_P3Context ctx = new();
+				using EFModels.HeArcP3Context ctx = new();
 
 				ctx.PlayerStatistics.Add(playerStatistic.ToEFModel());
 				ctx.SaveChanges();
@@ -54,7 +54,7 @@ namespace Wp.Database.Services
 		{
 			lock (_lock)
 			{
-				using EFModels.HEARC_P3Context ctx = new();
+				using EFModels.HeArcP3Context ctx = new();
 
 				EFModels.PlayerStatistic dbPlayerStatistic = ctx.PlayerStatistics.GetEFModel(playerStatistic);
 				ctx.PlayerStatistics.Remove(dbPlayerStatistic);

@@ -104,7 +104,7 @@
 
         public override int GetHashCode()
         {
-            return Guild.GetHashCode() ^ Id.GetHashCode();
+            return Guild.GetHashCode();
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

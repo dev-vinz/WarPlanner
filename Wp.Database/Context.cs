@@ -25,7 +25,7 @@ namespace Wp.Database
             {
                 lock (_lock)
                 {
-                    EFModels.HEARC_P3Context ctx = new();
+                    EFModels.HeArcP3Context ctx = new();
 
                     Common.Models.Calendar[] calendars = ctx.Calendars
                         .Include(c => c.GuildNavigation)
@@ -48,7 +48,7 @@ namespace Wp.Database
             {
                 lock (_lock)
                 {
-                    EFModels.HEARC_P3Context ctx = new();
+                    EFModels.HeArcP3Context ctx = new();
 
                     Common.Models.Clan[] clans = ctx.Clans
                         .Include(c => c.GuildNavigation)
@@ -71,7 +71,7 @@ namespace Wp.Database
             {
                 lock (_lock)
                 {
-                    EFModels.HEARC_P3Context ctx = new();
+                    EFModels.HeArcP3Context ctx = new();
 
                     Common.Models.Competition[] competitions = ctx.Competitions
                         .Include(c => c.GuildNavigation)
@@ -94,7 +94,7 @@ namespace Wp.Database
             {
                 lock (_lock)
                 {
-                    EFModels.HEARC_P3Context ctx = new();
+                    EFModels.HeArcP3Context ctx = new();
 
                     Common.Models.Guild[] guilds = ctx.Guilds
                         .Select(c => c.ToModel())
@@ -116,7 +116,7 @@ namespace Wp.Database
             {
                 lock (_lock)
                 {
-                    EFModels.HEARC_P3Context ctx = new();
+                    EFModels.HeArcP3Context ctx = new();
 
                     Common.Models.Player[] players = ctx.Players
                         .Include(p => p.GuildNavigation)
@@ -139,7 +139,7 @@ namespace Wp.Database
             {
                 lock (_lock)
                 {
-                    EFModels.HEARC_P3Context ctx = new();
+                    EFModels.HeArcP3Context ctx = new();
 
                     Common.Models.PlayerStatistic[] playerStatistics = ctx.PlayerStatistics
                         .Include(ps => ps.GuildNavigation)
@@ -162,7 +162,7 @@ namespace Wp.Database
             {
                 lock (_lock)
                 {
-                    EFModels.HEARC_P3Context ctx = new();
+                    EFModels.HeArcP3Context ctx = new();
 
                     Common.Models.Role[] roles = ctx.Roles
                         .Include(r => r.GuildNavigation)
@@ -185,7 +185,7 @@ namespace Wp.Database
             {
                 lock (_lock)
                 {
-                    EFModels.HEARC_P3Context ctx = new();
+                    EFModels.HeArcP3Context ctx = new();
 
                     Common.Models.Time[] times = ctx.Times
                         .Include(t => t.GuildNavigation)
@@ -208,7 +208,7 @@ namespace Wp.Database
             {
                 lock (_lock)
                 {
-                    EFModels.HEARC_P3Context ctx = new();
+                    EFModels.HeArcP3Context ctx = new();
 
                     Common.Models.WarStatistic[] warStatistics = ctx.WarStatistics
                         .Include(ws => ws.GuildNavigation)
