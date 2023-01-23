@@ -1,8 +1,8 @@
 ﻿using Discord;
 
-namespace Wp.Bot.Services.Logger
+namespace Wp.Bot.Services.Logger.Command
 {
-    public class LoggerMessage
+    public class CommandLoggerMessage
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
@@ -44,7 +44,7 @@ namespace Wp.Bot.Services.Logger
         |*                            CONSTRUCTORS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public LoggerMessage(string title, Color color, string guild, string guildThumbnail, string command, string exception, string error)
+        public CommandLoggerMessage(string title, Color color, string guild, string guildThumbnail, string command, string exception, string error)
         {
             // Inputs
             {

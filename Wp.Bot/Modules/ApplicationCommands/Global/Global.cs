@@ -88,15 +88,12 @@ namespace Wp.Bot.Modules.ApplicationCommands.Global
 				.WithButton(linkButtonBuilder);
 
 			// Embed
-			FileAttachment fileLogo = new(@"H:\BA3\SA\3282_Projet-P3\020-Sources\Wp.Common\Images\Logo_HEARC\HE_ARC.jpg", "logo.jpg");
-
 			EmbedBuilder embedBuilder = new EmbedBuilder()
 				.WithTitle(commandText.EmbedInformations)
 				.WithThumbnailUrl(Context.Guild.IconUrl)
 				.WithDescription(commandText.EmbedDescription)
 				.AddField(commandText.EmbedFieldAuthor, "Vincent Jeannin, ISC3il-b", true)
 				.AddField(commandText.EmbedFieldYear, "2022 - 2023", true)
-				.WithImageUrl(@"attachment://logo.jpg")
 				.WithColor(new Color((uint)new Random().Next(0x1000000)))
 				.WithFooter($"{dbGuild.Now.Year} © {Context.Client.CurrentUser.Username}");
 
@@ -104,7 +101,6 @@ namespace Wp.Bot.Modules.ApplicationCommands.Global
 			{
 				msg.Components = new(componentBuilder.Build());
 				msg.Embed = embedBuilder.Build();
-				msg.Attachments = new(new List<FileAttachment>() { fileLogo });
 			});
 		}
 

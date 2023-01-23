@@ -6,7 +6,7 @@ using Wp.Common.Services.NodaTime;
 using Wp.Database.Settings;
 using TZone = Wp.Common.Models.TimeZone;
 
-namespace Wp.Bot.Services.Logger
+namespace Wp.Bot.Services.Logger.Command
 {
     public class CommandLogger : ICommandLogger
     {
@@ -69,7 +69,7 @@ namespace Wp.Bot.Services.Logger
             string command = info.ToString();
             string exception = result.Error.ToString() ?? "Default";
 
-            LoggerMessage message = new("Component Command Error", embedColor, guild, thumbnail, command, exception, result.ErrorReason);
+            CommandLoggerMessage message = new("Component Command Error", embedColor, guild, thumbnail, command, exception, result.ErrorReason);
 
             await LogErrorToChannelAsync(message);
         }
@@ -93,7 +93,7 @@ namespace Wp.Bot.Services.Logger
             string command = info.ToString();
             string exception = result.Error.ToString() ?? "Default";
 
-            LoggerMessage message = new("Modal Command Error", embedColor, guild, thumbnail, command, exception, result.ErrorReason);
+            CommandLoggerMessage message = new("Modal Command Error", embedColor, guild, thumbnail, command, exception, result.ErrorReason);
 
             await LogErrorToChannelAsync(message);
         }
@@ -117,7 +117,7 @@ namespace Wp.Bot.Services.Logger
             string command = info.ToString();
             string exception = result.Error.ToString() ?? "Default";
 
-            LoggerMessage message = new("Slash Command Error", embedColor, guild, thumbnail, command, exception, result.ErrorReason);
+            CommandLoggerMessage message = new("Slash Command Error", embedColor, guild, thumbnail, command, exception, result.ErrorReason);
 
             await LogErrorToChannelAsync(message);
         }
@@ -132,7 +132,7 @@ namespace Wp.Bot.Services.Logger
         |*                          PRIVATE METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        private async Task LogErrorToChannelAsync(LoggerMessage message)
+        private async Task LogErrorToChannelAsync(CommandLoggerMessage message)
         {
             IChannel channel = await client.GetChannelAsync(Configurations.DEV_LOG_CHANNEL_ID);
 

@@ -109,7 +109,10 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
 			Color darkOrange = Color.FromRgb(246, 178, 107);
 			Color lightOrange = Color.FromRgb(252, 229, 205);
 
-			FontFamily fontFamily = SystemFonts.Collection.Get("Quicksand SemiBold");
+			if (!SystemFonts.Collection.TryGet("Quicksand SemiBold", out FontFamily fontFamily))
+			{
+				fontFamily = SystemFonts.Collection.Families.FirstOrDefault();
+			}
 
 			CultureInfo cultureInfo = guild.CultureInfo;
 
@@ -168,13 +171,14 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
 
 					count = 0;
 
+					string dayMax = tabDays.MaxBy(d => d.Length)!;
 					int fontSize = 50;
 					Font quicksand = fontFamily.CreateFont(fontSize);
 
 					do
 					{
 						quicksand = fontFamily.CreateFont(fontSize--);
-					} while (TextMeasurer.Measure(tabDays[0], new TextOptions(quicksand)).Width > intervalWidth - 20);
+					} while (TextMeasurer.Measure(dayMax, new TextOptions(quicksand)).Width > intervalWidth - 20);
 
 					Font font = fontFamily.CreateFont(fontSize, FontStyle.Bold);
 

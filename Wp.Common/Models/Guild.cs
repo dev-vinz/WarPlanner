@@ -130,8 +130,8 @@ namespace Wp.Common.Models
 
 			// Defaults
 			{
-				language = Language.ENGLISH;
-				premiumLevel = PremiumLevel.NONE;
+				language = Language.FRENCH;
+				premiumLevel = PremiumLevel.HIGH;
 				minimalTownHallLevel = 0;
 			}
 		}

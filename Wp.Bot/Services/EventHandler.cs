@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using Wp.Bot.Modules.TimeEvents;
+using Wp.Bot.Services.Logger.Event;
 using Wp.Common.Models;
 using Wp.Common.Services;
 using Wp.Common.Settings;
@@ -16,6 +17,7 @@ namespace Wp.Bot.Services
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		private readonly DiscordSocketClient client;
+		private readonly EventLogger logger;
 
 		private bool isDatabaseVerified;
 
@@ -44,7 +46,7 @@ namespace Wp.Bot.Services
 
 			// Tools
 			{
-				// TODO Logger
+				logger = new EventLogger(client);
 				isDatabaseVerified = false;
 			}
 		}
@@ -86,12 +88,16 @@ namespace Wp.Bot.Services
 			LogMessage logMessage = new(LogSeverity.Info, "Gateway", $"Guild with id {id} left");
 			Console.WriteLine(logMessage.ToString());
 
+			await logger.GuildLeftAsync(id);
+
 			// Guild left, DELETE CASCADE - We juste have to delete guild from DB
 			return Database.Context.Guilds.Remove(g => g.Id == id);
 		}
 
 		private async Task GuildLeftAsync(SocketGuild guild)
 		{
+			await logger.GuildLeftAsync(guild);
+
 			// Guild left, DELETE CASCADE - We juste have to delete guild from DB
 			Database.Context.Guilds.Remove(g => g.Id == guild.Id);
 		}
@@ -102,6 +108,8 @@ namespace Wp.Bot.Services
 
 			// In doupts, checks that guild doesn't exists
 			if (guilds.Any(g => g.Id == guild.Id)) return false;
+
+			await logger.GuildJoinedAsync(guild);
 
 			// Creates and adds new guild
 			Guild newGuild = new(guild.Id, DefaultParameters.DEFAULT_TIME_ZONE);
@@ -122,13 +130,16 @@ namespace Wp.Bot.Services
 		private Task HandleTime()
 		{
 			// Have to be in an other thread
-			new Thread(() =>
+			new Thread(async () =>
 			{
 				// Until database is verified and operational
 				while (!isDatabaseVerified)
 				{
 					// Wait
+					Thread.Sleep(10);
 				}
+
+				await logger.ClientReadyAsync();
 
 				JSFunctions.SetInterval(() =>
 				{

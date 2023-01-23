@@ -2,7 +2,7 @@
 using Discord.Interactions;
 using Discord.WebSocket;
 using System.Reflection;
-using Wp.Bot.Services.Logger;
+using Wp.Bot.Services.Logger.Command;
 
 namespace Wp.Bot.Services
 {

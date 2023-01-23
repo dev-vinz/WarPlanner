@@ -108,6 +108,7 @@ namespace Wp.Bot
             }
             else
             {
+                await client!.SetGameAsync("Clash Of Clans");
                 await commands!.RegisterCommandsGloballyAsync(true);
             }
 
