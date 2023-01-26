@@ -32,7 +32,7 @@ CREATE TABLE Calendar (
     CalendarId VARCHAR(100) NOT NULL,
     ChannelId DECIMAL(25, 0),
     MessageId DECIMAL(25, 0),
-    PRIMARY KEY (Guild, CalendarId),
+    PRIMARY KEY (Guild),
     FOREIGN KEY (Guild)
         REFERENCES Guild(Id)
         ON DELETE CASCADE
