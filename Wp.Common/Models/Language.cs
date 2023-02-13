@@ -8,13 +8,6 @@ namespace Wp.Common.Models
     public enum Language
     {
         /// <summary>
-        /// English language
-        /// </summary>
-        [Display(Name = "English")]
-        [Language("en", "en-US", "🇬🇧")]
-        ENGLISH = 0,
-
-        /// <summary>
         /// French language
         /// </summary>
         [Display(Name = "Français")]

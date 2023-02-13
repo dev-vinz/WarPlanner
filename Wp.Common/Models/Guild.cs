@@ -1,7 +1,6 @@
 ﻿using System.Globalization;
 using Wp.Common.Services.NodaTime;
 using Wp.Language;
-using Wp.Language.English;
 using Wp.Language.French;
 
 namespace Wp.Common.Models
@@ -66,7 +65,6 @@ namespace Wp.Common.Models
 		/// </summary>
 		public IAdmin AdminText => language switch
 		{
-			Language.ENGLISH => new AdminEnglish(),
 			Language.FRENCH => new AdminFrench(),
 			_ => throw new ArgumentOutOfRangeException(nameof(language), language, null),
 		};
@@ -76,7 +74,6 @@ namespace Wp.Common.Models
 		/// </summary>
 		public IGeneralResponse GeneralResponses => language switch
 		{
-			Language.ENGLISH => new EnglishGeneralResponse(),
 			Language.FRENCH => new FrenchGeneralResponse(),
 			_ => throw new ArgumentOutOfRangeException(nameof(language), language, null),
 		};
@@ -86,7 +83,6 @@ namespace Wp.Common.Models
 		/// </summary>
 		public IGlobal GlobalText => language switch
 		{
-			Language.ENGLISH => new GlobalEnglish(),
 			Language.FRENCH => new GlobalFrench(),
 			_ => throw new ArgumentOutOfRangeException(nameof(language), language, null),
 		};
@@ -96,7 +92,6 @@ namespace Wp.Common.Models
 		/// </summary>
 		public IManager ManagerText => language switch
 		{
-			Language.ENGLISH => new ManagerEnglish(),
 			Language.FRENCH => new ManagerFrench(),
 			_ => throw new ArgumentOutOfRangeException(nameof(language), language, null),
 		};
@@ -106,7 +101,6 @@ namespace Wp.Common.Models
 		/// </summary>
 		public ITime TimeText => language switch
 		{
-			Language.ENGLISH => new TimeEnglish(),
 			Language.FRENCH => new TimeFrench(),
 			_ => throw new ArgumentOutOfRangeException(nameof(language), language, null),
 		};
@@ -131,7 +125,7 @@ namespace Wp.Common.Models
 			// Defaults
 			{
 				language = Language.FRENCH;
-				premiumLevel = PremiumLevel.HIGH;
+				premiumLevel = PremiumLevel.NONE;
 				minimalTownHallLevel = 0;
 			}
 		}

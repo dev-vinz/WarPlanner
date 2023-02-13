@@ -140,6 +140,24 @@ namespace Wp.Bot.Services
 
                 await logger.ClientReadyAsync();
 
+                JSFunctions.SetInterval(() =>
+                {
+                    DbTimes times = Database.Context.Times;
+
+                    // In each guild	
+                    client.Guilds
+                        .AsParallel()
+                        .ForAll(guild =>
+                        {
+                            Time[] events = times.Where(t => t.Guild.Id == guild.Id).ToArray();
+
+                            // For each time events
+                            events
+                                .AsParallel()
+                                .ForAll(@event => TimeCaller.Execute(@event.Action, guild));
+                        });
+                }, TimeSpan.FromSeconds(15));
+
                 try
                 {
                     JSFunctions.SetInterval(() =>
@@ -164,7 +182,6 @@ namespace Wp.Bot.Services
                 {
                     LogMessage msg = new(LogSeverity.Critical, "Time Loop", "Error...", e);
                     Console.WriteLine(msg);
-                    throw;
                 }
 
                 LogMessage logMessage = new(LogSeverity.Info, "Discord", "Time loop started");
