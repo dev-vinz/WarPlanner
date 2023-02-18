@@ -4,6 +4,7 @@ using Wp.Bot.Services;
 using Wp.Common.Models;
 using Wp.Common.Settings;
 using Wp.Database.Services;
+using Wp.Discord;
 using Wp.Language;
 
 namespace Wp.Bot.Modules.ApplicationCommands.Admin
@@ -126,7 +127,8 @@ namespace Wp.Bot.Modules.ApplicationCommands.Admin
 					.Where(r => r != null)
 					.ForAll(r =>
 					{
-						menuBuilder.AddOption(r!.Name, r.Id.ToString());
+						IEmote emote = r!.Emoji.Name != null ? r!.Emoji : CustomEmojis.Profile;
+						menuBuilder.AddOption(r!.Name, r.Id.ToString(), emote: emote);
 					});
 
 				// Sort options by name
@@ -241,7 +243,8 @@ namespace Wp.Bot.Modules.ApplicationCommands.Admin
 					.Where(r => r != null)
 					.ForAll(r =>
 					{
-						menuBuilder.AddOption(r!.Name, r.Id.ToString());
+						IEmote emote = r!.Emoji.Name != null ? r!.Emoji : CustomEmojis.Profile;
+						menuBuilder.AddOption(r!.Name, r.Id.ToString(), emote: emote);
 					});
 
 				// Sort options by name

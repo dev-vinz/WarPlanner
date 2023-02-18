@@ -9,6 +9,7 @@ using Wp.Common.Models;
 using Wp.Common.Settings;
 using Wp.Database.Services;
 using Wp.Database.Settings;
+using Wp.Discord;
 using Wp.Discord.ComponentInteraction;
 using Wp.Discord.Extensions;
 using Wp.Language;
@@ -143,7 +144,11 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 
 			availablePlayers
 				.ToList()
-				.ForEach(p => menuBuilder.AddOption(p.Account.Name, p.Tag, p.Tag));
+				.ForEach(p =>
+				{
+					ClashOfClans.Models.Player cPlayer = p.Account;
+					menuBuilder.AddOption(cPlayer.Name, p.Tag, p.Tag, CustomEmojis.ParseTownHallLevel(cPlayer.TownHallLevel));
+				});
 
 			// Next button
 			ButtonBuilder nextButtonBuilder = new ButtonBuilder()
@@ -213,7 +218,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 
 			Enumerable.Range(0, 4)
 				.ToList()
-				.ForEach(n => menuBuilder.AddOption(warDate.AddMinutes(n * 15).ToString("t", cultureInfo), (n * 15).ToString()));
+				.ForEach(n => menuBuilder.AddOption(warDate.AddMinutes(n * 15).ToString("t", cultureInfo), (n * 15).ToString(), emote: CustomEmojis.CocClock));
 
 			// Cancel button
 			ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
@@ -283,7 +288,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 			dbCompetitions
 				.OrderBy(c => c.Name)
 				.ToList()
-				.ForEach(c => menuBuilder.AddOption(c.Name, c.Id.ToString()));
+				.ForEach(c => menuBuilder.AddOption(c.Name, c.Id.ToString(), emote: CustomEmojis.CocTrophy));
 
 			// Cancel button
 			ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
@@ -444,7 +449,11 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 
 			availablePlayers
 				.ToList()
-				.ForEach(p => menuBuilder.AddOption(p.Account.Name, p.Tag, p.Tag));
+				.ForEach(p =>
+				{
+					ClashOfClans.Models.Player cPlayer = p.Account;
+					menuBuilder.AddOption(cPlayer.Name, p.Tag, p.Tag, CustomEmojis.ParseTownHallLevel(cPlayer.TownHallLevel));
+				});
 
 			// Next button
 			string customButtonId = isLastPage ? IdProvider.WAR_ADD_BUTTON_LAST_NEXT_PLAYERS : IdProvider.WAR_ADD_BUTTON_NEXT_PLAYERS;

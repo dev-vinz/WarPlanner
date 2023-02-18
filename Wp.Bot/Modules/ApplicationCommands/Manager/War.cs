@@ -11,6 +11,7 @@ using Wp.Common.Services.NodaTime;
 using Wp.Common.Settings;
 using Wp.Database.Services;
 using Wp.Database.Settings;
+using Wp.Discord;
 using Wp.Discord.ComponentInteraction;
 using Wp.Discord.Extensions;
 using Wp.Language;
@@ -151,7 +152,7 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
             Enumerable.Range(0, 24)
                 .Reverse()
                 .ToList()
-                .ForEach(n => menuBuilder.AddOption(warDate.AddHours(n).ToString("t", cultureInfo), n.ToString()));
+                .ForEach(n => menuBuilder.AddOption(warDate.AddHours(n).ToString("t", cultureInfo), n.ToString(), emote: CustomEmojis.CocClock));
 
             // Cancel button
             ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
@@ -233,7 +234,7 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
                     DateTimeOffset start = nodaConverter.ConvertDateTo(e.Start, dbGuild.TimeZone);
                     DateTimeOffset end = nodaConverter.ConvertDateTo(e.End, dbGuild.TimeZone);
 
-                    menuBuilder.AddOption($"{e.CompetitionName} : {e.OpponentClan.Name}", e.Id, commandText.WarDeleteMatchFromTo(start.ToString("dd/MM", cultureInfo), start.ToString("HH:mm", cultureInfo), end.ToString("HH:mm", cultureInfo)));
+                    menuBuilder.AddOption($"{e.CompetitionName} : {e.OpponentClan.Name}", e.Id, commandText.WarDeleteMatchFromTo(start.ToString("dd/MM", cultureInfo), start.ToString("HH:mm", cultureInfo), end.ToString("HH:mm", cultureInfo)), CustomEmojis.WarSwords);
                 });
 
             // Cancel button

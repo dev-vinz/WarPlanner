@@ -4,6 +4,7 @@ using Wp.Api;
 using Wp.Bot.Services;
 using Wp.Common.Models;
 using Wp.Database.Services;
+using Wp.Discord;
 using Wp.Language;
 
 namespace Wp.Bot.Modules.ApplicationCommands.Manager
@@ -147,7 +148,8 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
 				{
 					if (!dbCompetitions.AsParallel().Any(comp => comp.MainTag == c.Tag || comp.SecondTag == c.Tag))
 					{
-						menuBuilder.AddOption(c.Profile.Name, c.Tag, c.Tag);
+						ClashOfClans.Models.Clan cClan = c.Profile;
+						menuBuilder.AddOption(cClan.Name, c.Tag, c.Tag, CustomEmojis.ParseClanLevel(cClan.ClanLevel));
 					}
 				});
 
@@ -163,8 +165,15 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
 				.OrderBy(o => o.Label)
 				.ToList();
 
+			// Cancel button
+			ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+				.WithLabel(generalResponses.CancelButton)
+				.WithStyle(ButtonStyle.Danger)
+				.WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+
 			ComponentBuilder componentBuilder = new ComponentBuilder()
-				.WithSelectMenu(menuBuilder);
+				.WithSelectMenu(menuBuilder)
+				.WithButton(cancelButtonBuilder);
 
 			IUserMessage message = await ModifyOriginalResponseAsync(msg =>
 			{

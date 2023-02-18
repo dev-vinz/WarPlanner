@@ -61,6 +61,30 @@ namespace Wp.Bot.Services.Logger.Event
             await LogEventToChannelAsync(message);
         }
 
+        public async Task EventExecutionFailedAsync(Exception e)
+        {
+            string title = "Time loop error";
+            Color color = new(173, 52, 62);
+            string description = e.Message;
+            string guildThumbnail = client.CurrentUser.GetAvatarUrl();
+
+            EventLoggerMessage message = new(title, color, description, null, guildThumbnail);
+
+            await LogEventToChannelAsync(message);
+        }
+
+        public async Task EventExecutionStartedAsync()
+        {
+            string title = "Time loop";
+            Color color = new(67, 197, 158);
+            string description = "The time loop has just started";
+            string guildThumbnail = client.CurrentUser.GetAvatarUrl();
+
+            EventLoggerMessage message = new(title, color, description, null, guildThumbnail);
+
+            await LogEventToChannelAsync(message);
+        }
+
         public async Task GuildJoinedAsync(SocketGuild guild)
         {
             string title = "Guild joined";

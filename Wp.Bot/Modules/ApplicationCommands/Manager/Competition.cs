@@ -6,6 +6,7 @@ using Wp.Bot.Modules.ApplicationCommands.AutoCompletion;
 using Wp.Bot.Services;
 using Wp.Common.Models;
 using Wp.Database.Services;
+using Wp.Discord;
 using Wp.Discord.ComponentInteraction;
 using Wp.Language;
 
@@ -104,7 +105,8 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
 				.AsParallel()
 				.ForAll(c =>
 				{
-					menuBuilder.AddOption(c.Profile.Name, c.Tag, c.Tag);
+					ClashOfClans.Models.Clan cClan = c.Profile;
+					menuBuilder.AddOption(cClan.Name, c.Tag, c.Tag, CustomEmojis.ParseClanLevel(cClan.ClanLevel));
 				});
 
 			// Sort options by name
@@ -182,7 +184,7 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
 				.AsParallel()
 				.ForAll(c =>
 				{
-					menuBuilder.AddOption(c.Name, c.Id.ToString());
+					menuBuilder.AddOption(c.Name, c.Id.ToString(), emote: CustomEmojis.CocTrophy);
 				});
 
 			// Sort options by name
