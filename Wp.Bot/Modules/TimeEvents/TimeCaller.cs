@@ -24,6 +24,7 @@ namespace Wp.Bot.Modules.TimeEvents
 					War.Remind.Execute(guild);
 					break;
 				case TimeAction.REMIND_WAR_STATUS:
+					War.Status.Execute(guild);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(action), action, null);

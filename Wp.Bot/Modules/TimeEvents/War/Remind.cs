@@ -8,6 +8,8 @@ using Wp.Common.Settings;
 using Wp.Database;
 using Wp.Database.Services;
 using Wp.Database.Settings;
+using Wp.Discord;
+using Wp.Discord.Extensions;
 
 namespace Wp.Bot.Modules.TimeEvents.War
 {
@@ -69,6 +71,35 @@ namespace Wp.Bot.Modules.TimeEvents.War
 			// Gets all events
 			CalendarEvent[] calendarEvents = await GoogleCalendarApi.Events.ListAsync(dbCalendar.Id);
 
+			// Gets all guild users
+			IReadOnlyCollection<IGuildUser> users = await guild.GetUsersAsync();
+
+			// Filters events and warn managers
+			calendarEvents
+				.AsParallel()
+				.Where(e =>
+				{
+					TimeSpan timeSpan = e.Start - dbGuild.Now;
+					int nbMinutes = (int)Math.Ceiling(timeSpan.TotalMinutes);
+					return nbMinutes == Settings.CALENDAR_REMIND_WAR_MANAGER_TIME;
+				})
+				.Where(e => dbCompetitions.Any(c => c.Name == e.CompetitionName))
+				.ForAll(@event =>
+				{
+					Competition competition = dbCompetitions.First(c => c.Name == @event.CompetitionName);
+
+					Player[] competPlayers = @event.Players
+						.AsParallel()
+						.Select(tag => dbPlayers.FirstOrDefault(p => p.Tag == tag))
+						.Where(p => p != null)
+						.ToArray()!;
+
+					users
+						.AsParallel()
+						.Where(u => u.IsAManager())
+						.ForAll(async manager => await WarnManagerAsync(manager, competPlayers, @event, competition));
+				});
+
 			// Filters events and warn players
 			calendarEvents
 				.AsParallel()
@@ -95,17 +126,91 @@ namespace Wp.Bot.Modules.TimeEvents.War
         |*                          PRIVATE METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		private static async Task WarnApiOffline(IGuildUser user, Player player, CalendarEvent calendarEvent)
+		private static async Task WarnManagerApiOffline(IGuildUser manager, Guild guild, CalendarEvent calendarEvent)
 		{
 			// Gets remaining time
 			TimeSpan remaining = calendarEvent.Start.UtcDateTime - DateTime.UtcNow;
 			DateTime dateRemaining = new(remaining.Ticks, DateTimeKind.Utc);
 
 			// Gets text
-			CultureInfo cultureInfo = player.Guild.CultureInfo;
-			string warnText = player.Guild.TimeText.WarRemindApiOffline(user.DisplayName, calendarEvent.CompetitionName, dateRemaining.ToString("HH:mm", cultureInfo));
+			CultureInfo cultureInfo = guild.CultureInfo;
+			string warnText = guild.TimeText.WarRemindManagerApiOffline(calendarEvent.CompetitionName, dateRemaining.ToString("HH:mm", cultureInfo));
 
-			await user.SendMessageAsync(warnText);
+			try
+			{
+				await manager.SendMessageAsync(warnText);
+			}
+			catch (Exception)
+			{
+				// Manager doesn't accept DMs or bot is blocked
+			}
+		}
+
+		private static async Task WarnPlayerApiOffline(IGuildUser user, Player player, Guild guild, CalendarEvent calendarEvent)
+		{
+			// Gets remaining time
+			TimeSpan remaining = calendarEvent.Start.UtcDateTime - DateTime.UtcNow;
+			DateTime dateRemaining = new(remaining.Ticks, DateTimeKind.Utc);
+
+			// Gets text
+			CultureInfo cultureInfo = guild.CultureInfo;
+			string warnText = guild.TimeText.WarRemindPlayerApiOffline(user.DisplayName, calendarEvent.CompetitionName, dateRemaining.ToString("HH:mm", cultureInfo));
+
+			try
+			{
+				await user.SendMessageAsync(warnText);
+			}
+			catch (Exception)
+			{
+				// User doesn't accept DMs or bot is blocked
+			}
+		}
+
+		private static async Task WarnManagerAsync(IGuildUser manager, Player[] players, CalendarEvent calendarEvent, Competition dbCompetition)
+		{
+			// Checks that Clash of Clans API is online
+			if (!await ClashOfClansApi.TryAccessApiAsync())
+			{
+				await WarnManagerApiOffline(manager, dbCompetition.Guild, calendarEvent);
+
+				return;
+			}
+
+			// Gets clan war league group
+			ClashOfClans.Models.ClanWarLeagueGroup? mainLeagueGroup = await ClashOfClansApi.Clans.GetWarLeagueGroupAsync(dbCompetition.MainTag);
+
+			// Checks if a clan war league is active, and if a second clan exists
+			bool isMainInLeague = mainLeagueGroup != null && mainLeagueGroup.State != ClashOfClans.Models.State.Ended;
+			bool isSecond = dbCompetition.SecondClan != null;
+
+			// Gets clan in function
+			ClashOfClans.Models.Clan cClan = isMainInLeague && isSecond ? dbCompetition.SecondClan! : dbCompetition.MainClan;
+
+			// Gets missing players
+			string[] missingPlayers = players
+				.Where(p => !cClan.MemberList?.Any(m => m.Tag == p.Tag) ?? true)
+				.Select(p => p.Account)
+				.Select(p => $"{CustomEmojis.ParseTownHallLevel(p.TownHallLevel)} **{p.Name}** `{p.Tag}`")
+				.ToArray();
+
+			if (!missingPlayers.Any()) return;
+
+			// Gets remaining time
+			TimeSpan remaining = calendarEvent.Start.UtcDateTime - DateTime.UtcNow;
+			DateTime dateRemaining = new(remaining.Ticks, DateTimeKind.Utc);
+
+			// Gets text
+			CultureInfo cultureInfo = dbCompetition.Guild.CultureInfo;
+			string warnText = dbCompetition.Guild.TimeText.WarRemindWarnManager(string.Join("\n", missingPlayers), cClan.Name, dbCompetition.Name, dateRemaining.ToString("HH:mm", cultureInfo));
+
+			try
+			{
+				await manager.SendMessageAsync(warnText);
+			}
+			catch (Exception)
+			{
+				// Manager doesn't accept DMs or bot is blocked
+			}
 		}
 
 		private static async Task WarnPlayerAsync(IGuild guild, Player player, CalendarEvent calendarEvent, Competition dbCompetition)
@@ -118,7 +223,7 @@ namespace Wp.Bot.Modules.TimeEvents.War
 			// Checks that Clash of Clans API is online
 			if (!await ClashOfClansApi.TryAccessApiAsync())
 			{
-				await WarnApiOffline(user, player, calendarEvent);
+				await WarnPlayerApiOffline(user, player, dbCompetition.Guild, calendarEvent);
 
 				return;
 			}
@@ -140,12 +245,12 @@ namespace Wp.Bot.Modules.TimeEvents.War
 			ButtonBuilder clanBuilder = new ButtonBuilder()
 				.WithLabel(cClan.Name)
 				.WithStyle(ButtonStyle.Link)
-				.WithUrl(cClan.GetLink(player.Guild.Language.GetShortcutValue()));
+				.WithUrl(cClan.GetLink(dbCompetition.Guild.Language.GetShortcutValue()));
 
 			ButtonBuilder opponentBuilder = new ButtonBuilder()
 				.WithLabel(calendarEvent.OpponentClan.Name)
 				.WithStyle(ButtonStyle.Link)
-				.WithUrl(calendarEvent.OpponentClan.GetLink(player.Guild.Language.GetShortcutValue()));
+				.WithUrl(calendarEvent.OpponentClan.GetLink(dbCompetition.Guild.Language.GetShortcutValue()));
 
 			// Build component
 			ComponentBuilder componentBuilder = new ComponentBuilder()
@@ -157,10 +262,17 @@ namespace Wp.Bot.Modules.TimeEvents.War
 			DateTime dateRemaining = new(remaining.Ticks, DateTimeKind.Utc);
 
 			// Gets text
-			CultureInfo cultureInfo = player.Guild.CultureInfo;
-			string warnText = player.Guild.TimeText.WarRemindWarnPlayer(player.Account.Name, cClan.Name, dbCompetition.Name, calendarEvent.OpponentClan.Name, calendarEvent.Start.ToString("HH:mm", cultureInfo), dateRemaining.ToString("HH:mm", cultureInfo));
+			CultureInfo cultureInfo = dbCompetition.Guild.CultureInfo;
+			string warnText = dbCompetition.Guild.TimeText.WarRemindWarnPlayer(player.Account.Name, cClan.Name, dbCompetition.Name, calendarEvent.OpponentClan.Name, calendarEvent.Start.ToString("HH:mm", cultureInfo), dateRemaining.ToString("HH:mm", cultureInfo));
 
-			await user.SendMessageAsync(warnText, components: componentBuilder.Build());
+			try
+			{
+				await user.SendMessageAsync(warnText, components: componentBuilder.Build());
+			}
+			catch (Exception)
+			{
+				// User doesn't accept DMs or bot is blocked
+			}
 		}
 	}
 }

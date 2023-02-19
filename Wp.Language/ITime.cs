@@ -12,7 +12,10 @@
         |*                          WAR REMIND EVENT                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public string WarRemindApiOffline(string player, string competition, string remaining);
+		public string WarRemindManagerApiOffline(string competition, string remaining);
+		public string WarRemindPlayerApiOffline(string player, string competition, string remaining);
+		public string WarRemindWarnManager(string players, string clan, string competition, string remaining);
 		public string WarRemindWarnPlayer(string player, string clan, string competition, string opponent, string start, string remaining);
+
 	}
 }

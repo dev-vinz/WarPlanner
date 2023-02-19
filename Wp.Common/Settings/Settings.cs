@@ -6,6 +6,8 @@
 		public static readonly int MAX_OPTION_PER_SELECT_MENU = 20;
 		public static readonly int NB_WAR_PROPOSED_DATES = 14;
 
+		public static readonly int CALENDAR_REMIND_STATUS = 50;
+		public static readonly int CALENDAR_REMIND_WAR_MANAGER_TIME = 60;
 		public static readonly IReadOnlyDictionary<int, int> CALENDAR_REMIND_WAR = new Dictionary<int, int>()
 		{
 			{ 1, 120 }, // 2h

@@ -60,7 +60,7 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         [SlashCommand("add", "Register a new war within the calendar", runMode: RunMode.Async)]
-        public async Task Add([Summary("opponent")] string opponentTag,
+        public async Task Add([Summary("opponent", "The opponent clan's tag")] string opponentTag,
                               [Summary("date", "When the war should be"), Autocomplete(typeof(WarDateAutocompleteHandler))] string date,
                               [Summary("preparation", "How long the preparation time should be"), Autocomplete(typeof(WarPreparationAutocompleteHandler))] int warPreparation,
                               [Summary("war", "How long the war time should be"), Autocomplete(typeof(WarDurationAutocompleteHandler))] int warDuration)
