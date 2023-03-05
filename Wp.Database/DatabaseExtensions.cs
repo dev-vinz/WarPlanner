@@ -216,9 +216,9 @@ namespace Wp.Database
 			DefenseAvgDuration = (decimal)warStatistic.DefenseAvgDuration,
 		};
 
-		public static EFModels.WarStatistic GetEFModel(this DbSet<EFModels.WarStatistic> warStatistics, WarStatistic warStatistic)
+		public static EFModels.WarStatistic? GetEFModel(this DbSet<EFModels.WarStatistic> warStatistics, WarStatistic warStatistic)
 		{
-			return warStatistics.AsEnumerable().First(ws => DateTimeOffset.Compare(ws.DateStart, warStatistic.Date) == 0 && ws.ClanTag == warStatistic.ClanTag);
+			return warStatistics.AsEnumerable().FirstOrDefault(ws => DateTimeOffset.Compare(ws.DateStart, warStatistic.Date) == 0 && ws.ClanTag == warStatistic.ClanTag);
 		}
 	}
 }

@@ -9,6 +9,9 @@ namespace Wp.Common.Settings
 		public static readonly int DEFAULT_NUMBER_CALENDAR_DISPLAY_PER_DAY = 1;
 		public static readonly int DEFAULT_NUMBER_REMIND = 1;
 
+		public static readonly int DEFAULT_HOUR_WAR_PREPARATION_TIME = 23;
+
 		public static readonly TimeZone DEFAULT_TIME_ZONE = TimeZone.CET_CEST;
+		public static readonly Models.Language DEFAULT_LANGUAGE = Models.Language.FRENCH;
 	}
 }

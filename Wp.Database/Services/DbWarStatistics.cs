@@ -56,7 +56,10 @@ namespace Wp.Database.Services
 			{
 				using EFModels.HeArcP3Context ctx = new();
 
-				EFModels.WarStatistic dbWarStatistic = ctx.WarStatistics.GetEFModel(warStatistic);
+				EFModels.WarStatistic? dbWarStatistic = ctx.WarStatistics.GetEFModel(warStatistic);
+
+				if (dbWarStatistic is null) return false;
+
 				ctx.WarStatistics.Remove(dbWarStatistic);
 				ctx.SaveChanges();
 
