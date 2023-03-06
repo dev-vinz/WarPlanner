@@ -133,9 +133,6 @@ namespace Wp.Bot.Modules.TimeEvents.War
 			// endWar - 15 <= e.EndWar <= endWar + 15
 			IEnumerable<CalendarEvent> matchEnd = matchStart.Where(e => endWar.AddMinutes(-MINUTES_DELAY_ACCEPTED) <= e.End.UtcDateTime && e.End.UtcDateTime <= endWar.AddMinutes(MINUTES_DELAY_ACCEPTED));
 
-			// Check if the opponent is the one planned
-			//IEnumerable<WarMatch> matchOpponent = matchEnd.Where(e => e.OpponentClan.Tag == cWar.Opponent.Tag);
-
 			if (!matchEnd.Any()) return (false, null);
 
 			// Check if the tournament is still in database and clan is valid
