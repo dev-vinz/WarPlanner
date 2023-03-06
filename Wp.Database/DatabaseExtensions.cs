@@ -218,7 +218,7 @@ namespace Wp.Database
 
 		public static EFModels.WarStatistic? GetEFModel(this DbSet<EFModels.WarStatistic> warStatistics, WarStatistic warStatistic)
 		{
-			return warStatistics.AsEnumerable().FirstOrDefault(ws => DateTimeOffset.Compare(ws.DateStart, warStatistic.Date) == 0 && ws.ClanTag == warStatistic.ClanTag);
+			return warStatistics.AsEnumerable().FirstOrDefault(ws => ws.DateStart.Ticks == warStatistic.Date.Ticks && ws.ClanTag == warStatistic.ClanTag);
 		}
 	}
 }

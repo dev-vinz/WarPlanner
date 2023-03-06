@@ -434,9 +434,10 @@ namespace Wp.Bot.Modules.TimeEvents.War
 			if (dbGuild.PremiumLevel < PremiumLevel.MEDIUM)
 			{
 				dbWarStatistics
-					.AsParallel()
-					.Where(w => w.ClanTag == war.Clan.Tag && w != currentWar)
-					.ForAll(w => warStatistics.Remove(w));
+				   .Where(w => w.ClanTag == war.Clan.Tag && w != currentWar)
+				   .ToList()
+				   .AsParallel()
+				   .ForAll(w => warStatistics.Remove(w));
 			}
 
 			if (isEsport) await DisplayResultAsync(guild, competition, war);
