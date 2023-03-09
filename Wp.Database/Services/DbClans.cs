@@ -56,7 +56,10 @@ namespace Wp.Database.Services
             {
                 using EFModels.HeArcP3Context ctx = new();
 
-                EFModels.Clan dbClan = ctx.Clans.GetEFModel(clan);
+                EFModels.Clan? dbClan = ctx.Clans.GetEFModel(clan);
+
+                if (dbClan == null) return false;
+
                 ctx.Clans.Remove(dbClan);
                 ctx.SaveChanges();
 

@@ -3,102 +3,107 @@ using Wp.Common.Services.Extensions;
 
 namespace Wp.Database.Services
 {
-	public class DbTimes : List<Time>
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+    public class DbTimes : List<Time>
+    {
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		private static readonly object _lock = new();
+        private static readonly object _lock = new();
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
 		|*                            CONSTRUCTORS                           *|
 		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public DbTimes(Time[] times)
-		{
-			lock (_lock)
-			{
-				times
-					.ToList()
-					.ForEach(t => base.Add(t));
-			}
-		}
+        public DbTimes(Time[] times)
+        {
+            lock (_lock)
+            {
+                times
+                    .ToList()
+                    .ForEach(t => base.Add(t));
+            }
+        }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		/// <summary>
-		/// Adds a time to the database and saves it
-		/// </summary>
-		/// <param name="time">The time to be added to the database</param>
-		public new void Add(Time time)
-		{
-			lock (_lock)
-			{
-				using EFModels.HeArcP3Context ctx = new();
+        /// <summary>
+        /// Adds a time to the database and saves it
+        /// </summary>
+        /// <param name="time">The time to be added to the database</param>
+        public new void Add(Time time)
+        {
+            lock (_lock)
+            {
+                using EFModels.HeArcP3Context ctx = new();
 
-				ctx.Times.Add(time.ToEFModel());
-				ctx.SaveChanges();
+                ctx.Times.Add(time.ToEFModel());
+                ctx.SaveChanges();
 
-				base.Add(time);
-			}
-		}
+                base.Add(time);
+            }
+        }
 
-		/// <summary>
-		/// Removes a time from the database
-		/// </summary>
-		/// <param name="time">The time to be removed</param>
-		/// <returns>true if time is successfully removed; false otherwise</returns>
-		public new bool Remove(Time time)
-		{
-			lock (_lock)
-			{
-				using EFModels.HeArcP3Context ctx = new();
+        /// <summary>
+        /// Removes a time from the database
+        /// </summary>
+        /// <param name="time">The time to be removed</param>
+        /// <returns>true if time is successfully removed; false otherwise</returns>
+        public new bool Remove(Time time)
+        {
+            lock (_lock)
+            {
+                using EFModels.HeArcP3Context ctx = new();
 
-				EFModels.Time dbTime = ctx.Times.GetEFModel(time);
-				ctx.Times.Remove(dbTime);
-				ctx.SaveChanges();
+                EFModels.Time? dbTime = ctx.Times.GetEFModel(time);
 
-				return base.Remove(time);
-			}
-		}
+                if (dbTime == null) return false;
 
-		/// <summary>
-		/// Removes a time from the database
-		/// </summary>
-		/// <param name="predicate">A delegate for the matching time to be removed</param>
-		/// <returns>true if time is successfully removed; false otherwise</returns>
-		public bool Remove(Predicate<Time> predicate)
-		{
-			Time? time = Find(predicate);
+                ctx.Times.Remove(dbTime);
+                ctx.SaveChanges();
 
-			return time != null && Remove(time);
-		}
+                return base.Remove(time);
+            }
+        }
 
-		/// <summary>
-		/// Updates a time in the database
-		/// </summary>
-		/// <param name="time">The time to be updated</param>
-		public void Update(Time time)
-		{
-			lock (_lock)
-			{
-				using EFModels.HeArcP3Context ctx = new();
+        /// <summary>
+        /// Removes a time from the database
+        /// </summary>
+        /// <param name="predicate">A delegate for the matching time to be removed</param>
+        /// <returns>true if time is successfully removed; false otherwise</returns>
+        public bool Remove(Predicate<Time> predicate)
+        {
+            Time? time = Find(predicate);
 
-				EFModels.Time dbTime = ctx.Times.GetEFModel(time);
+            return time != null && Remove(time);
+        }
 
-				dbTime.Date = time.Date.TruncSeconds().UtcDateTime;
-				dbTime.Additional = time.Additional;
-				dbTime.Optional = time.Optional;
+        /// <summary>
+        /// Updates a time in the database
+        /// </summary>
+        /// <param name="time">The time to be updated</param>
+        public void Update(Time time)
+        {
+            lock (_lock)
+            {
+                using EFModels.HeArcP3Context ctx = new();
 
-				ctx.Times.Update(dbTime);
-				ctx.SaveChanges();
+                EFModels.Time? dbTime = ctx.Times.GetEFModel(time);
 
-				base.Remove(time);
-				base.Add(time);
-			}
-		}
-	}
+                if (dbTime == null) return;
+
+                dbTime.Date = time.Date.TruncSeconds().UtcDateTime;
+                dbTime.Additional = time.Additional;
+                dbTime.Optional = time.Optional;
+
+                ctx.Times.Update(dbTime);
+                ctx.SaveChanges();
+
+                base.Remove(time);
+                base.Add(time);
+            }
+        }
+    }
 }

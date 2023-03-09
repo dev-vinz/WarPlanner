@@ -2,103 +2,108 @@
 
 namespace Wp.Database.Services
 {
-	public class DbGuilds : List<Guild>
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+    public class DbGuilds : List<Guild>
+    {
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		private static readonly object _lock = new();
+        private static readonly object _lock = new();
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
 		|*                            CONSTRUCTORS                           *|
 		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public DbGuilds(Guild[] guilds)
-		{
-			lock (_lock)
-			{
-				guilds
-					.ToList()
-					.ForEach(g => base.Add(g));
-			}
-		}
+        public DbGuilds(Guild[] guilds)
+        {
+            lock (_lock)
+            {
+                guilds
+                    .ToList()
+                    .ForEach(g => base.Add(g));
+            }
+        }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		/// <summary>
-		/// Adds a guild to the database and saves it
-		/// </summary>
-		/// <param name="guild">The guild to be added to the database</param>
-		public new void Add(Guild guild)
-		{
-			lock (_lock)
-			{
-				using EFModels.HeArcP3Context ctx = new();
+        /// <summary>
+        /// Adds a guild to the database and saves it
+        /// </summary>
+        /// <param name="guild">The guild to be added to the database</param>
+        public new void Add(Guild guild)
+        {
+            lock (_lock)
+            {
+                using EFModels.HeArcP3Context ctx = new();
 
-				ctx.Guilds.Add(guild.ToEFModel());
-				ctx.SaveChanges();
+                ctx.Guilds.Add(guild.ToEFModel());
+                ctx.SaveChanges();
 
-				base.Add(guild);
-			}
-		}
+                base.Add(guild);
+            }
+        }
 
-		/// <summary>
-		/// Removes a guild from the database
-		/// </summary>
-		/// <param name="guild">The guild to be removed</param>
-		/// <returns>true if guild is successfully removed; false otherwise</returns>
-		public new bool Remove(Guild guild)
-		{
-			lock (_lock)
-			{
-				using EFModels.HeArcP3Context ctx = new();
+        /// <summary>
+        /// Removes a guild from the database
+        /// </summary>
+        /// <param name="guild">The guild to be removed</param>
+        /// <returns>true if guild is successfully removed; false otherwise</returns>
+        public new bool Remove(Guild guild)
+        {
+            lock (_lock)
+            {
+                using EFModels.HeArcP3Context ctx = new();
 
-				EFModels.Guild dbGuild = ctx.Guilds.GetEFModel(guild);
-				ctx.Guilds.Remove(dbGuild);
-				ctx.SaveChanges();
+                EFModels.Guild? dbGuild = ctx.Guilds.GetEFModel(guild);
 
-				return base.Remove(guild);
-			}
-		}
+                if (dbGuild == null) return false;
 
-		/// <summary>
-		/// Removes a guild from the database
-		/// </summary>
-		/// <param name="predicate">A delegate for the matching guild to be removed</param>
-		/// <returns>true if guild is successfully removed; false otherwise</returns>
-		public bool Remove(Predicate<Guild> predicate)
-		{
-			Guild? guild = Find(predicate);
+                ctx.Guilds.Remove(dbGuild);
+                ctx.SaveChanges();
 
-			return guild != null && Remove(guild);
-		}
+                return base.Remove(guild);
+            }
+        }
 
-		/// <summary>
-		/// Updates a guild in the database
-		/// </summary>
-		/// <param name="guild">The guild to be updated</param>
-		public void Update(Guild guild)
-		{
-			lock (_lock)
-			{
-				using EFModels.HeArcP3Context ctx = new();
+        /// <summary>
+        /// Removes a guild from the database
+        /// </summary>
+        /// <param name="predicate">A delegate for the matching guild to be removed</param>
+        /// <returns>true if guild is successfully removed; false otherwise</returns>
+        public bool Remove(Predicate<Guild> predicate)
+        {
+            Guild? guild = Find(predicate);
 
-				EFModels.Guild dbGuild = ctx.Guilds.GetEFModel(guild);
+            return guild != null && Remove(guild);
+        }
 
-				dbGuild.Language = (int)guild.Language;
-				dbGuild.TimeZone = (int)guild.TimeZone;
-				dbGuild.PremiumLevel = (int)guild.PremiumLevel;
-				dbGuild.MinThlevel = (int)guild.MinimalTownHallLevel;
+        /// <summary>
+        /// Updates a guild in the database
+        /// </summary>
+        /// <param name="guild">The guild to be updated</param>
+        public void Update(Guild guild)
+        {
+            lock (_lock)
+            {
+                using EFModels.HeArcP3Context ctx = new();
 
-				ctx.Guilds.Update(dbGuild);
-				ctx.SaveChanges();
+                EFModels.Guild? dbGuild = ctx.Guilds.GetEFModel(guild);
 
-				base.Remove(guild);
-				base.Add(guild);
-			}
-		}
-	}
+                if (dbGuild == null) return;
+
+                dbGuild.Language = (int)guild.Language;
+                dbGuild.TimeZone = (int)guild.TimeZone;
+                dbGuild.PremiumLevel = (int)guild.PremiumLevel;
+                dbGuild.MinThlevel = (int)guild.MinimalTownHallLevel;
+
+                ctx.Guilds.Update(dbGuild);
+                ctx.SaveChanges();
+
+                base.Remove(guild);
+                base.Add(guild);
+            }
+        }
+    }
 }

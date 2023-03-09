@@ -56,7 +56,10 @@ namespace Wp.Database.Services
             {
                 using EFModels.HeArcP3Context ctx = new();
 
-                EFModels.Competition dbCompetition = ctx.Competitions.GetEFModel(competition);
+                EFModels.Competition? dbCompetition = ctx.Competitions.GetEFModel(competition);
+
+                if (dbCompetition == null) return false;
+
                 ctx.Competitions.Remove(dbCompetition);
                 ctx.SaveChanges();
 
@@ -86,7 +89,9 @@ namespace Wp.Database.Services
             {
                 using EFModels.HeArcP3Context ctx = new();
 
-                EFModels.Competition dbCompetition = ctx.Competitions.GetEFModel(competition);
+                EFModels.Competition? dbCompetition = ctx.Competitions.GetEFModel(competition);
+
+                if (dbCompetition == null) return;
 
                 dbCompetition.ResultId = competition.ResultId;
                 dbCompetition.Name = competition.Name;
