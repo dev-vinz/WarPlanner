@@ -53,6 +53,36 @@ namespace Wp.Api.Extensions
 		}
 
 		/// <summary>
+		/// Gets all the opening attacks made during the clan war
+		/// </summary>
+		/// <param name="cWar">The clan war</param>
+		/// <returns>A read-only collection containing all the opening attacks</returns>
+		public static IReadOnlyCollection<ClanWarAttack> GetAllOpeningAttacks(this ClanWar cWar)
+		{
+			IReadOnlyCollection<ClanWarAttack> allAttacks = cWar.GetAllAttacks();
+
+			List<ClanWarAttack> attacks = new();
+
+			// Clan attacks
+			cWar.Opponent?
+				.Members?
+				.AsParallel()
+				.Select(m => allAttacks.First(a => a.DefenderTag == m.Tag)) // Works because allAttacks is sorted by order
+				.ToList()
+				.ForEach(a => attacks.Add(a));
+
+			// Opponent attacks
+			cWar.Clan?
+				.Members?
+				.AsParallel()
+				.Select(m => allAttacks.First(a => a.DefenderTag == m.Tag)) // Works because allAttacks is sorted by order
+				.ToList()
+				.ForEach(a => attacks.Add(a));
+
+			return attacks.OrderBy(a => a.Order).ToArray();
+		}
+
+		/// <summary>
 		/// Gets the average duration of all attacks in clan
 		/// </summary>
 		/// <param name="cWar">The clan war</param>

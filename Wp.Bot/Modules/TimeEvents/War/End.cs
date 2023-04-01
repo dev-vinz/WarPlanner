@@ -11,6 +11,7 @@ using Wp.Common.Models;
 using Wp.Common.Settings;
 using Wp.Database;
 using Wp.Database.Services;
+using Wp.Database.Settings;
 using Wp.Discord;
 using Color = SixLabors.ImageSharp.Color;
 using Image = SixLabors.ImageSharp.Image;
@@ -385,6 +386,41 @@ namespace Wp.Bot.Modules.TimeEvents.War
 			}
 		}
 
+		private static void InsertPlayerStatistics(Guild guild, ClashOfClans.Models.ClanWar cWar, WarType warType)
+		{
+			// Loads database infos
+			DbPlayers players = Context.Players;
+			DbPlayerStatistics playerStatistics = Context.PlayerStatistics;
+
+			DateTimeOffset startWar = new(cWar.PreparationStartTime, TimeZoneInfo.Utc.BaseUtcOffset);
+
+			IReadOnlyCollection<ClashOfClans.Models.ClanWarAttack> allAttacks = cWar.GetAllAttacks();
+			IReadOnlyCollection<ClashOfClans.Models.ClanWarAttack> allOpens = cWar.GetAllOpeningAttacks();
+
+			cWar.Clan.Members?
+				.AsParallel()
+				.ForAll(m =>
+				{
+					Player? dbPlayer = players.FirstOrDefault(p => (p.Guild == guild || p.Guild.Id == Configurations.DEV_GUILD_ID) && p.Tag == m.Tag);
+
+					if (dbPlayer is null) return;
+
+					// Registers all attacks
+					allAttacks
+						.AsParallel()
+						.Where(a => a.AttackerTag == m.Tag)
+						.Select(a => new PlayerStatistic(guild, dbPlayer.Id, m.Tag, cWar.Clan.Tag!, startWar, a.Order, warType, PlayerStatisticType.ATTACK, allOpens.Contains(a) ? PlayerStatisticAction.OPENING : PlayerStatisticAction.RUNNING_OVER, a.Stars, a.DestructionPercentage, a.Duration))
+						.ForAll(ps => playerStatistics.Add(ps));
+
+					// Registers all defenses
+					allAttacks
+						.AsParallel()
+						.Where(d => d.DefenderTag == m.Tag)
+						.Select(d => new PlayerStatistic(guild, dbPlayer.Id, m.Tag, cWar.Clan.Tag!, startWar, d.Order, warType, PlayerStatisticType.DEFENSE, allOpens.Contains(d) ? PlayerStatisticAction.OPENING : PlayerStatisticAction.RUNNING_OVER, d.Stars, d.DestructionPercentage, d.Duration))
+						.ForAll(ps => playerStatistics.Add(ps));
+				});
+		}
+
 		private static async Task ScanCurrentWarAsync(IGuild guild, ClashOfClans.Models.ClanWar war)
 		{
 			// If the premium level is enough (>= Medium), keep the previous war statistics
@@ -438,6 +474,9 @@ namespace Wp.Bot.Modules.TimeEvents.War
 			}
 
 			if (isEsport) await DisplayResultAsync(guild, competition, war);
+
+			if (dbGuild.PremiumLevel >= PremiumLevel.MEDIUM && !isEsport) InsertPlayerStatistics(dbGuild, war, warType);
+			if (dbGuild.PremiumLevel >= PremiumLevel.LOW && isEsport) InsertPlayerStatistics(dbGuild, war, warType);
 		}
 	}
 }
