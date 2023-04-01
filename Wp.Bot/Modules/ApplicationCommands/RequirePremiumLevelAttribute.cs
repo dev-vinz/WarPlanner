@@ -1,27 +1,23 @@
 ﻿using Discord;
 using Discord.Interactions;
-using Wp.Bot.Services;
 using Wp.Common.Models;
-using Wp.Common.Settings;
-using Wp.Language;
-using Color = Discord.Color;
+using Wp.Database;
 
-namespace Wp.Bot.Modules.ApplicationCommands.Global
+namespace Wp.Bot.Modules.ApplicationCommands
 {
-	[RequireContext(ContextType.Guild)]
-	public class Global : InteractionModuleBase<SocketInteractionContext>
+	public class RequirePremiumLevelAttribute : PreconditionAttribute
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		private readonly CommandHandler handler;
+		private readonly PremiumLevel premiumLevel;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                             PROPERTIES                            *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public InteractionService? Commands { get; set; }
+
 
 		/* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
@@ -33,9 +29,9 @@ namespace Wp.Bot.Modules.ApplicationCommands.Global
         |*                            CONSTRUCTORS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public Global(CommandHandler handler)
+		public RequirePremiumLevelAttribute(PremiumLevel premiumLevel)
 		{
-			this.handler = handler;
+			this.premiumLevel = premiumLevel;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -48,64 +44,7 @@ namespace Wp.Bot.Modules.ApplicationCommands.Global
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		[SlashCommand("infos", "Get some informations about the bot, and the links")]
-		public async Task Informations()
-		{
-			await DeferAsync(true);
 
-			// Loads databases infos
-			Guild dbGuild = Database.Context
-				.Guilds
-				.First(g => g.Id == Context.Guild.Id);
-
-			// Gets responses
-			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
-			IGlobal commandText = dbGuild.GlobalText;
-
-			// Documentation button
-			ButtonBuilder docButtonBuilder = new ButtonBuilder()
-				.WithLabel(generalResponses.Documentation)
-				.WithStyle(ButtonStyle.Link)
-				.WithUrl(Utilities.GITBOOK_DOCUMENTATION)
-				.WithEmote(new Emoji("📚"));
-
-			// Support button
-			ButtonBuilder supportButtonBuilder = new ButtonBuilder()
-				.WithLabel(generalResponses.SupportServer)
-				.WithStyle(ButtonStyle.Link)
-				.WithUrl(Utilities.SUPPORT_GUILD_INVITATION)
-				.WithEmote(new Emoji("⚙️"));
-
-			// Link button
-			ButtonBuilder linkButtonBuilder = new ButtonBuilder()
-				.WithLabel(generalResponses.LinkInvitation)
-				.WithStyle(ButtonStyle.Link)
-				.WithUrl(Utilities.BOT_LINK_INVITATION)
-				.WithEmote(new Emoji("🔗"));
-
-			// Build component
-			ComponentBuilder componentBuilder = new ComponentBuilder()
-				.WithButton(supportButtonBuilder)
-				.WithButton(docButtonBuilder)
-				.WithButton(linkButtonBuilder);
-
-			// Embed
-			EmbedBuilder embedBuilder = new EmbedBuilder()
-				.WithTitle(commandText.EmbedInformations)
-				.WithThumbnailUrl(Context.Guild.IconUrl)
-				.WithDescription(commandText.EmbedDescription)
-				.AddField(commandText.EmbedFieldAuthor, "Vincent Jeannin, ISC3il-b", true)
-				.AddField(commandText.EmbedFieldYear, "2022 - 2023", true)
-				.WithColor(new Color((uint)new Random().Next(0x1000000)))
-				.WithFooter($"{dbGuild.Now.Year} © {Context.Client.CurrentUser.Username}");
-
-
-			await ModifyOriginalResponseAsync(msg =>
-			{
-				msg.Components = new(componentBuilder.Build());
-				msg.Embed = embedBuilder.Build();
-			});
-		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         PROTECTED METHODS                         *|
@@ -123,7 +62,22 @@ namespace Wp.Bot.Modules.ApplicationCommands.Global
         |*                          OVERRIDE METHODS                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		public override Task<PreconditionResult> CheckRequirementsAsync(IInteractionContext context, ICommandInfo commandInfo, IServiceProvider services)
+		{
+			// Loads databases infos
+			Guild dbGuild = Context
+				.Guilds
+				.First(g => g.Id == context.Guild.Id);
 
+			if (dbGuild.PremiumLevel >= premiumLevel)
+			{
+				return Task.FromResult(PreconditionResult.FromSuccess());
+			}
+			else
+			{
+				return Task.FromResult(PreconditionResult.FromError("TODO"));
+			}
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           STATIC METHODS                          *|
@@ -140,8 +94,5 @@ namespace Wp.Bot.Modules.ApplicationCommands.Global
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         OPERATORS OVERLOAD                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-
-
 	}
 }

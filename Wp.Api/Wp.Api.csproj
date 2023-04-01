@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ClashOfClans" Version="8.6.0" />
-    <PackageReference Include="Google.Apis.Calendar.v3" Version="1.60.0.2759" />
+    <PackageReference Include="ClashOfClans" Version="8.7.0" />
+    <PackageReference Include="Google.Apis.Calendar.v3" Version="1.60.0.2993" />
   </ItemGroup>
 
 </Project>

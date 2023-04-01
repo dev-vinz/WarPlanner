@@ -6,6 +6,7 @@ using Wp.Language;
 
 namespace Wp.Bot.Modules.ApplicationCommands.Admin
 {
+	[RequireUserRole(RoleType.ADMINISTRATOR)]
 	public class Admin : InteractionModuleBase<SocketInteractionContext>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

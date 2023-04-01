@@ -12,6 +12,7 @@ using Wp.Language;
 
 namespace Wp.Bot.Modules.ApplicationCommands.Manager
 {
+	[RequireUserRole(RoleType.MANAGER)]
 	[Group("competition", "Competition commands handler")]
 	public class Competition : InteractionModuleBase<SocketInteractionContext>
 	{

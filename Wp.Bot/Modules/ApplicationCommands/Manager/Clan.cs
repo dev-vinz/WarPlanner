@@ -9,6 +9,7 @@ using Wp.Language;
 
 namespace Wp.Bot.Modules.ApplicationCommands.Manager
 {
+	[RequireUserRole(RoleType.MANAGER)]
 	[Group("clan", "Clan commands handler")]
 	public class Clan : InteractionModuleBase<SocketInteractionContext>
 	{

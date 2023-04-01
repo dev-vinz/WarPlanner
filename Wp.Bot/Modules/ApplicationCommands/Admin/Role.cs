@@ -9,6 +9,7 @@ using Wp.Language;
 
 namespace Wp.Bot.Modules.ApplicationCommands.Admin
 {
+	[RequireUserRole(RoleType.ADMINISTRATOR)]
 	[Group("role", "Role commands handler")]
 	public class Role : InteractionModuleBase<SocketInteractionContext>
 	{

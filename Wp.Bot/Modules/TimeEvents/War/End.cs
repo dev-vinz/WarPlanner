@@ -1,9 +1,6 @@
 ﻿using Discord;
 using SixLabors.Fonts;
-using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.Processing;
 using Wp.Api;
 using Wp.Api.Extensions;
 using Wp.Api.Models;
@@ -151,7 +148,7 @@ namespace Wp.Bot.Modules.TimeEvents.War
 			// Gets image
 			HttpClient client = new();
 			using Stream bytes = await client.GetStreamAsync(Utilities.SECOND_BACKGROUND_WAR_RESULT);
-			Image image = Image.Load(bytes, new PngDecoder());
+			Image image = Image.Load(bytes);
 
 			// Initializes some settings
 			IPen blackPen = new Pen(Color.Black, 1);
@@ -198,7 +195,7 @@ namespace Wp.Bot.Modules.TimeEvents.War
 
 						using Stream starBytes = starEmote.Result;
 
-						Image starImage = Image.Load(starBytes, new PngDecoder());
+						Image starImage = Image.Load(starBytes);
 						starImage.Mutate(ctx => ctx.Resize(25, 25));
 
 						int clanStars = clanPlayer.Attacks?.Aggregate(0, (acc, a) => acc += a.Stars) ?? 0;
@@ -225,7 +222,7 @@ namespace Wp.Bot.Modules.TimeEvents.War
 			// Gets image
 			HttpClient client = new();
 			using Stream bytes = await client.GetStreamAsync(Utilities.MAIN_BACKGROUND_WAR_RESULT);
-			Image image = Image.Load(bytes, new PngDecoder());
+			Image image = Image.Load(bytes);
 
 			// Initializes some settings
 			IPen blackPen = new Pen(Color.Black, 1);
@@ -255,8 +252,8 @@ namespace Wp.Bot.Modules.TimeEvents.War
 				using Stream crownBytes = crown.Result;
 
 				// Draw images
-				Image clanBadge = Image.Load(clanBytes, new PngDecoder());
-				Image opponentBadge = Image.Load(opponentBytes, new PngDecoder());
+				Image clanBadge = Image.Load(clanBytes);
+				Image opponentBadge = Image.Load(opponentBytes);
 
 				ctx.DrawImage(clanBadge, new Point(115, 75), 1);
 				ctx.DrawImage(opponentBadge, new Point(969, 75), 1);
@@ -267,7 +264,7 @@ namespace Wp.Bot.Modules.TimeEvents.War
 				int rotateFactor = result == WarResult.WIN ? -1 : 1;
 				Point position = result == WarResult.WIN ? new Point(75, -5) : new Point(1025, -5);
 
-				Image crownImg = Image.Load(crownBytes, new PngDecoder());
+				Image crownImg = Image.Load(crownBytes);
 				crownImg.Mutate(ctx => { ctx.Resize(150, 100); ctx.Rotate(rotateFactor * 30); });
 
 				ctx.DrawImage(crownImg, position, 1);
@@ -326,7 +323,7 @@ namespace Wp.Bot.Modules.TimeEvents.War
 
 						using Stream starBytes = starEmote.Result;
 
-						Image starImage = Image.Load(starBytes, new PngDecoder());
+						Image starImage = Image.Load(starBytes);
 						starImage.Mutate(ctx => ctx.Resize(25, 25));
 
 						int clanStars = clanPlayer.Attacks?.Aggregate(0, (acc, a) => acc += a.Stars) ?? 0;

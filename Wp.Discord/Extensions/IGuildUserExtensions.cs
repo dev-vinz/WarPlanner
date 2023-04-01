@@ -2,11 +2,22 @@
 using Wp.Common.Models;
 using Wp.Database;
 using Wp.Database.Services;
+using Wp.Database.Settings;
 
 namespace Wp.Discord.Extensions
 {
 	public static class IGuildUserExtensions
 	{
+		/// <summary>
+		/// Indicates wether a guild user is the bot owner or not
+		/// </summary>
+		/// <param name="guildUser">An user to be check</param>
+		/// <returns>True if the user is the owner; False otherwise</returns>
+		public static bool IsTheOwner(this IGuildUser guildUser)
+		{
+			return guildUser.Id == Configurations.DEV_USER_ID;
+		}
+
 		/// <summary>
 		/// Indicates wether a guild user is an admin or not
 		/// </summary>
