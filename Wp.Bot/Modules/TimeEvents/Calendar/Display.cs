@@ -1,9 +1,6 @@
 ﻿using Discord;
 using SixLabors.Fonts;
-using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 using System.Globalization;
 using Wp.Api;
 using Wp.Api.Models;
@@ -351,7 +348,14 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
 			try
 			{
 				IMessage? oldMsg = await channel.GetMessageAsync(dbCalendar.MessageId ?? 0);
-				await oldMsg?.DeleteAsync()!;
+				if (oldMsg != null) await oldMsg.DeleteAsync();
+
+				while (oldMsg?.Reference != null)
+				{
+					oldMsg = await channel.GetMessageAsync(oldMsg.Reference.MessageId.GetValueOrDefault());
+
+					if (oldMsg != null) await oldMsg.DeleteAsync();
+				}
 			}
 			catch (Exception)
 			{
@@ -362,11 +366,17 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
 				.Select(c => new FileAttachment(c.Value, c.Key))
 				.ToArray();
 
-			// Sends new message with files
-			IMessage msg = await channel.SendFilesAsync(files);
+			// Sends new messages with file
+			IMessage? msg = null;
+
+			foreach (FileAttachment attachment in files)
+			{
+				MessageReference? messageReference = msg != null ? new(msg.Id, msg.Channel.Id, guild.Id) : null;
+				msg = await channel.SendFileAsync(attachment, messageReference: messageReference);
+			}
 
 			// Update in database
-			dbCalendar.MessageId = msg.Id;
+			dbCalendar.MessageId = msg!.Id;
 			Context.Calendars.Update(dbCalendar);
 		}
 
