@@ -75,7 +75,7 @@ namespace Wp.Bot.Modules.ApplicationCommands
 			}
 			else
 			{
-				return Task.FromResult(PreconditionResult.FromError("TODO"));
+				return Task.FromResult(PreconditionResult.FromError(dbGuild.GeneralResponses.RequirePremiumAttribute(premiumLevel.GetDisplayName())));
 			}
 		}
 

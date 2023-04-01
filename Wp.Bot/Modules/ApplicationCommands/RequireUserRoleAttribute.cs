@@ -89,12 +89,12 @@ namespace Wp.Bot.Modules.ApplicationCommands
 				}
 				else
 				{
-					return Task.FromResult(PreconditionResult.FromError("TODO"));
+					return Task.FromResult(PreconditionResult.FromError(dbGuild.GeneralResponses.RequireUserAttribute));
 				}
 			}
 			else
 			{
-				return Task.FromResult(PreconditionResult.FromError("TODO 2"));
+				return Task.FromResult(PreconditionResult.FromError(dbGuild.GeneralResponses.RequireUserNotInGuild));
 			}
 		}
 

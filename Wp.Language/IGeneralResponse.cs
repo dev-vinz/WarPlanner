@@ -14,6 +14,14 @@ namespace Wp.Language
 		protected string ClashOfClansUnknownError { get; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                      PRECONDITION ATTRIBUTES                      *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string RequirePremiumAttribute(string premiumLevel);
+		public string RequireUserNotInGuild { get; }
+		public string RequireUserAttribute { get; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         CLASH OF CLANS API                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

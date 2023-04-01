@@ -12,6 +12,14 @@
 		string IGeneralResponse.ClashOfClansUnknownError => "Un problème est survenu, l'erreur a été remontée au développeur. Merci de bien vouloir attendre la correction du problème";
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                      PRECONDITION ATTRIBUTES                      *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string RequirePremiumAttribute(string premiumLevel) => $"Vous devez être abonné au niveau `{premiumLevel}` pour avoir accès à cette fonctionnalité";
+		public string RequireUserNotInGuild => "Vous ne vous trouvez pas dans un serveur, je ne peux pas répondre d'ici";
+		public string RequireUserAttribute => "Vous ne possédez pas la permission suffisante pour exécuter cette commande";
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         GOOGLE CALENDAR API                       *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
