@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using System.Data;
 using Wp.Api;
 using Wp.Bot.Modules.ModalCommands.Modals;
 using Wp.Bot.Services;
@@ -56,7 +57,6 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 			SocketUserMessage msg = socket.Message;
 
 			// Loads databases infos
-			DbClans clans = Database.Context.Clans;
 			DbCompetitions competitions = Database.Context.Competitions;
 			DbRoles roles = Database.Context.Roles;
 			Guild dbGuild = Database.Context
@@ -80,6 +80,12 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 			string competitionName = datas[0];
 			string mainTag = datas[1];
 
+			if (dbGuild.PremiumLevel >= PremiumLevel.LOW)
+			{
+				await AskForEnvironmentAsync(competitionName, mainTag);
+				return;
+			}
+
 			// Guild roles
 			IReadOnlyCollection<IRole> guildRoles = roles
 				.AsParallel()
@@ -100,6 +106,119 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 			competitions.Add(dbCompetition);
 
 			await FollowupAsync(interactionText.CompetitionAdded(competitionName, dbCompetition.MainClan.Name), ephemeral: true);
+		}
+
+		[ComponentInteraction(IdProvider.COMPETITION_ADD_BUTTON_CREATE_ENVIRONMENT, runMode: RunMode.Async)]
+		public async Task AddWithEnvironment()
+		{
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+			// Gets SocketMessageComponent and original message
+			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+			SocketUserMessage msg = socket.Message;
+
+			// Loads databases infos
+			DbCompetitions competitions = Database.Context.Competitions;
+			DbRoles roles = Database.Context.Roles;
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
+
+			// Gets interaction texts
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			// Gets component datas
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length < 2)
+			{
+				await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+				return;
+			}
+
+			// Recovers datas
+			string competitionName = datas![0];
+			string mainTag = datas[1];
+			string? secondClan = datas.Length == 3 ? datas[2] : null;
+
+			// Guild roles
+			IReadOnlyCollection<IRole> guildRoles = roles
+				.AsParallel()
+				.Where(r => r.Guild == dbGuild && r.Type == RoleType.PLAYER)
+				.Select(r => Context.Guild.GetRole(r.Id))
+				.ToArray();
+
+			// Create environment
+			if (!TryCreateEnvironment(competitionName, guildRoles, out ulong? categoryId, out ulong? resultId, out IRole? refRole))
+			{
+				await FollowupAsync(interactionText.CouldntCreateCompetitionEnvironment, ephemeral: true);
+
+				return;
+			}
+
+			// Register competition
+			Common.Models.Competition dbCompetition = new(dbGuild, categoryId!.Value, resultId!.Value, competitionName, mainTag);
+
+			if (secondClan != null) dbCompetition.SecondTag = secondClan;
+
+			competitions.Add(dbCompetition);
+
+			await FollowupAsync(interactionText.CompetitionAdded(competitionName, dbCompetition.MainClan.Name, secondClan != null ? dbCompetition.SecondClan!.Name : null), ephemeral: true);
+		}
+
+		[ComponentInteraction(IdProvider.COMPETITION_ADD_BUTTON_CREATE_NO_ENVIRONMENT, runMode: RunMode.Async)]
+		public async Task AddWithoutEnvironment()
+		{
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+			// Gets SocketMessageComponent and original message
+			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+			SocketUserMessage msg = socket.Message;
+
+			// Loads databases infos
+			DbCompetitions competitions = Database.Context.Competitions;
+			DbRoles roles = Database.Context.Roles;
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
+
+			// Gets interaction texts
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			// Gets component datas
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length < 2)
+			{
+				await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+				return;
+			}
+
+			// Recovers datas
+			string competitionName = datas![0];
+			string mainTag = datas[1];
+			string? secondClan = datas.Length == 3 ? datas[2] : null;
+
+			// Guild roles
+			IReadOnlyCollection<IRole> guildRoles = roles
+				.AsParallel()
+				.Where(r => r.Guild == dbGuild && r.Type == RoleType.PLAYER)
+				.Select(r => Context.Guild.GetRole(r.Id))
+				.ToArray();
+
+			IGuildChannel category = await Context.Guild.CreateCategoryChannelAsync(competitionName);
+			await category.DeleteAsync();
+
+			// Register competition
+			Common.Models.Competition dbCompetition = new(dbGuild, category.Id, category.Id, competitionName, mainTag);
+
+			if (secondClan != null) dbCompetition.SecondTag = secondClan;
+
+			competitions.Add(dbCompetition);
+
+			await FollowupAsync(interactionText.CompetitionAdded(competitionName, dbCompetition.MainClan.Name, secondClan != null ? dbCompetition.SecondClan!.Name : null), ephemeral: true);
 		}
 
 		[ComponentInteraction(IdProvider.COMPETITION_EDIT_BUTTON_MAIN_CLAN, runMode: RunMode.Async)]
@@ -430,6 +549,12 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 			string competitionName = datas[0];
 			string mainTag = datas[1];
 
+			if (dbGuild.PremiumLevel >= PremiumLevel.LOW)
+			{
+				await AskForEnvironmentAsync(competitionName, mainTag, secondTag);
+				return;
+			}
+
 			// Creates environment
 			if (!TryCreateEnvironment(competitionName, guildRoles, out ulong? categoryId, out ulong? resultId, out IRole? refRole))
 			{
@@ -481,7 +606,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 				.Where(c => c is not null && c.CategoryId == dbCompetition.Id)
 				.ToList()!;
 
-			SocketGuildChannel category = Context.Guild.GetChannel(dbCompetition.Id);
+			SocketCategoryChannel category = Context.Guild.GetCategoryChannel(dbCompetition.Id);
 
 			IReadOnlyList<SocketRole> roles = Context.Guild.Roles
 				.Where(c => c.Name.Contains(dbCompetition.Name))
@@ -496,7 +621,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 				.AsParallel()
 				.ForAll(async c => await c.DeleteAsync());
 
-			await category.DeleteAsync();
+			if (category != null) await category.DeleteAsync();
 
 			roles
 				.AsParallel()
@@ -597,6 +722,51 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          PRIVATE METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		private async Task AskForEnvironmentAsync(string name, string mainClan, string? secondClan = null)
+		{
+			// Loads databases infos
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
+
+			// Gets interaction texts
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			// With environment button
+			ButtonBuilder withButtonBuilder = new ButtonBuilder()
+				.WithLabel(interactionText.CompetitionAddWithEnvironment)
+				.WithStyle(ButtonStyle.Primary)
+				.WithCustomId(IdProvider.COMPETITION_ADD_BUTTON_CREATE_ENVIRONMENT);
+
+			// Without environment button
+			ButtonBuilder withoutButtonBuilder = new ButtonBuilder()
+				.WithLabel(interactionText.CompetitionAddWithoutEnvironment)
+				.WithStyle(ButtonStyle.Secondary)
+				.WithCustomId(IdProvider.COMPETITION_ADD_BUTTON_CREATE_NO_ENVIRONMENT);
+
+			// Cancel button
+			ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+				.WithLabel(generalResponses.CancelButton)
+				.WithStyle(ButtonStyle.Danger)
+				.WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+
+			// Build component
+			ComponentBuilder componentBuilder = new ComponentBuilder()
+				.WithButton(withoutButtonBuilder)
+				.WithButton(withButtonBuilder)
+				.WithButton(cancelButtonBuilder, row: 1);
+
+			// Sends message
+			IUserMessage message = await FollowupAsync(interactionText.CompetitionAddChooseEnvironment, components: componentBuilder.Build(), ephemeral: true);
+
+			// Registers informations into storage
+			ComponentStorage storage = ComponentStorage.GetInstance();
+
+			string[] datas = secondClan != null ? new[] { name, mainClan, secondClan } : new[] { name, mainClan };
+			storage.MessageDatas.TryAdd(message.Id, datas);
+		}
 
 		private bool TryCreateEnvironment(string competitionName, IReadOnlyCollection<IRole> playerRoles, out ulong? categoryId, out ulong? resultId, out IRole? refRole)
 		{
