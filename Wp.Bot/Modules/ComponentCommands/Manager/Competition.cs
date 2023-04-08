@@ -6,6 +6,7 @@ using Wp.Api;
 using Wp.Bot.Modules.ModalCommands.Modals;
 using Wp.Bot.Services;
 using Wp.Common.Models;
+using Wp.Common.Settings;
 using Wp.Database.Services;
 using Wp.Discord;
 using Wp.Discord.ComponentInteraction;
@@ -293,6 +294,157 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 			storage.MessageDatas.TryAdd(message.Id, datas);
 		}
 
+		[ComponentInteraction(IdProvider.COMPETITION_EDIT_BUTTON_RESULT_CHANNEL, runMode: RunMode.Async)]
+		public async Task EditResultChannel()
+		{
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+			// Gets SocketMessageComponent and original message
+			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+			SocketUserMessage msg = socket.Message;
+
+			// Loads databases infos
+			DbCompetitions competitions = Database.Context.Competitions;
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
+
+			// Gets interaction texts
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			// Gets component datas
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
+			{
+				await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+				return;
+			}
+
+			// Recovers datas
+			ulong competitionId = ulong.Parse(datas[0]);
+
+			// Build select menu
+			SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+				.WithCustomId(IdProvider.COMPETITION_EDIT_SELECT_RESULT_CHANNEL);
+
+			SocketTextChannel[] allTextChannels = Context.Guild.TextChannels
+				.Where(c => c.GetChannelType() == ChannelType.Text)
+				.OrderBy(c => c.Category != null ? c.Category.Name : "")
+				.ThenBy(c => c.Name)
+				.ToArray();
+
+			bool isFirstAndLastPage = (int)Math.Ceiling((double)allTextChannels.Length / Settings.MAX_OPTION_PER_SELECT_MENU) == 1;
+
+			allTextChannels
+				.Take(Settings.MAX_OPTION_PER_SELECT_MENU)
+				.ToList()
+				.ForEach(c => menuBuilder.AddOption(c.Name, c.Id.ToString(), c.Category?.Name));
+
+			// Next button
+			ButtonBuilder nextButtonBuilder = new ButtonBuilder()
+				.WithLabel(interactionText.EditCompetitionNextChannels)
+				.WithDisabled(isFirstAndLastPage)
+				.WithStyle(ButtonStyle.Secondary)
+				.WithCustomId(IdProvider.COMPETITION_EDIT_BUTTON_NEXT_RESULT_CHANNEL);
+
+			// Cancel button
+			ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+				.WithLabel(generalResponses.CancelButton)
+				.WithStyle(ButtonStyle.Danger)
+				.WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+
+			// Build component
+			ComponentBuilder componentBuilder = new ComponentBuilder()
+				.WithSelectMenu(menuBuilder)
+				.WithButton(cancelButtonBuilder)
+				.WithButton(nextButtonBuilder);
+
+			IUserMessage message = await FollowupAsync(interactionText.EditCompetitionSelectNewResultChannel, components: componentBuilder.Build(), ephemeral: true);
+
+			// Adds datas to new message
+			datas = new[] { competitionId.ToString(), "1" };
+			storage.MessageDatas.TryAdd(message.Id, datas);
+		}
+
+		[ComponentInteraction(IdProvider.COMPETITION_EDIT_BUTTON_NEXT_RESULT_CHANNEL, runMode: RunMode.Async)]
+		public async Task EditNextResultChannel()
+		{
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+			// Gets SocketMessageComponent and original message
+			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+			SocketUserMessage msg = socket.Message;
+
+			// Loads databases infos
+			DbCompetitions competitions = Database.Context.Competitions;
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
+
+			// Gets interaction texts
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			// Gets component datas
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 2)
+			{
+				await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+				return;
+			}
+
+			// Recovers datas
+			ulong competitionId = ulong.Parse(datas[0]);
+			int currentPage = int.Parse(datas[1]);
+
+			// Build select menu
+			SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+				.WithCustomId(IdProvider.COMPETITION_EDIT_SELECT_RESULT_CHANNEL);
+
+			SocketTextChannel[] allTextChannels = Context.Guild.TextChannels
+				.Where(c => c.GetChannelType() == ChannelType.Text)
+				.OrderBy(c => c.Category != null ? c.Category.Name : "")
+				.ThenBy(c => c.Name)
+				.ToArray();
+
+			int nbPages = (int)Math.Ceiling((double)allTextChannels.Length / Settings.MAX_OPTION_PER_SELECT_MENU);
+			bool isLastPage = currentPage + 1 == nbPages;
+
+			allTextChannels
+				.Skip(currentPage * Settings.MAX_OPTION_PER_SELECT_MENU)
+				.Take(Settings.MAX_OPTION_PER_SELECT_MENU)
+				.ToList()
+				.ForEach(c => menuBuilder.AddOption(c.Name, c.Id.ToString(), c.Category?.Name));
+
+			// Next button
+			ButtonBuilder nextButtonBuilder = new ButtonBuilder()
+				.WithLabel(interactionText.EditCompetitionNextChannels)
+				.WithDisabled(isLastPage)
+				.WithStyle(ButtonStyle.Secondary)
+				.WithCustomId(IdProvider.COMPETITION_EDIT_BUTTON_NEXT_RESULT_CHANNEL);
+
+			// Cancel button
+			ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+				.WithLabel(generalResponses.CancelButton)
+				.WithStyle(ButtonStyle.Danger)
+				.WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+
+			// Build component
+			ComponentBuilder componentBuilder = new ComponentBuilder()
+				.WithSelectMenu(menuBuilder)
+				.WithButton(cancelButtonBuilder)
+				.WithButton(nextButtonBuilder);
+
+			IUserMessage message = await FollowupAsync(interactionText.EditCompetitionSelectNewResultChannel, components: componentBuilder.Build(), ephemeral: true);
+
+			// Adds datas to new message
+			datas = new[] { competitionId.ToString(), (currentPage + 1).ToString() };
+			storage.MessageDatas.TryAdd(message.Id, datas);
+		}
+
 		[ComponentInteraction(IdProvider.COMPETITION_EDIT_BUTTON_SECOND_CLAN, runMode: RunMode.Async)]
 		public async Task EditSecondClan()
 		{
@@ -304,7 +456,6 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 
 			// Gets guild and interaction text
 			DbClans clans = Database.Context.Clans;
-			DbCompetitions competitions = Database.Context.Competitions;
 			Guild dbGuild = Database.Context
 				.Guilds
 				.First(g => g.Id == Context.Guild.Id);
@@ -674,6 +825,48 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 			competitions.Update(dbCompetition);
 
 			await FollowupAsync(interactionText.EditCompetitionSelectMainClanUpdated(dbCompetition.Name, dbCompetition.MainClan.Name), ephemeral: true);
+		}
+
+		[ComponentInteraction(IdProvider.COMPETITION_EDIT_SELECT_RESULT_CHANNEL, runMode: RunMode.Async)]
+		public async Task EditResultChannel(string[] selections)
+		{
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+			// Loads databases infos
+			DbCompetitions competitions = Database.Context.Competitions;
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
+
+			// Gets interaction texts
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			// Gets SocketMessageComponent and original message
+			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+			SocketUserMessage msg = socket.Message;
+
+			// Gets component datas
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 2)
+			{
+				await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+				return;
+			}
+
+			// Recovers data
+			ulong competitionId = ulong.Parse(datas[0]);
+			ulong channelId = ulong.Parse(selections.First());
+
+			SocketTextChannel channel = Context.Guild.GetTextChannel(channelId);
+			Common.Models.Competition dbCompetition = competitions.First(c => c.Guild == dbGuild && c.Id == competitionId);
+
+			// Updates competition
+			dbCompetition.ResultId = channel.Id;
+			competitions.Update(dbCompetition);
+
+			await FollowupAsync(interactionText.EditCompetitionSelectNewResultChannelUpdated(dbCompetition.Name, channel.Mention), ephemeral: true);
 		}
 
 		[ComponentInteraction(IdProvider.COMPETITION_EDIT_SELECT_SECOND_CLAN, runMode: RunMode.Async)]

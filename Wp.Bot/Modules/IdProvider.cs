@@ -45,10 +45,12 @@
 		public const string COMPETITION_DELETE_SELECT = "competition_delete_select";
 
 		public const string COMPETITION_EDIT_BUTTON_NAME = "competition_edit_button_name";
-		public const string COMPETITION_EDIT_BUTTON_RESULT_CHANNEL = "competition_edit_button_result_channel";
 		public const string COMPETITION_EDIT_BUTTON_MAIN_CLAN = "competition_edit_button_main_clan";
+		public const string COMPETITION_EDIT_BUTTON_RESULT_CHANNEL = "competition_edit_button_result_channel";
+		public const string COMPETITION_EDIT_BUTTON_NEXT_RESULT_CHANNEL = "competition_edit_button_next_result_channel";
 		public const string COMPETITION_EDIT_BUTTON_SECOND_CLAN = "competition_edit_button_second_clan";
 		public const string COMPETITION_EDIT_SELECT_MAIN_CLAN = "competition_edit_select_main_clan";
+		public const string COMPETITION_EDIT_SELECT_RESULT_CHANNEL = "competition_edit_select_result_channel";
 		public const string COMPETITION_EDIT_SELECT_SECOND_CLAN = "competition_edit_select_second_clan";
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

@@ -139,7 +139,7 @@ namespace Wp.Bot
 				.BuildServiceProvider();
 		}
 
-		public static Task Main(string[] args) => new Program().MainAsync();
+		public static Task Main(string[] _) => new Program().MainAsync();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                              INDEXERS                             *|

@@ -46,6 +46,12 @@
 		public string ChooseCompetitionToDelete => "Veuillez choisir la compétition à supprimer";
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                      COMPETITION EDIT BUTTON                      *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string EditCompetitionNextChannels => "Salons suivants";
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                      COMPETITION EDIT COMMAND                     *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -86,8 +92,9 @@
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		public string EditCompetitionSelectMainClan => "Choisissez votre nouveau clan principal";
-
 		public string EditCompetitionSelectMainClanUpdated(string competition, string name) => $"Le clan principal utilisé en **{competition}** sera dorénavant **{name}**";
+		public string EditCompetitionSelectNewResultChannel => "Sélectionnez le nouveau salon de résultat";
+		public string EditCompetitionSelectNewResultChannelUpdated(string competition, string name) => $"Le nouveau salon où sera posté les résultats des matchs en **{competition}** sera dorénavant **{name}**";
 		public string EditCompetitionSelectSecondClan => "Choisissez votre nouveau clan secondaire";
 		public string EditCompetitionSelectSecondClanUpdated(string competition, string name) => $"Le clan secondaire utilisé en **{competition}** sera dorénavant **{name}**";
 

@@ -250,7 +250,7 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
 			// Edit result channel
 			ButtonBuilder resultButtonBuilder = new ButtonBuilder()
 				.WithLabel(commandText.EditCompetitionResultChannel)
-				.WithDisabled(true)
+				.WithDisabled(dbGuild.PremiumLevel < PremiumLevel.LOW)
 				.WithStyle(ButtonStyle.Secondary)
 				.WithCustomId(IdProvider.COMPETITION_EDIT_BUTTON_RESULT_CHANNEL);
 

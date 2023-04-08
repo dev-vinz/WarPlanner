@@ -46,6 +46,12 @@
 		public string ChooseCompetitionToDelete { get; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                      COMPETITION EDIT BUTTON                      *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string EditCompetitionNextChannels { get; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                      COMPETITION EDIT COMMAND                     *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -83,6 +89,8 @@
 
 		public string EditCompetitionSelectMainClan { get; }
 		public string EditCompetitionSelectMainClanUpdated(string competition, string name);
+		public string EditCompetitionSelectNewResultChannel { get; }
+		public string EditCompetitionSelectNewResultChannelUpdated(string competition, string name);
 		public string EditCompetitionSelectSecondClan { get; }
 		public string EditCompetitionSelectSecondClanUpdated(string competition, string name);
 
