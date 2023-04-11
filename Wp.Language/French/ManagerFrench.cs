@@ -187,6 +187,18 @@
 		public string WarEditChooseEdition(string opponent) => $"Choisissez la modification que vous souhaitez faire sur votre match contre **{opponent}**";
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                        WAR EDIT DAY BUTTON                        *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string WarEditDaySelect => "Sélectionnez le nouveau jour de match";
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                        WAR EDIT DAY SELECT                        *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string WarEditDayChanged(string date) => $"Le match a été déplacé au **{date}**";
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                      WAR EDIT OPPONENT MODAL                      *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

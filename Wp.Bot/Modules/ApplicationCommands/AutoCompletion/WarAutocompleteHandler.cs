@@ -42,7 +42,7 @@ namespace Wp.Bot.Modules.ApplicationCommands.AutoCompletion
 
 			IEnumerable<AutocompleteResult> results = allEvents
 				.OrderBy(e => e.Start)
-				.Select(e => new AutocompleteResult(dbGuild.ManagerText.WarEditAutocompletion(e.Start.ToString("dd.MM", cultureInfo), DateTimeOffset.FromUnixTimeSeconds((long)(e.End - e.Start).TotalSeconds).ToString("HH:mm", cultureInfo), e.OpponentClan?.Name ?? e.OpponentTag), e.Id));
+				.Select(e => new AutocompleteResult(dbGuild.ManagerText.WarEditAutocompletion(e.Start.ToString("dd/MM, HH:mm", cultureInfo), DateTimeOffset.FromUnixTimeSeconds((long)(e.End - e.Start).TotalSeconds).ToString("HH:mm", cultureInfo), e.OpponentClan?.Name ?? e.OpponentTag), e.Id));
 
 			if (predicate != string.Empty)
 			{

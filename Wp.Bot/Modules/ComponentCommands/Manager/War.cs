@@ -7,6 +7,7 @@ using Wp.Api.Models;
 using Wp.Bot.Modules.ModalCommands.Modals;
 using Wp.Bot.Services;
 using Wp.Common.Models;
+using Wp.Common.Services.Extensions;
 using Wp.Common.Settings;
 using Wp.Database.Services;
 using Wp.Database.Settings;
@@ -74,7 +75,74 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 		[ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_DAY, runMode: RunMode.Async)]
 		public async Task EditDay()
 		{
-			await RespondAsync("TODO", ephemeral: true);
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+			// Gets SocketMessageComponent and original message
+			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+			SocketUserMessage msg = socket.Message;
+
+			// Loads databases infos
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
+
+			Calendar dbCalendar = Database.Context
+				.Calendars
+				.First(c => c.Guild == dbGuild);
+
+			// Gets interaction text
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			// Gets component datas
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
+			{
+				await RespondAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+				return;
+			}
+
+			// Recovers data
+			string eventId = datas[0];
+			CalendarEvent warEvent = (await GoogleCalendarApi.Events.GetAsync(dbCalendar.Id, eventId))!;
+
+			// Gets date and culture info
+			DateTimeOffset today = dbGuild.Now.Date;
+			CultureInfo cultureInfo = dbGuild.CultureInfo;
+
+			// Build select menu
+			SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+				.WithCustomId(IdProvider.WAR_EDIT_SELECT_DAY);
+
+			Emoji calendar = new("🗓");
+
+			Enumerable.Range(0, Settings.NB_WAR_PROPOSED_DATES)
+				.ToList()
+				.ForEach(n =>
+				{
+					DateTimeOffset day = today.AddDays(n);
+					bool isDay = day.Date == warEvent.Start.Date;
+
+					menuBuilder.AddOption(day.ToString("d", cultureInfo), day.ToString(), day.ToString("dddd", cultureInfo).Capitalize(), calendar, isDay);
+				});
+
+			// Cancel button
+			ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+				.WithLabel(generalResponses.CancelButton)
+				.WithStyle(ButtonStyle.Danger)
+				.WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+
+			// Build component
+			ComponentBuilder componentBuilder = new ComponentBuilder()
+				.WithSelectMenu(menuBuilder)
+				.WithButton(cancelButtonBuilder);
+
+			IUserMessage message = await FollowupAsync(interactionText.WarEditDaySelect, components: componentBuilder.Build(), ephemeral: true);
+
+			// Inserts new datas
+			datas = new[] { eventId };
+			storage.MessageDatas.TryAdd(message.Id, datas);
 		}
 
 		[ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_FORMAT, runMode: RunMode.Async)]
@@ -571,7 +639,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 				.First(g => g.Id == Context.Guild.Id);
 
 			// Filters for guild
-			Common.Models.Calendar dbCalendar = calendars
+			Calendar dbCalendar = calendars
 				.AsParallel()
 				.First(c => c.Guild == dbGuild);
 
@@ -590,6 +658,62 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 			}
 
 			await FollowupAsync(interactionText.WarDeleteMatchDeleted, ephemeral: true);
+		}
+
+		[ComponentInteraction(IdProvider.WAR_EDIT_SELECT_DAY, runMode: RunMode.Async)]
+		public async Task EditDay(string[] selections)
+		{
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+			// Gets SocketMessageComponent and original message
+			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+			SocketUserMessage msg = socket.Message;
+
+			// Loads databases infos
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
+
+			Calendar dbCalendar = Database.Context
+				.Calendars
+				.First(c => c.Guild == dbGuild);
+
+			// Gets interaction texts
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			// Gets component datas
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
+			{
+				await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+				return;
+			}
+
+			// Recovers datas
+			string eventId = datas[0];
+			DateTimeOffset warDate = DateTimeOffset.Parse(selections.First());
+
+			// Gets event
+			CalendarEvent warEvent = (await GoogleCalendarApi.Events.GetAsync(dbCalendar.Id, eventId))!;
+
+			// Gets format to update end date too
+			DateTimeOffset start = warEvent.Start;
+			TimeSpan format = warEvent.End - warEvent.Start;
+
+			// Updates and saves
+			warEvent.Start = warDate.AddHours(start.Hour).AddMinutes(start.Minute);
+			warEvent.End = warEvent.Start.AddMinutes(format.TotalMinutes);
+
+			if (!await GoogleCalendarApi.Events.UpdateAsync(warEvent, dbCalendar.Id))
+			{
+				await FollowupAsync(generalResponses.GoogleCannotUpdateEvent, ephemeral: true);
+
+				return;
+			}
+
+			await FollowupAsync(interactionText.WarEditDayChanged(warDate.ToString("d", dbGuild.CultureInfo)), ephemeral: true);
 		}
 	}
 }
