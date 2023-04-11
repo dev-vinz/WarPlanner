@@ -167,5 +167,31 @@
 
 		public string WarDeleteCannotDelete => "Hmm... il y a eu un problème lors de la suppression du match. Êtes-vous sûr–e que je possède encore les droits requis, et que le calendrier existe toujours ?";
 		public string WarDeleteMatchDeleted => "Le match a été supprimé de votre calendrier";
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                      WAR EDIT AUTOCOMPLETION                      *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string WarEditAutocompletion(string date, string timeInMinutes, string opponentName) => $"[{date}] ⚔️ {opponentName} ({timeInMinutes})";
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                          WAR EDIT COMMAND                         *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string WarEditOpponent => "Clan adverse";
+		public string WarEditFormat => "Format de guerre";
+		public string WarEditDay => "Jour de lancement";
+		public string WarEditStartHour => "Heure de lancement";
+		public string WarEditAddPlayer => "Ajouter des joueurs";
+		public string WarEditRemovePlayer => "Enlever des joueurs";
+		public string WarEditChooseEdition(string opponent) => $"Choisissez la modification que vous souhaitez faire sur votre match contre **{opponent}**";
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                      WAR EDIT OPPONENT MODAL                      *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string WarEditOpponentModalTitle => "Modification de l'adversaire";
+		public string WarEditOpponentModalField => "Tag Clash Of Clans de l'adversaire";
+		public string WarEditOpponentUpdated(string opponent) => $"L'adversaire sera désormais **{opponent}**";
 	}
 }

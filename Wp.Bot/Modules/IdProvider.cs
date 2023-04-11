@@ -73,5 +73,12 @@
 		public const string WAR_ADD_BUTTON_NEXT_PLAYERS = "war_add_button_next_players";
 
 		public const string WAR_DELETE_SELECT_EVENT = "war_delete_select_event";
+
+		public const string WAR_EDIT_BUTTON_OPPONENT = "war_edit_button_opponent";
+		public const string WAR_EDIT_BUTTON_FORMAT = "war_edit_button_format";
+		public const string WAR_EDIT_BUTTON_DAY = "war_edit_button_day";
+		public const string WAR_EDIT_BUTTON_START_HOUR = "war_edit_button_start_hour";
+		public const string WAR_EDIT_BUTTON_ADD_PLAYER = "war_edit_button_add_player";
+		public const string WAR_EDIT_BUTTON_REMOVE_PLAYER = "war_edit_button_remove_player";
 	}
 }

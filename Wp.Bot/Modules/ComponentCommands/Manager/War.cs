@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using System.Globalization;
 using Wp.Api;
 using Wp.Api.Models;
+using Wp.Bot.Modules.ModalCommands.Modals;
 using Wp.Bot.Services;
 using Wp.Common.Models;
 using Wp.Common.Settings;
@@ -13,6 +14,7 @@ using Wp.Discord;
 using Wp.Discord.ComponentInteraction;
 using Wp.Discord.Extensions;
 using Wp.Language;
+using Calendar = Wp.Common.Models.Calendar;
 
 namespace Wp.Bot.Modules.ComponentCommands.Manager
 {
@@ -61,6 +63,77 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 		{
 			// Simply redirect to select component, exactly the same interaction
 			await AddPlayers(Array.Empty<string>());
+		}
+
+		[ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_ADD_PLAYER, runMode: RunMode.Async)]
+		public async Task EditAddPlayer()
+		{
+			await RespondAsync("TODO", ephemeral: true);
+		}
+
+		[ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_DAY, runMode: RunMode.Async)]
+		public async Task EditDay()
+		{
+			await RespondAsync("TODO", ephemeral: true);
+		}
+
+		[ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_FORMAT, runMode: RunMode.Async)]
+		public async Task EditFormat()
+		{
+			await RespondAsync("TODO", ephemeral: true);
+		}
+
+		[ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_OPPONENT, runMode: RunMode.Async)]
+		public async Task EditOpponent()
+		{
+			// Gets SocketMessageComponent and original message
+			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+			SocketUserMessage msg = socket.Message;
+
+			// Gets guild and interaction text
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
+
+			Calendar dbCalendar = Database.Context
+				.Calendars
+				.First(c => c.Guild == dbGuild);
+
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			// Gets component datas
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryGetValue(msg.Id, out string[]? datas) && datas?.Length != 1)
+			{
+				await RespondAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+				return;
+			}
+
+			// Recovers data
+			string eventId = datas[0];
+
+			CalendarEvent warEvent = (await GoogleCalendarApi.Events.GetAsync(dbCalendar.Id, eventId))!;
+
+			ModalBuilder modalBuilder = new ModalBuilder()
+				.WithTitle(interactionText.WarEditOpponentModalTitle)
+				.WithCustomId(WarEditOpponentModal.ID)
+				.AddTextInput(interactionText.WarEditOpponentModalField, WarEditOpponentModal.OPPONENT_TAG_ID, value: warEvent.OpponentTag);
+
+			await RespondWithModalAsync(modalBuilder.Build());
+		}
+
+		[ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_REMOVE_PLAYER, runMode: RunMode.Async)]
+		public async Task EditRemovePlayer()
+		{
+			await RespondAsync("TODO", ephemeral: true);
+		}
+
+		[ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_START_HOUR, runMode: RunMode.Async)]
+		public async Task EditStartHour()
+		{
+			await RespondAsync("TODO", ephemeral: true);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\

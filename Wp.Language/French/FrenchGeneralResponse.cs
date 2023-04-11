@@ -24,6 +24,7 @@
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		public string GoogleCannotAccessCalendar => "Je n'ai pas accès à ce calendrier\nÊtes-vous sûr-e de m'avoir ajouté correctement ?";
+		public string GoogleCannotUpdateEvent => "Une erreur est survenue, je n'ai pas réussi à modifier cet évènement dans votre calendrier Google";
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           SOCKET CHANNELS                         *|

@@ -38,6 +38,7 @@ namespace Wp.Language
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		public string GoogleCannotAccessCalendar { get; }
+		public string GoogleCannotUpdateEvent { get; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           SOCKET CHANNELS                         *|

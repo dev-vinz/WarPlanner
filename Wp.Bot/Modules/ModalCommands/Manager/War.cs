@@ -1,37 +1,30 @@
-﻿using Discord;
-using Discord.Interactions;
+﻿using Discord.Interactions;
+using Discord.Rest;
 using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
-using Wp.Api.Settings;
+using Wp.Api;
+using Wp.Api.Models;
+using Wp.Bot.Modules.ModalCommands.Modals;
 using Wp.Bot.Services;
-using Wp.Database.Settings;
+using Wp.Common.Models;
+using Wp.Discord.ComponentInteraction;
+using Wp.Discord.Extensions;
+using Wp.Language;
 
-namespace Wp.Bot
+namespace Wp.Bot.Modules.ModalCommands.Manager
 {
-	public class Program
+	public class War : InteractionModuleBase<SocketInteractionContext>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		private DiscordSocketClient? client;
-		private InteractionService? commands;
+		private readonly CommandHandler handler;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                             PROPERTIES                            *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		private static bool IsDebug
-		{
-			get
-			{
-#if DEBUG
-				return true;
-#else
-                return false;
-#endif
-			}
-		}
+		public InteractionService? Commands { get; set; }
 
 		/* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
@@ -43,7 +36,10 @@ namespace Wp.Bot
         |*                            CONSTRUCTORS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
+		public War(CommandHandler handler)
+		{
+			this.handler = handler;
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          ABSTRACT METHODS                         *|
@@ -55,32 +51,64 @@ namespace Wp.Bot
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public async Task MainAsync()
+		[ModalInteraction(WarEditOpponentModal.ID, runMode: RunMode.Async)]
+		public async Task EditName(WarEditOpponentModal modal)
 		{
-			// Call ConfigureServices to create the ServiceCollection/Provider for passing around the services
-			using ServiceProvider services = ConfigureServices();
+			await DeferAsync(true);
 
-			// Get the client and assign to client 
-			// You get the services via GetRequiredService<T>
-			client = services.GetRequiredService<DiscordSocketClient>();
-			commands = services.GetRequiredService<InteractionService>();
+			// Gets SocketMessageComponent and original message
+			SocketModal socket = (Context.Interaction as SocketModal)!;
+			RestInteractionMessage originalMessage = await socket.GetOriginalResponseAsync();
 
-			// Setup logging and the ready event
-			client.Log += LogAsync;
-			client.Ready += ReadyAsync;
-			commands.Log += LogAsync;
+			// Disable all components
+			await originalMessage.DisableAllComponentsAsync();
 
-			// This is where we get the Token value from the configuration file, and start the bot
-			await client.LoginAsync(TokenType.Bot, Keys.DISCORD_BOT_TOKEN);
-			await client.StartAsync();
+			// Gets guild and interaction text
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
 
-			// We get the CommandHandler class here and call the InitializeAsync method to start things up for the CommandHandler service
-			await services.GetRequiredService<CommandHandler>().InitializeAsync();
+			Calendar dbCalendar = Database.Context
+				.Calendars
+				.First(c => c.Guild == dbGuild);
 
-			// Same for EventHandler
-			await services.GetRequiredService<Services.EventHandler>().InitializeAsync();
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
-			await Task.Delay(Timeout.Infinite);
+			// Gets component datas and remove then instantly
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryRemove(originalMessage.Id, out string[]? datas) && datas?.Length != 1)
+			{
+				await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+				return;
+			}
+
+			// Recovers data
+			string eventId = datas[0];
+			CalendarEvent warEvent = (await GoogleCalendarApi.Events.GetAsync(dbCalendar.Id, eventId))!;
+
+			// Checks Clash Of Clans tag
+			ClashOfClans.Models.Clan? cClan = await ClashOfClansApi.Clans.GetByTagAsync(modal.Tag);
+
+			if (cClan == null)
+			{
+				await FollowupAsync(generalResponses.ClashOfClansError, ephemeral: true);
+
+				return;
+			}
+
+			// Updates war's opponent
+			warEvent.OpponentTag = cClan.Tag;
+
+			if (!await GoogleCalendarApi.Events.UpdateAsync(warEvent, dbCalendar.Id))
+			{
+				await FollowupAsync(generalResponses.GoogleCannotUpdateEvent, ephemeral: true);
+
+				return;
+			}
+
+			await FollowupAsync(interactionText.WarEditOpponentUpdated(cClan.Name), ephemeral: true);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -93,27 +121,7 @@ namespace Wp.Bot
         |*                          PRIVATE METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		private Task LogAsync(LogMessage log)
-		{
-			Console.WriteLine(log.ToString());
-			return Task.CompletedTask;
-		}
 
-		private async Task ReadyAsync()
-		{
-			if (IsDebug)
-			{
-				Console.WriteLine($"DEBUG MODE : Adding commands to {Configurations.DEV_GUILD_ID}...");
-				await commands!.RegisterCommandsToGuildAsync(Configurations.DEV_GUILD_ID);
-			}
-			else
-			{
-				await client!.SetGameAsync("Clash Of Clans");
-				await commands!.RegisterCommandsGloballyAsync(true);
-			}
-
-			Console.WriteLine($"Connected as [{client!.CurrentUser}]");
-		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          OVERRIDE METHODS                         *|
@@ -125,23 +133,7 @@ namespace Wp.Bot
         |*                           STATIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		private static ServiceProvider ConfigureServices()
-		{
-			return new ServiceCollection()
-				.AddSingleton(x => new DiscordSocketClient(new DiscordSocketConfig
-				{
-					GatewayIntents = GatewayIntents.AllUnprivileged,
-					AlwaysDownloadUsers = true,
-					DefaultRetryMode = RetryMode.RetryTimeouts,
-					LogGatewayIntentWarnings = false,
-				}))
-				.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
-				.AddSingleton<CommandHandler>()
-				.AddSingleton<Services.EventHandler>()
-				.BuildServiceProvider();
-		}
 
-		public static Task Main(string[] _) => new Program().MainAsync();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                              INDEXERS                             *|
@@ -152,5 +144,8 @@ namespace Wp.Bot
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         OPERATORS OVERLOAD                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+
 	}
 }

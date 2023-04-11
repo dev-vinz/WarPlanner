@@ -5,44 +5,46 @@ using Wp.Database.Services;
 
 namespace Wp.Bot.Modules.ApplicationCommands.AutoCompletion
 {
-    public class CompetitionAutocompleteHandler : AutocompleteHandler
-    {
-        private static readonly int MAX_SUGGESTIONS = 25;
+	public class CompetitionAutocompleteHandler : AutocompleteHandler
+	{
+		private static readonly int MAX_SUGGESTIONS = 25;
 
-        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          OVERRIDE METHODS                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        public override Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context, IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
-        {
-            string predicate = autocompleteInteraction.Data.Current.Value as string ?? string.Empty;
+		public override Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context, IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
+		{
+			string predicate = autocompleteInteraction.Data.Current.Value as string ?? string.Empty;
 
-            // Loads databases infos
-            DbCompetitions competitions = Database.Context.Competitions;
-            Guild dbGuild = Database.Context
-                .Guilds
-                .First(g => g.Id == context.Guild.Id);
+			// Loads databases infos
+			DbCompetitions competitions = Database.Context.Competitions;
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == context.Guild.Id);
 
-            // Sorted competitions
-            IEnumerable<Competition> dbCompetitions = competitions
-                .Where(c => c.Guild == dbGuild);
+			// Sorted competitions
+			IEnumerable<Competition> dbCompetitions = competitions
+				.Where(c => c.Guild == dbGuild);
 
-            if (predicate != string.Empty)
-            {
-                dbCompetitions = dbCompetitions.Where(c => c.Name.Contains(predicate, StringComparison.InvariantCultureIgnoreCase));
-            }
+			if (!dbCompetitions.Any()) return Task.FromResult(AutocompletionResult.FromError(InteractionCommandError.Exception, "TODO: No competition registered"));
 
-            IEnumerable<AutocompleteResult> results = dbCompetitions
-                .AsParallel()
-                .Select(c => new AutocompleteResult(c.Name, c.Id.ToString()));
+			if (predicate != string.Empty)
+			{
+				dbCompetitions = dbCompetitions.Where(c => c.Name.Contains(predicate, StringComparison.InvariantCultureIgnoreCase));
+			}
 
-            return Task.FromResult(
-                AutocompletionResult.FromSuccess(
-                        results
-                            .OrderBy(r => r.Name)
-                            .Take(MAX_SUGGESTIONS)
-                    )
-                );
-        }
-    }
+			IEnumerable<AutocompleteResult> results = dbCompetitions
+				.AsParallel()
+				.Select(c => new AutocompleteResult(c.Name, c.Id.ToString()));
+
+			return Task.FromResult(
+				AutocompletionResult.FromSuccess(
+						results
+							.OrderBy(r => r.Name)
+							.Take(MAX_SUGGESTIONS)
+					)
+				);
+		}
+	}
 }

@@ -10,10 +10,10 @@ namespace Wp.Api.Models
 
 		private readonly string id;
 		private readonly string competitionName;
-		private readonly string opponentTag;
-		private readonly DateTimeOffset start;
-		private readonly DateTimeOffset end;
-		private readonly string[] players;
+		private string opponentTag;
+		private DateTimeOffset start;
+		private DateTimeOffset end;
+		private string[] players;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                             PROPERTIES                            *|
@@ -32,22 +32,22 @@ namespace Wp.Api.Models
 		/// <summary>
 		/// Gets the match opponent tag
 		/// </summary>
-		public string OpponentTag { get => opponentTag; }
+		public string OpponentTag { get => opponentTag; set => opponentTag = value; }
 
 		/// <summary>
 		/// Gets the match start time
 		/// </summary>
-		public DateTimeOffset Start { get => start; }
+		public DateTimeOffset Start { get => start; set => start = value; }
 
 		/// <summary>
 		/// Gets the match end time
 		/// </summary>
-		public DateTimeOffset End { get => end; }
+		public DateTimeOffset End { get => end; set => end = value; }
 
 		/// <summary>
 		/// Gets the match players
 		/// </summary>
-		public IReadOnlyCollection<string> Players { get => players; }
+		public IReadOnlyCollection<string> Players { get => players; set => players = value.ToArray(); }
 
 		/* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|

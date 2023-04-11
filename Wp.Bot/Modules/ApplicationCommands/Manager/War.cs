@@ -256,6 +256,110 @@ namespace Wp.Bot.Modules.ApplicationCommands.Manager
 			});
 		}
 
+		[SlashCommand("edit", "Edit a registered war from the calendar", runMode: RunMode.Async)]
+		public async Task Edit([Summary("war", "The war you want to edit"), Autocomplete(typeof(WarAutocompleteHandler))] string eventId)
+		{
+			await DeferAsync(true);
+
+			// Loads databases infos
+			DbCalendars calendars = Database.Context.Calendars;
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
+
+			// Filters for guild
+			Calendar dbCalendar = calendars
+				.AsParallel()
+				.First(c => c.Guild == dbGuild);
+
+			// Gets command responses
+			IAdmin adminResponses = dbGuild.AdminText;
+			IManager commandText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			if (dbCalendar is null)
+			{
+				await ModifyOriginalResponseAsync(msg => msg.Content = adminResponses.CalendarIdNotSet);
+
+				return;
+			}
+
+			// Checks if Clash Of Clans API is online
+			if (!await ClashOfClansApi.TryAccessApiAsync())
+			{
+				await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.ClashOfClansError);
+
+				return;
+			}
+
+			// Cancel button
+			ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+				.WithLabel(generalResponses.CancelButton)
+				.WithStyle(ButtonStyle.Danger)
+				.WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+
+			// Change opponent
+			ButtonBuilder opponentButtonBuilder = new ButtonBuilder()
+				.WithLabel(commandText.WarEditOpponent)
+				.WithStyle(ButtonStyle.Secondary)
+				.WithCustomId(IdProvider.WAR_EDIT_BUTTON_OPPONENT);
+
+			// Change format
+			ButtonBuilder formatButtonBuilder = new ButtonBuilder()
+				.WithLabel(commandText.WarEditFormat)
+				.WithStyle(ButtonStyle.Secondary)
+				.WithCustomId(IdProvider.WAR_EDIT_BUTTON_FORMAT);
+
+			// Change day
+			ButtonBuilder dayButtonBuilder = new ButtonBuilder()
+				.WithLabel(commandText.WarEditDay)
+				.WithStyle(ButtonStyle.Secondary)
+				.WithCustomId(IdProvider.WAR_EDIT_BUTTON_DAY);
+
+			// Change hour
+			ButtonBuilder timeButtonBuilder = new ButtonBuilder()
+				.WithLabel(commandText.WarEditStartHour)
+				.WithStyle(ButtonStyle.Secondary)
+				.WithCustomId(IdProvider.WAR_EDIT_BUTTON_START_HOUR);
+
+			// Remove players
+			ButtonBuilder removePlayerButtonBuilder = new ButtonBuilder()
+				.WithLabel(commandText.WarEditRemovePlayer)
+				.WithStyle(ButtonStyle.Primary)
+				.WithCustomId(IdProvider.WAR_EDIT_BUTTON_REMOVE_PLAYER);
+
+			// Add players
+			ButtonBuilder addPlayerButtonBuilder = new ButtonBuilder()
+				.WithLabel(commandText.WarEditAddPlayer)
+				.WithStyle(ButtonStyle.Success)
+				.WithCustomId(IdProvider.WAR_EDIT_BUTTON_ADD_PLAYER);
+
+			// Build component
+			ComponentBuilder componentBuilder = new ComponentBuilder()
+				.WithButton(opponentButtonBuilder)
+				.WithButton(formatButtonBuilder)
+				.WithButton(dayButtonBuilder, 1)
+				.WithButton(timeButtonBuilder, 1)
+				.WithButton(removePlayerButtonBuilder, 2)
+				.WithButton(addPlayerButtonBuilder, 2)
+				.WithButton(cancelButtonBuilder, 3);
+
+			// Gets event informations
+			CalendarEvent clashEvent = (await GoogleCalendarApi.Events.GetAsync(dbCalendar.Id, eventId))!;
+
+			IUserMessage message = await ModifyOriginalResponseAsync(msg =>
+			{
+				msg.Content = commandText.WarEditChooseEdition(clashEvent.OpponentClan.Name);
+				msg.Components = new(componentBuilder.Build());
+			});
+
+			// Registers informations into storage
+			ComponentStorage storage = ComponentStorage.GetInstance();
+
+			string[] datas = new[] { eventId };
+			storage.MessageDatas.TryAdd(message.Id, datas);
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         PROTECTED METHODS                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

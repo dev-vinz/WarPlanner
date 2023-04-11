@@ -160,5 +160,31 @@
 
 		public string WarDeleteCannotDelete { get; }
 		public string WarDeleteMatchDeleted { get; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                      WAR EDIT AUTOCOMPLETION                      *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string WarEditAutocompletion(string date, string timeInMinutes, string opponentName);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                          WAR EDIT COMMAND                         *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string WarEditOpponent { get; }
+		public string WarEditFormat { get; }
+		public string WarEditDay { get; }
+		public string WarEditStartHour { get; }
+		public string WarEditAddPlayer { get; }
+		public string WarEditRemovePlayer { get; }
+		public string WarEditChooseEdition(string opponent);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                      WAR EDIT OPPONENT MODAL                      *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string WarEditOpponentModalTitle { get; }
+		public string WarEditOpponentModalField { get; }
+		public string WarEditOpponentUpdated(string opponent);
 	}
 }
