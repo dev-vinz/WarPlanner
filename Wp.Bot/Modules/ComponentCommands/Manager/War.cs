@@ -148,7 +148,67 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 		[ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_FORMAT, runMode: RunMode.Async)]
 		public async Task EditFormat()
 		{
-			await RespondAsync("TODO", ephemeral: true);
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+			// Gets SocketMessageComponent and original message
+			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+			SocketUserMessage msg = socket.Message;
+
+			// Loads databases infos
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
+
+			// Gets interaction text
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			// Gets component datas
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
+			{
+				await RespondAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+				return;
+			}
+
+			// Build options
+			List<SelectMenuOptionBuilder> options = new()
+			{
+				new SelectMenuOptionBuilder($"5 {generalResponses.Minutes}", "5"),
+				new SelectMenuOptionBuilder($"15 {generalResponses.Minutes}", "15"),
+				new SelectMenuOptionBuilder($"30 {generalResponses.Minutes}", "30"),
+				new SelectMenuOptionBuilder($"1 {generalResponses.Hour}", "60"),
+				new SelectMenuOptionBuilder($"2 {generalResponses.Hours}", "120"),
+				new SelectMenuOptionBuilder($"4 {generalResponses.Hours}", "240"),
+				new SelectMenuOptionBuilder($"6 {generalResponses.Hours}", "360"),
+				new SelectMenuOptionBuilder($"8 {generalResponses.Hours}", "480"),
+				new SelectMenuOptionBuilder($"12 {generalResponses.Hours}", "720"),
+				new SelectMenuOptionBuilder($"16 {generalResponses.Hours}", "960"),
+				new SelectMenuOptionBuilder($"20 {generalResponses.Hours}", "1200"),
+				new SelectMenuOptionBuilder($"1 {generalResponses.Day}", "1440"),
+			};
+
+			// Build select menu
+			SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+				.WithCustomId(IdProvider.WAR_EDIT_SELECT_FORMAT_PREPARATION)
+				.WithOptions(options);
+
+			// Cancel button
+			ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+				.WithLabel(generalResponses.CancelButton)
+				.WithStyle(ButtonStyle.Danger)
+				.WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+
+			// Build component
+			ComponentBuilder componentBuilder = new ComponentBuilder()
+				.WithSelectMenu(menuBuilder)
+				.WithButton(cancelButtonBuilder);
+
+			IUserMessage message = await FollowupAsync(interactionText.WarEditFormatSelect, components: componentBuilder.Build(), ephemeral: true);
+
+			// Inserts new datas
+			storage.MessageDatas.TryAdd(message.Id, datas);
 		}
 
 		[ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_OPPONENT, runMode: RunMode.Async)]
@@ -514,7 +574,6 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 			}
 		}
 
-
 		[ComponentInteraction(IdProvider.WAR_ADD_SELECT_PLAYERS, runMode: RunMode.Async)]
 		public async Task AddPlayers(string[] selections)
 		{
@@ -660,6 +719,94 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 			await FollowupAsync(interactionText.WarDeleteMatchDeleted, ephemeral: true);
 		}
 
+		[ComponentInteraction(IdProvider.WAR_EDIT_SELECT_CHOOSE_UPDATE, runMode: RunMode.Async)]
+		public async Task EditChooseUpdate(string[] selections)
+		{
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+			// Gets data
+			string eventId = selections.First();
+
+			// Loads databases infos
+			DbCalendars calendars = Database.Context.Calendars;
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
+
+			// Filters for guild
+			Calendar dbCalendar = calendars
+				.AsParallel()
+				.First(c => c.Guild == dbGuild);
+
+			// Gets command responses
+			IAdmin adminResponses = dbGuild.AdminText;
+			IManager commandText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			// Cancel button
+			ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+				.WithLabel(generalResponses.CancelButton)
+				.WithStyle(ButtonStyle.Danger)
+				.WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+
+			// Change opponent
+			ButtonBuilder opponentButtonBuilder = new ButtonBuilder()
+				.WithLabel(commandText.WarEditOpponent)
+				.WithStyle(ButtonStyle.Secondary)
+				.WithCustomId(IdProvider.WAR_EDIT_BUTTON_OPPONENT);
+
+			// Change format
+			ButtonBuilder formatButtonBuilder = new ButtonBuilder()
+				.WithLabel(commandText.WarEditFormat)
+				.WithStyle(ButtonStyle.Secondary)
+				.WithCustomId(IdProvider.WAR_EDIT_BUTTON_FORMAT);
+
+			// Change day
+			ButtonBuilder dayButtonBuilder = new ButtonBuilder()
+				.WithLabel(commandText.WarEditDay)
+				.WithStyle(ButtonStyle.Secondary)
+				.WithCustomId(IdProvider.WAR_EDIT_BUTTON_DAY);
+
+			// Change hour
+			ButtonBuilder timeButtonBuilder = new ButtonBuilder()
+				.WithLabel(commandText.WarEditStartHour)
+				.WithStyle(ButtonStyle.Secondary)
+				.WithCustomId(IdProvider.WAR_EDIT_BUTTON_START_HOUR);
+
+			// Remove players
+			ButtonBuilder removePlayerButtonBuilder = new ButtonBuilder()
+				.WithLabel(commandText.WarEditRemovePlayer)
+				.WithStyle(ButtonStyle.Primary)
+				.WithCustomId(IdProvider.WAR_EDIT_BUTTON_REMOVE_PLAYER);
+
+			// Add players
+			ButtonBuilder addPlayerButtonBuilder = new ButtonBuilder()
+				.WithLabel(commandText.WarEditAddPlayer)
+				.WithStyle(ButtonStyle.Success)
+				.WithCustomId(IdProvider.WAR_EDIT_BUTTON_ADD_PLAYER);
+
+			// Build component
+			ComponentBuilder componentBuilder = new ComponentBuilder()
+				.WithButton(opponentButtonBuilder)
+				.WithButton(formatButtonBuilder)
+				.WithButton(dayButtonBuilder, 1)
+				.WithButton(timeButtonBuilder, 1)
+				.WithButton(removePlayerButtonBuilder, 2)
+				.WithButton(addPlayerButtonBuilder, 2)
+				.WithButton(cancelButtonBuilder, 3);
+
+			// Gets event informations
+			CalendarEvent clashEvent = (await GoogleCalendarApi.Events.GetAsync(dbCalendar.Id, eventId))!;
+
+			IUserMessage message = await FollowupAsync(commandText.WarEditChooseEdition(clashEvent.OpponentClan.Name), components: componentBuilder.Build(), ephemeral: true);
+
+			// Registers informations into storage
+			ComponentStorage storage = ComponentStorage.GetInstance();
+
+			string[] datas = new[] { eventId };
+			storage.MessageDatas.TryAdd(message.Id, datas);
+		}
+
 		[ComponentInteraction(IdProvider.WAR_EDIT_SELECT_DAY, runMode: RunMode.Async)]
 		public async Task EditDay(string[] selections)
 		{
@@ -714,6 +861,126 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 			}
 
 			await FollowupAsync(interactionText.WarEditDayChanged(warDate.ToString("d", dbGuild.CultureInfo)), ephemeral: true);
+		}
+
+		[ComponentInteraction(IdProvider.WAR_EDIT_SELECT_FORMAT_PREPARATION, runMode: RunMode.Async)]
+		public async Task EditFormatPreparation(string[] selections)
+		{
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+			// Gets SocketMessageComponent and original message
+			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+			SocketUserMessage msg = socket.Message;
+
+			// Loads databases infos
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
+
+			// Gets interaction text
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			// Gets component datas
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
+			{
+				await RespondAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+				return;
+			}
+
+			// Build options
+			List<SelectMenuOptionBuilder> options = new()
+			{
+				new SelectMenuOptionBuilder($"15 {generalResponses.Minutes}", "15"),
+				new SelectMenuOptionBuilder($"30 {generalResponses.Minutes}", "30"),
+				new SelectMenuOptionBuilder($"45 {generalResponses.Minutes}", "45"),
+				new SelectMenuOptionBuilder($"1 {generalResponses.Hour}", "60"),
+				new SelectMenuOptionBuilder($"2 {generalResponses.Hours}", "120"),
+				new SelectMenuOptionBuilder($"4 {generalResponses.Hours}", "240"),
+				new SelectMenuOptionBuilder($"6 {generalResponses.Hours}", "360"),
+				new SelectMenuOptionBuilder($"8 {generalResponses.Hours}", "480"),
+				new SelectMenuOptionBuilder($"12 {generalResponses.Hours}", "720"),
+				new SelectMenuOptionBuilder($"16 {generalResponses.Hours}", "960"),
+				new SelectMenuOptionBuilder($"20 {generalResponses.Hours}", "1200"),
+				new SelectMenuOptionBuilder($"1 {generalResponses.Day}", "1440"),
+			};
+
+			// Build select menu
+			SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+				.WithCustomId(IdProvider.WAR_EDIT_SELECT_FORMAT_WAR)
+				.WithOptions(options);
+
+			// Cancel button
+			ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+				.WithLabel(generalResponses.CancelButton)
+				.WithStyle(ButtonStyle.Danger)
+				.WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+
+			// Build component
+			ComponentBuilder componentBuilder = new ComponentBuilder()
+				.WithSelectMenu(menuBuilder)
+				.WithButton(cancelButtonBuilder);
+
+			IUserMessage message = await FollowupAsync(interactionText.WarEditFormatPreparation, components: componentBuilder.Build(), ephemeral: true);
+
+			// Inserts new datas
+			datas = new[] { datas[0], selections.First() };
+			storage.MessageDatas.TryAdd(message.Id, datas);
+		}
+
+		[ComponentInteraction(IdProvider.WAR_EDIT_SELECT_FORMAT_WAR, runMode: RunMode.Async)]
+		public async Task EditFormatWar(string[] selections)
+		{
+			await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+			// Gets SocketMessageComponent and original message
+			SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+			SocketUserMessage msg = socket.Message;
+
+			// Loads databases infos
+			Guild dbGuild = Database.Context
+				.Guilds
+				.First(g => g.Id == Context.Guild.Id);
+
+			Calendar dbCalendar = Database.Context
+				.Calendars
+				.First(c => c.Guild == dbGuild);
+
+			// Gets interaction text
+			IManager interactionText = dbGuild.ManagerText;
+			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+			// Gets component datas
+			ComponentStorage storage = ComponentStorage.GetInstance();
+			if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 2)
+			{
+				await RespondAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+				return;
+			}
+
+			// Recovers datas
+			string eventId = datas[0];
+
+			int preparationTime = int.Parse(datas[1]);
+			int warTime = int.Parse(selections.First());
+
+			TimeSpan format = TimeSpan.FromMinutes(preparationTime + warTime);
+			CalendarEvent warEvent = (await GoogleCalendarApi.Events.GetAsync(dbCalendar.Id, eventId))!;
+
+			// Updates and saves
+			warEvent.End = warEvent.Start.AddMinutes(format.TotalMinutes);
+
+			if (!await GoogleCalendarApi.Events.UpdateAsync(warEvent, dbCalendar.Id))
+			{
+				await FollowupAsync(generalResponses.GoogleCannotUpdateEvent, ephemeral: true);
+
+				return;
+			}
+
+			await FollowupAsync(interactionText.WarEditFormatChanged, ephemeral: true);
 		}
 	}
 }

@@ -46,7 +46,7 @@
         |*                     GLOBAL BUTTONS INTERACTION                    *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public string ActionCanceledByButton => "Très bien, j'annule";
+		public string ActionCanceledByButton => "C'est noté, l'interaction en cours a été annulée";
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                            GLOBAL DAYS                            *|

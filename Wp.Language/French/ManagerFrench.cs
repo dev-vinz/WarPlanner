@@ -178,6 +178,14 @@
         |*                          WAR EDIT COMMAND                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		public string WarEditNoEvents => "Vous n'avez aucun match prévu ces prochains jours";
+		public string WarEditMatchFromTo(string date, string start, string end) => $"Le {date}, de {start} à {end}";
+		public string WarEditChooseMatch => "Sélectionnez le match que vous voulez modifier";
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                          WAR EDIT SELECT                          *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		public string WarEditOpponent => "Clan adverse";
 		public string WarEditFormat => "Format de guerre";
 		public string WarEditDay => "Jour de lancement";
@@ -197,6 +205,24 @@
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		public string WarEditDayChanged(string date) => $"Le match a été déplacé au **{date}**";
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                       WAR EDIT FORMAT BUTTON                      *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string WarEditFormatSelect => "Sélectionnez la durée de préparation";
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                 WAR EDIT FORMAT PREPARATION SELECT                *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string WarEditFormatPreparation => "Sélectionnez la durée de guerre";
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                     WAR EDIT FORMAT WAR SELECT                    *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string WarEditFormatChanged => "Les durées de préparation et de guerre de ce match ont été modifiées";
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                      WAR EDIT OPPONENT MODAL                      *|

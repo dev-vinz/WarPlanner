@@ -171,6 +171,14 @@
         |*                          WAR EDIT COMMAND                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		public string WarEditNoEvents { get; }
+		public string WarEditMatchFromTo(string date, string start, string end);
+		public string WarEditChooseMatch { get; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                          WAR EDIT SELECT                          *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		public string WarEditOpponent { get; }
 		public string WarEditFormat { get; }
 		public string WarEditDay { get; }
@@ -190,6 +198,24 @@
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		public string WarEditDayChanged(string date);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                       WAR EDIT FORMAT BUTTON                      *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string WarEditFormatSelect { get; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                 WAR EDIT FORMAT PREPARATION SELECT                *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string WarEditFormatPreparation { get; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                     WAR EDIT FORMAT WAR SELECT                    *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		public string WarEditFormatChanged { get; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                      WAR EDIT OPPONENT MODAL                      *|
