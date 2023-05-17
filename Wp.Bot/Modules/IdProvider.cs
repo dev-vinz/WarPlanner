@@ -78,6 +78,8 @@
 		public const string WAR_EDIT_SELECT_DAY = "war_edit_select_day";
 		public const string WAR_EDIT_SELECT_FORMAT_PREPARATION = "war_edit_select_format_preparation";
 		public const string WAR_EDIT_SELECT_FORMAT_WAR = "war_edit_select_format_war";
+		public const string WAR_EDIT_SELECT_START_HOUR = "war_edit_select_start_hour";
+		public const string WAR_EDIT_SELECT_START_MINUTE = "war_edit_select_start_minute";
 		public const string WAR_EDIT_BUTTON_OPPONENT = "war_edit_button_opponent";
 		public const string WAR_EDIT_BUTTON_FORMAT = "war_edit_button_format";
 		public const string WAR_EDIT_BUTTON_DAY = "war_edit_button_day";
