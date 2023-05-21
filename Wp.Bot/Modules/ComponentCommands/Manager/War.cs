@@ -68,9 +68,111 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
         }
 
         [ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_ADD_PLAYER, runMode: RunMode.Async)]
-        public async Task EditAddPlayer()
+        public async Task EditAddPlayers()
         {
-            await RespondAsync("TODO", ephemeral: true);
+            await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+            // Gets SocketMessageComponent and original message
+            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+            SocketUserMessage msg = socket.Message;
+
+            // Loads databases infos
+            DbPlayers players = Database.Context.Players;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
+
+            Calendar dbCalendar = Database.Context
+                .Calendars
+                .First(c => c.Guild == dbGuild);
+
+            // Filters for guild
+            Player[] dbPlayers = players
+                .AsParallel()
+                .Where(p => p.Guild == dbGuild || p.Guild.Id == Configurations.DEV_GUILD_ID)
+                .ToArray();
+
+            // Gets interaction text
+            IManager interactionText = dbGuild.ManagerText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+            // Gets component datas
+            ComponentStorage storage = ComponentStorage.GetInstance();
+            if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
+            {
+                await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+                return;
+            }
+
+            // Recovers data
+            string eventId = datas[0];
+            CalendarEvent warEvent = (await GoogleCalendarApi.Events.GetAsync(dbCalendar.Id, eventId))!;
+
+            // Gets all guild members
+            IReadOnlyCollection<SocketGuildUser> allMembers = Context.Guild.Users;
+
+            // Filters one more time
+            Player[] availablePlayers = dbPlayers
+                .Where(p =>
+                {
+                    SocketGuildUser? user = allMembers.FirstOrDefault(m => m.Id == p.Id);
+
+                    return user is not null && user.IsAPlayer() && p.Account.TownHallLevel >= dbGuild.MinimalTownHallLevel && !warEvent.Players.Contains(p.Tag, StringComparer.InvariantCultureIgnoreCase);
+                })
+                .OrderByDescending(p => p.Account.TownHallLevel)
+                .ThenBy(p => p.Account.Name)
+                .ToArray();
+
+            int nbPages = (int)Math.Ceiling((double)availablePlayers.Length / Settings.MAX_OPTION_PER_SELECT_MENU);
+            bool isLastPage = nbPages < 2;
+
+            // Filters for options
+            availablePlayers = availablePlayers
+                .Take(Settings.MAX_OPTION_PER_SELECT_MENU)
+                .ToArray();
+
+            // Build select menu
+            string customSelectId = isLastPage ? IdProvider.WAR_EDIT_SELECT_LAST_PLAYERS : IdProvider.WAR_EDIT_SELECT_PLAYERS;
+            SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+                .WithCustomId(customSelectId)
+                .WithMinValues(1)
+                .WithMaxValues(availablePlayers.Length);
+
+            availablePlayers
+                .ToList()
+                .ForEach(p =>
+                {
+                    ClashOfClans.Models.Player cPlayer = p.Account;
+                    menuBuilder.AddOption(cPlayer.Name, p.Tag, p.Tag, CustomEmojis.ParseTownHallLevel(cPlayer.TownHallLevel));
+                });
+
+            // Next button
+            string customButtonId = isLastPage ? IdProvider.WAR_EDIT_BUTTON_LAST_NEXT_PLAYERS : IdProvider.WAR_EDIT_BUTTON_NEXT_PLAYERS;
+            string buttonText = isLastPage ? interactionText.WarEditAddPlayersEnd : interactionText.WarEditAddPlayersNext;
+            ButtonBuilder nextButtonBuilder = new ButtonBuilder()
+                .WithLabel(buttonText)
+                .WithDisabled(isLastPage)
+                .WithStyle(ButtonStyle.Secondary)
+                .WithCustomId(customButtonId);
+
+            // Cancel button
+            ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+                .WithLabel(generalResponses.CancelButton)
+                .WithStyle(ButtonStyle.Danger)
+                .WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+
+            // Build component
+            ComponentBuilder componentBuilder = new ComponentBuilder()
+                .WithSelectMenu(menuBuilder)
+                .WithButton(cancelButtonBuilder)
+                .WithButton(nextButtonBuilder);
+
+            IUserMessage message = await FollowupAsync(interactionText.WarEditAddPlayersSelect(nbPages), components: componentBuilder.Build(), ephemeral: true);
+
+            // Inserts new datas
+            datas = new[] { eventId, "0" };
+            storage.MessageDatas.TryAdd(message.Id, datas);
         }
 
         [ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_DAY, runMode: RunMode.Async)]
@@ -99,7 +201,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             ComponentStorage storage = ComponentStorage.GetInstance();
             if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
             {
-                await RespondAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+                await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
 
                 return;
             }
@@ -171,7 +273,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             ComponentStorage storage = ComponentStorage.GetInstance();
             if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
             {
-                await RespondAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+                await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
 
                 return;
             }
@@ -238,7 +340,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             ComponentStorage storage = ComponentStorage.GetInstance();
             if (!storage.MessageDatas.TryGetValue(msg.Id, out string[]? datas) && datas?.Length != 1)
             {
-                await RespondAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+                await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
 
                 return;
             }
@@ -260,6 +362,20 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
         public async Task EditRemovePlayer()
         {
             await RespondAsync("TODO", ephemeral: true);
+        }
+
+        [ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_NEXT_PLAYERS, runMode: RunMode.Async)]
+        public async Task EditSkipPlayers()
+        {
+            // Simply redirect to select component, exactly the same interaction
+            await EditAddPlayers(Array.Empty<string>());
+        }
+
+        [ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_LAST_NEXT_PLAYERS, runMode: RunMode.Async)]
+        public async Task EditSkipLastPlayers()
+        {
+            // Simply redirect to select component, exactly the same interaction
+            await EditAddLastPlayers(Array.Empty<string>());
         }
 
         [ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_START_HOUR, runMode: RunMode.Async)]
@@ -783,6 +899,172 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             await FollowupAsync(interactionText.WarDeleteMatchDeleted, ephemeral: true);
         }
 
+        [ComponentInteraction(IdProvider.WAR_EDIT_SELECT_LAST_PLAYERS, runMode: RunMode.Async)]
+        public async Task EditAddLastPlayers(string[] selections)
+        {
+            await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+            // Gets SocketMessageComponent and original message
+            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+            SocketUserMessage msg = socket.Message;
+
+            // Loads databases infos
+            DbCalendars calendars = Database.Context.Calendars;
+            DbCompetitions competitions = Database.Context.Competitions;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
+
+            // Filters for guild
+            Calendar dbCalendar = calendars
+                .AsParallel()
+                .First(c => c.Guild == dbGuild);
+
+            // Gets interaction texts
+            IManager interactionText = dbGuild.ManagerText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+            // Gets component datas
+            ComponentStorage storage = ComponentStorage.GetInstance();
+            if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length < 2)
+            {
+                await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+                return;
+            }
+
+            // Recovers datas
+            string eventId = datas![0];
+            int currentPage = int.Parse(datas[1]);
+            string[] playersTag = datas.Skip(2).Concat(selections).ToArray();
+
+            CalendarEvent warEvent = (await GoogleCalendarApi.Events.GetAsync(dbCalendar.Id, eventId))!;
+
+            // Updates war match and saves into calendar
+            warEvent.Players = warEvent.Players.Concat(playersTag).ToArray();
+
+            if (!await GoogleCalendarApi.Events.UpdateAsync(warEvent, dbCalendar.Id))
+            {
+                await FollowupAsync(generalResponses.GoogleCannotUpdateEvent, ephemeral: true);
+
+                return;
+            }
+
+            await FollowupAsync(interactionText.WarEditAddPlayersUpdated(playersTag.Length), ephemeral: true);
+        }
+
+        [ComponentInteraction(IdProvider.WAR_EDIT_SELECT_PLAYERS, runMode: RunMode.Async)]
+        public async Task EditAddPlayers(string[] selections)
+        {
+            await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+            // Gets SocketMessageComponent and original message
+            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+            SocketUserMessage msg = socket.Message;
+
+            // Loads databases infos
+            DbPlayers players = Database.Context.Players;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
+
+            Calendar dbCalendar = Database.Context
+               .Calendars
+               .First(c => c.Guild == dbGuild);
+
+            // Filters for guild
+            Player[] dbPlayers = players
+                .AsParallel()
+                .Where(p => p.Guild == dbGuild || p.Guild.Id == Configurations.DEV_GUILD_ID)
+                .ToArray();
+
+            // Gets interaction texts
+            IManager interactionText = dbGuild.ManagerText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+            // Gets component datas
+            ComponentStorage storage = ComponentStorage.GetInstance();
+            if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length < 2)
+            {
+                await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+                return;
+            }
+
+            // Recovers datas
+            string eventId = datas![0];
+            int currentPage = int.Parse(datas[1]) + 1;
+            string[] playersTag = datas.Skip(2).Concat(selections).ToArray();
+
+            CalendarEvent warEvent = (await GoogleCalendarApi.Events.GetAsync(dbCalendar.Id, eventId))!;
+
+            // Gets all guild members
+            IReadOnlyCollection<SocketGuildUser> allMembers = Context.Guild.Users;
+
+            // Filters one more time
+            Player[] availablePlayers = dbPlayers
+                .Where(p =>
+                {
+                    SocketGuildUser? user = allMembers.FirstOrDefault(m => m.Id == p.Id);
+
+                    return user is not null && user.IsAPlayer() && p.Account.TownHallLevel >= dbGuild.MinimalTownHallLevel && !warEvent.Players.Contains(p.Tag, StringComparer.InvariantCultureIgnoreCase);
+                })
+                .OrderByDescending(p => p.Account.TownHallLevel)
+                .ThenBy(p => p.Account.Name)
+                .ToArray();
+
+            int nbPages = (int)Math.Ceiling((double)availablePlayers.Length / Settings.MAX_OPTION_PER_SELECT_MENU);
+            bool isLastPage = currentPage + 1 == nbPages;
+
+            // Filters for options
+            availablePlayers = availablePlayers
+                .Skip(currentPage * Settings.MAX_OPTION_PER_SELECT_MENU)
+                .Take(Settings.MAX_OPTION_PER_SELECT_MENU)
+                .ToArray();
+
+            // Build select menu
+            string customSelectId = isLastPage ? IdProvider.WAR_EDIT_SELECT_LAST_PLAYERS : IdProvider.WAR_EDIT_SELECT_PLAYERS;
+            SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+                .WithCustomId(customSelectId)
+                .WithMinValues(1)
+                .WithMaxValues(availablePlayers.Length);
+
+            availablePlayers
+                .ToList()
+                .ForEach(p =>
+                {
+                    ClashOfClans.Models.Player cPlayer = p.Account;
+                    menuBuilder.AddOption(cPlayer.Name, p.Tag, p.Tag, CustomEmojis.ParseTownHallLevel(cPlayer.TownHallLevel));
+                });
+
+            // Next button
+            string customButtonId = isLastPage ? IdProvider.WAR_EDIT_BUTTON_LAST_NEXT_PLAYERS : IdProvider.WAR_EDIT_BUTTON_NEXT_PLAYERS;
+            string buttonText = isLastPage ? interactionText.WarEditAddPlayersEnd : interactionText.WarEditAddPlayersNext;
+            ButtonBuilder nextButtonBuilder = new ButtonBuilder()
+                .WithLabel(buttonText)
+                .WithDisabled(isLastPage && !playersTag.Any())
+                .WithStyle(ButtonStyle.Secondary)
+                .WithCustomId(customButtonId);
+
+            // Cancel button
+            ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+                .WithLabel(generalResponses.CancelButton)
+                .WithStyle(ButtonStyle.Danger)
+                .WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+
+            // Build component
+            ComponentBuilder componentBuilder = new ComponentBuilder()
+                .WithSelectMenu(menuBuilder)
+                .WithButton(cancelButtonBuilder)
+                .WithButton(nextButtonBuilder);
+
+            IUserMessage message = await FollowupAsync(interactionText.WarEditAddPlayersSelect(currentPage + 1, nbPages, playersTag.Length), components: componentBuilder.Build(), ephemeral: true);
+
+            // Inserts new datas
+            datas = new[] { eventId, currentPage.ToString() }.Concat(playersTag).ToArray();
+            storage.MessageDatas.TryAdd(message.Id, datas);
+        }
+
         [ComponentInteraction(IdProvider.WAR_EDIT_SELECT_CHOOSE_UPDATE, runMode: RunMode.Async)]
         public async Task EditChooseUpdate(string[] selections)
         {
@@ -793,6 +1075,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 
             // Loads databases infos
             DbCalendars calendars = Database.Context.Calendars;
+            DbPlayers players = Database.Context.Players;
             Guild dbGuild = Database.Context
                 .Guilds
                 .First(g => g.Id == Context.Guild.Id);
@@ -801,6 +1084,29 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             Calendar dbCalendar = calendars
                 .AsParallel()
                 .First(c => c.Guild == dbGuild);
+
+            Player[] dbPlayers = players
+                .AsParallel()
+                .Where(p => p.Guild == dbGuild || p.Guild.Id == Configurations.DEV_GUILD_ID)
+                .ToArray();
+
+            // Gets event informations
+            CalendarEvent clashEvent = (await GoogleCalendarApi.Events.GetAsync(dbCalendar.Id, eventId))!;
+
+            // Gets all guild members
+            IReadOnlyCollection<SocketGuildUser> allMembers = Context.Guild.Users;
+
+            // Filters one more time
+            Player[] availablePlayers = dbPlayers
+                .Where(p =>
+                {
+                    SocketGuildUser? user = allMembers.FirstOrDefault(m => m.Id == p.Id);
+
+                    return user is not null && user.IsAPlayer() && p.Account.TownHallLevel >= dbGuild.MinimalTownHallLevel && !clashEvent.Players.Contains(p.Tag);
+                })
+                .OrderByDescending(p => p.Account.TownHallLevel)
+                .ThenBy(p => p.Account.Name)
+                .ToArray();
 
             // Gets command responses
             IAdmin adminResponses = dbGuild.AdminText;
@@ -841,12 +1147,14 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             ButtonBuilder removePlayerButtonBuilder = new ButtonBuilder()
                 .WithLabel(commandText.WarEditRemovePlayer)
                 .WithStyle(ButtonStyle.Primary)
+                .WithDisabled(!clashEvent.Players.Any())
                 .WithCustomId(IdProvider.WAR_EDIT_BUTTON_REMOVE_PLAYER);
 
             // Add players
             ButtonBuilder addPlayerButtonBuilder = new ButtonBuilder()
                 .WithLabel(commandText.WarEditAddPlayer)
                 .WithStyle(ButtonStyle.Success)
+                .WithDisabled(!availablePlayers.Any())
                 .WithCustomId(IdProvider.WAR_EDIT_BUTTON_ADD_PLAYER);
 
             // Build component
@@ -858,9 +1166,6 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
                 .WithButton(removePlayerButtonBuilder, 2)
                 .WithButton(addPlayerButtonBuilder, 2)
                 .WithButton(cancelButtonBuilder, 3);
-
-            // Gets event informations
-            CalendarEvent clashEvent = (await GoogleCalendarApi.Events.GetAsync(dbCalendar.Id, eventId))!;
 
             IUserMessage message = await FollowupAsync(commandText.WarEditChooseEdition(clashEvent.OpponentClan.Name), components: componentBuilder.Build(), ephemeral: true);
 
@@ -1022,7 +1327,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             ComponentStorage storage = ComponentStorage.GetInstance();
             if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 2)
             {
-                await RespondAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+                await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
 
                 return;
             }
@@ -1142,7 +1447,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             ComponentStorage storage = ComponentStorage.GetInstance();
             if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 2)
             {
-                await RespondAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+                await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
 
                 return;
             }

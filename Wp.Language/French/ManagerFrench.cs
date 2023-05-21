@@ -195,6 +195,28 @@
         public string WarEditChooseEdition(string opponent) => $"Choisissez la modification que vous souhaitez faire sur votre match contre **{opponent}**";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                    WAR EDIT ADD PLAYERS BUTTON                    *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarEditAddPlayersEnd => "Terminer";
+        public string WarEditAddPlayersNext => "Joueur–se–s suivant–e–s";
+        public string WarEditAddPlayersSelect(int nbPages) => $"Veuillez sélectionner les joueur–se–s que vous voulez ajouter au match\n" +
+            $"\nPage 1/{nbPages}";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                    WAR EDIT ADD PLAYERS SELECT                    *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarEditAddPlayersSelect(int currentPage, int nbPages, int nbPlayers) => $"Sélectionnez les joueur–se–s que vous voulez ajouter au match\nActuellement, il y a **{nbPlayers}** additions\n" +
+            $"\nPage {currentPage}/{nbPages}";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                  WAR EDIT ADD LAST PLAYERS SELECT                 *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarEditAddPlayersUpdated(int nbPlayers) => $"C'est bon, **{nbPlayers}** joueur–se–s ont été ajoutés au match";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                        WAR EDIT DAY BUTTON                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

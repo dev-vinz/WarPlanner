@@ -188,6 +188,26 @@
         public string WarEditChooseEdition(string opponent);
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                    WAR EDIT ADD PLAYERS BUTTON                    *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarEditAddPlayersEnd { get; }
+        public string WarEditAddPlayersNext { get; }
+        public string WarEditAddPlayersSelect(int nbPages);
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                    WAR EDIT ADD PLAYERS SELECT                    *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarEditAddPlayersSelect(int currentPage, int nbPages, int nbPlayers);
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                  WAR EDIT ADD LAST PLAYERS SELECT                 *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarEditAddPlayersUpdated(int nbPlayers);
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                        WAR EDIT DAY BUTTON                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
