@@ -247,6 +247,36 @@
         public string WarEditFormatChanged => "Les durées de préparation et de guerre de ce match ont été modifiées";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                      WAR EDIT OPPONENT MODAL                      *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarEditOpponentModalTitle => "Modification de l'adversaire";
+        public string WarEditOpponentModalField => "Tag Clash Of Clans de l'adversaire";
+        public string WarEditOpponentUpdated(string opponent) => $"L'adversaire sera désormais **{opponent}**";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                   WAR EDIT REMOVE PLAYERS BUTTON                  *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarEditRemovePlayersEnd => "Terminer";
+        public string WarEditRemovePlayersNext => "Joueur–se–s suivant–e–s";
+        public string WarEditRemovePlayersSelect(int nbPages) => $"Veuillez sélectionner les joueur–se–s que vous voulez retirer du match\n" +
+            $"\nPage 1/{nbPages}";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                   WAR EDIT REMOVE PLAYERS SELECT                  *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarEditRemovePlayersSelect(int currentPage, int nbPages, int nbPlayers) => $"Sélectionnez les joueur–se–s que vous voulez retirer du match\nActuellement, il y a **{nbPlayers}** retraits\n" +
+            $"\nPage {currentPage}/{nbPages}";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                 WAR EDIT REMOVE LAST PLAYERS SELECT               *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarEditRemovePlayersUpdated(int nbPlayers) => $"C'est bon, **{nbPlayers}** joueur–se–s ont été retirés du match";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                     WAR EDIT START HOUR BUTTON                    *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -258,13 +288,5 @@
 
         public string WarEditStartHourSelectMinutes => "L'heure est notée, mais pouvez-vous être un peu plus précis–e ?";
         public string WarEditStartHourUpdated(string date) => $"Le match a été décalé à **{date}**";
-
-        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-        |*                      WAR EDIT OPPONENT MODAL                      *|
-        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-        public string WarEditOpponentModalTitle => "Modification de l'adversaire";
-        public string WarEditOpponentModalField => "Tag Clash Of Clans de l'adversaire";
-        public string WarEditOpponentUpdated(string opponent) => $"L'adversaire sera désormais **{opponent}**";
     }
 }

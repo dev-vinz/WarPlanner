@@ -8,7 +8,7 @@ namespace Wp.Common.Services
         /// Clears a timer interval
         /// </summary>
         /// <param name="timer">The timer to clear</param>
-        public static void ClearInterval(Timer timer)
+        public static void ClearInterval(ref Timer timer)
         {
             timer.Stop();
             timer.Dispose();
@@ -24,14 +24,16 @@ namespace Wp.Common.Services
         {
             Timer timer = new(timeout.TotalMilliseconds);
 
-            timer.Elapsed += (s, e) =>
-            {
-                timer.Enabled = false;
-                action();
-                timer.Enabled = true;
-            };
+            //timer.Elapsed += (s, e) =>
+            //{
+            //    timer.Enabled = false;
+            //    action();
+            //    timer.Enabled = true;
+            //};
 
-            timer.Enabled = true;
+            timer.Elapsed += (_, _) => action();
+            timer.AutoReset = true;
+            timer.Start();
 
             return timer;
         }

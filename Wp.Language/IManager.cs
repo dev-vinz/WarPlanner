@@ -238,6 +238,34 @@
         public string WarEditFormatChanged { get; }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                      WAR EDIT OPPONENT MODAL                      *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarEditOpponentModalTitle { get; }
+        public string WarEditOpponentModalField { get; }
+        public string WarEditOpponentUpdated(string opponent);
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                   WAR EDIT REMOVE PLAYERS BUTTON                  *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarEditRemovePlayersEnd { get; }
+        public string WarEditRemovePlayersNext { get; }
+        public string WarEditRemovePlayersSelect(int nbPages);
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                   WAR EDIT REMOVE PLAYERS SELECT                  *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarEditRemovePlayersSelect(int currentPage, int nbPages, int nbPlayers);
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                 WAR EDIT REMOVE LAST PLAYERS SELECT               *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string WarEditRemovePlayersUpdated(int nbPlayers);
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                     WAR EDIT START HOUR BUTTON                    *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -249,13 +277,5 @@
 
         public string WarEditStartHourSelectMinutes { get; }
         public string WarEditStartHourUpdated(string date);
-
-        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-        |*                      WAR EDIT OPPONENT MODAL                      *|
-        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-        public string WarEditOpponentModalTitle { get; }
-        public string WarEditOpponentModalField { get; }
-        public string WarEditOpponentUpdated(string opponent);
     }
 }

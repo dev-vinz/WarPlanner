@@ -133,7 +133,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
                 .ToArray();
 
             // Build select menu
-            string customSelectId = isLastPage ? IdProvider.WAR_EDIT_SELECT_LAST_PLAYERS : IdProvider.WAR_EDIT_SELECT_PLAYERS;
+            string customSelectId = isLastPage ? IdProvider.WAR_EDIT_SELECT_ADD_LAST_PLAYERS : IdProvider.WAR_EDIT_SELECT_ADD_PLAYERS;
             SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
                 .WithCustomId(customSelectId)
                 .WithMinValues(1)
@@ -148,7 +148,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
                 });
 
             // Next button
-            string customButtonId = isLastPage ? IdProvider.WAR_EDIT_BUTTON_LAST_NEXT_PLAYERS : IdProvider.WAR_EDIT_BUTTON_NEXT_PLAYERS;
+            string customButtonId = isLastPage ? IdProvider.WAR_EDIT_BUTTON_ADD_LAST_NEXT_PLAYERS : IdProvider.WAR_EDIT_BUTTON_ADD_NEXT_PLAYERS;
             string buttonText = isLastPage ? interactionText.WarEditAddPlayersEnd : interactionText.WarEditAddPlayersNext;
             ButtonBuilder nextButtonBuilder = new ButtonBuilder()
                 .WithLabel(buttonText)
@@ -173,6 +173,20 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             // Inserts new datas
             datas = new[] { eventId, "0" };
             storage.MessageDatas.TryAdd(message.Id, datas);
+        }
+
+        [ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_ADD_NEXT_PLAYERS, runMode: RunMode.Async)]
+        public async Task EditAddSkipPlayers()
+        {
+            // Simply redirect to select component, exactly the same interaction
+            await EditAddPlayers(Array.Empty<string>());
+        }
+
+        [ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_ADD_LAST_NEXT_PLAYERS, runMode: RunMode.Async)]
+        public async Task EditAddSkipLastPlayers()
+        {
+            // Simply redirect to select component, exactly the same interaction
+            await EditAddLastPlayers(Array.Empty<string>());
         }
 
         [ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_DAY, runMode: RunMode.Async)]
@@ -361,21 +375,113 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
         [ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_REMOVE_PLAYER, runMode: RunMode.Async)]
         public async Task EditRemovePlayer()
         {
-            await RespondAsync("TODO", ephemeral: true);
+            await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+            // Gets SocketMessageComponent and original message
+            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+            SocketUserMessage msg = socket.Message;
+
+            // Loads databases infos
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
+
+            Calendar dbCalendar = Database.Context
+                .Calendars
+                .First(c => c.Guild == dbGuild);
+
+            // Gets interaction text
+            IManager interactionText = dbGuild.ManagerText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+            // Gets component datas
+            ComponentStorage storage = ComponentStorage.GetInstance();
+            if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length != 1)
+            {
+                await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+                return;
+            }
+
+            // Recovers data
+            string eventId = datas[0];
+            CalendarEvent warEvent = (await GoogleCalendarApi.Events.GetAsync(dbCalendar.Id, eventId))!;
+
+            // Filters one more time
+            ClashOfClans.Models.Player?[] availablePlayers = warEvent.Players
+                .Select(p =>
+                {
+                    Task<ClashOfClans.Models.Player?> playerTask = ClashOfClansApi.Players.GetByTagAsync(p);
+                    playerTask.Wait();
+
+                    return playerTask.Result;
+                })
+                .OrderByDescending(p => p?.TownHallLevel)
+                .ThenBy(p => p?.Name)
+                .ToArray();
+
+            int nbPages = (int)Math.Ceiling((double)availablePlayers.Length / Settings.MAX_OPTION_PER_SELECT_MENU);
+            bool isLastPage = nbPages < 2;
+
+            // Filters for options
+            availablePlayers = availablePlayers
+                .Take(Settings.MAX_OPTION_PER_SELECT_MENU)
+                    .ToArray();
+
+            // Build select menu
+            string customSelectId = isLastPage ? IdProvider.WAR_EDIT_SELECT_REMOVE_LAST_PLAYERS : IdProvider.WAR_EDIT_SELECT_REMOVE_PLAYERS;
+            SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+                .WithCustomId(customSelectId)
+                .WithMinValues(1)
+                .WithMaxValues(availablePlayers.Length);
+
+            availablePlayers
+                .ToList()
+                    .ForEach(p =>
+                    {
+                        menuBuilder.AddOption(p?.Name, p?.Tag, p?.Tag, CustomEmojis.ParseTownHallLevel(p?.TownHallLevel ?? 0));
+                    });
+
+            // Next button
+            string customButtonId = isLastPage ? IdProvider.WAR_EDIT_BUTTON_REMOVE_LAST_NEXT_PLAYERS : IdProvider.WAR_EDIT_BUTTON_REMOVE_NEXT_PLAYERS;
+            string buttonText = isLastPage ? interactionText.WarEditRemovePlayersEnd : interactionText.WarEditRemovePlayersNext;
+            ButtonBuilder nextButtonBuilder = new ButtonBuilder()
+                .WithLabel(buttonText)
+                .WithDisabled(isLastPage)
+                .WithStyle(ButtonStyle.Secondary)
+                .WithCustomId(customButtonId);
+
+            // Cancel button
+            ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+                .WithLabel(generalResponses.CancelButton)
+                .WithStyle(ButtonStyle.Danger)
+                .WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+
+            // Build component
+            ComponentBuilder componentBuilder = new ComponentBuilder()
+                .WithSelectMenu(menuBuilder)
+                .WithButton(cancelButtonBuilder)
+                .WithButton(nextButtonBuilder);
+
+            IUserMessage message = await FollowupAsync(interactionText.WarEditRemovePlayersSelect(nbPages), components: componentBuilder.Build(), ephemeral: true);
+
+            // Inserts new datas
+            datas = new[] { eventId, "0" };
+            storage.MessageDatas.TryAdd(message.Id, datas);
         }
 
-        [ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_NEXT_PLAYERS, runMode: RunMode.Async)]
-        public async Task EditSkipPlayers()
+        [ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_REMOVE_NEXT_PLAYERS, runMode: RunMode.Async)]
+        public async Task EditRemoveSkipPlayers()
         {
             // Simply redirect to select component, exactly the same interaction
-            await EditAddPlayers(Array.Empty<string>());
+            await EditRemovePlayers(Array.Empty<string>());
         }
 
-        [ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_LAST_NEXT_PLAYERS, runMode: RunMode.Async)]
-        public async Task EditSkipLastPlayers()
+        [ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_REMOVE_LAST_NEXT_PLAYERS, runMode: RunMode.Async)]
+        public async Task EditRemoveSkipLastPlayers()
         {
             // Simply redirect to select component, exactly the same interaction
-            await EditAddLastPlayers(Array.Empty<string>());
+            await EditRemoveLastPlayers(Array.Empty<string>());
         }
 
         [ComponentInteraction(IdProvider.WAR_EDIT_BUTTON_START_HOUR, runMode: RunMode.Async)]
@@ -899,7 +1005,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             await FollowupAsync(interactionText.WarDeleteMatchDeleted, ephemeral: true);
         }
 
-        [ComponentInteraction(IdProvider.WAR_EDIT_SELECT_LAST_PLAYERS, runMode: RunMode.Async)]
+        [ComponentInteraction(IdProvider.WAR_EDIT_SELECT_ADD_LAST_PLAYERS, runMode: RunMode.Async)]
         public async Task EditAddLastPlayers(string[] selections)
         {
             await Context.Interaction.DisableComponentsAsync(allComponents: true);
@@ -953,7 +1059,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             await FollowupAsync(interactionText.WarEditAddPlayersUpdated(playersTag.Length), ephemeral: true);
         }
 
-        [ComponentInteraction(IdProvider.WAR_EDIT_SELECT_PLAYERS, runMode: RunMode.Async)]
+        [ComponentInteraction(IdProvider.WAR_EDIT_SELECT_ADD_PLAYERS, runMode: RunMode.Async)]
         public async Task EditAddPlayers(string[] selections)
         {
             await Context.Interaction.DisableComponentsAsync(allComponents: true);
@@ -1023,7 +1129,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
                 .ToArray();
 
             // Build select menu
-            string customSelectId = isLastPage ? IdProvider.WAR_EDIT_SELECT_LAST_PLAYERS : IdProvider.WAR_EDIT_SELECT_PLAYERS;
+            string customSelectId = isLastPage ? IdProvider.WAR_EDIT_SELECT_ADD_LAST_PLAYERS : IdProvider.WAR_EDIT_SELECT_ADD_PLAYERS;
             SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
                 .WithCustomId(customSelectId)
                 .WithMinValues(1)
@@ -1038,7 +1144,7 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
                 });
 
             // Next button
-            string customButtonId = isLastPage ? IdProvider.WAR_EDIT_BUTTON_LAST_NEXT_PLAYERS : IdProvider.WAR_EDIT_BUTTON_NEXT_PLAYERS;
+            string customButtonId = isLastPage ? IdProvider.WAR_EDIT_BUTTON_ADD_LAST_NEXT_PLAYERS : IdProvider.WAR_EDIT_BUTTON_ADD_NEXT_PLAYERS;
             string buttonText = isLastPage ? interactionText.WarEditAddPlayersEnd : interactionText.WarEditAddPlayersNext;
             ButtonBuilder nextButtonBuilder = new ButtonBuilder()
                 .WithLabel(buttonText)
@@ -1352,6 +1458,163 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
             }
 
             await FollowupAsync(interactionText.WarEditFormatChanged, ephemeral: true);
+        }
+
+        [ComponentInteraction(IdProvider.WAR_EDIT_SELECT_REMOVE_LAST_PLAYERS, runMode: RunMode.Async)]
+        public async Task EditRemoveLastPlayers(string[] selections)
+        {
+            await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+            // Gets SocketMessageComponent and original message
+            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+            SocketUserMessage msg = socket.Message;
+
+            // Loads databases infos
+            DbCalendars calendars = Database.Context.Calendars;
+            DbCompetitions competitions = Database.Context.Competitions;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
+
+            // Filters for guild
+            Calendar dbCalendar = calendars
+                .AsParallel()
+                .First(c => c.Guild == dbGuild);
+
+            // Gets interaction texts
+            IManager interactionText = dbGuild.ManagerText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+            // Gets component datas
+            ComponentStorage storage = ComponentStorage.GetInstance();
+            if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length < 2)
+            {
+                await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+                return;
+            }
+
+            // Recovers datas
+            string eventId = datas![0];
+            int currentPage = int.Parse(datas[1]);
+            string[] playersTag = datas.Skip(2).Concat(selections).ToArray();
+
+            CalendarEvent warEvent = (await GoogleCalendarApi.Events.GetAsync(dbCalendar.Id, eventId))!;
+
+            // Updates war match and saves into calendar
+            warEvent.Players = warEvent.Players.Except(playersTag).ToArray();
+
+            if (!await GoogleCalendarApi.Events.UpdateAsync(warEvent, dbCalendar.Id))
+            {
+                await FollowupAsync(generalResponses.GoogleCannotUpdateEvent, ephemeral: true);
+
+                return;
+            }
+
+            await FollowupAsync(interactionText.WarEditRemovePlayersUpdated(playersTag.Length), ephemeral: true);
+        }
+
+        [ComponentInteraction(IdProvider.WAR_EDIT_SELECT_REMOVE_PLAYERS, runMode: RunMode.Async)]
+        public async Task EditRemovePlayers(string[] selections)
+        {
+            await Context.Interaction.DisableComponentsAsync(allComponents: true);
+
+            // Gets SocketMessageComponent and original message
+            SocketMessageComponent socket = (Context.Interaction as SocketMessageComponent)!;
+            SocketUserMessage msg = socket.Message;
+
+            // Loads databases infos
+            DbPlayers players = Database.Context.Players;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
+
+            Calendar dbCalendar = Database.Context
+               .Calendars
+               .First(c => c.Guild == dbGuild);
+
+            // Gets interaction texts
+            IManager interactionText = dbGuild.ManagerText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+
+            // Gets component datas
+            ComponentStorage storage = ComponentStorage.GetInstance();
+            if (!storage.MessageDatas.TryRemove(msg.Id, out string[]? datas) && datas?.Length < 2)
+            {
+                await FollowupAsync(generalResponses.FailToGetStorageComponentData, ephemeral: true);
+
+                return;
+            }
+
+            // Recovers datas
+            string eventId = datas![0];
+            int currentPage = int.Parse(datas[1]) + 1;
+            string[] playersTag = datas.Skip(2).Concat(selections).ToArray();
+
+            CalendarEvent warEvent = (await GoogleCalendarApi.Events.GetAsync(dbCalendar.Id, eventId))!;
+
+            // Filters one more time
+            ClashOfClans.Models.Player?[] availablePlayers = warEvent.Players
+                .Select(p =>
+                {
+                    Task<ClashOfClans.Models.Player?> playerTask = ClashOfClansApi.Players.GetByTagAsync(p);
+                    playerTask.Wait();
+
+                    return playerTask.Result;
+                })
+                .OrderByDescending(p => p?.TownHallLevel)
+                .ThenBy(p => p?.Name)
+                .ToArray();
+
+            int nbPages = (int)Math.Ceiling((double)availablePlayers.Length / Settings.MAX_OPTION_PER_SELECT_MENU);
+            bool isLastPage = currentPage + 1 == nbPages;
+
+            // Filters for options
+            availablePlayers = availablePlayers
+                .Skip(currentPage * Settings.MAX_OPTION_PER_SELECT_MENU)
+                .Take(Settings.MAX_OPTION_PER_SELECT_MENU)
+                .ToArray();
+
+            // Build select menu
+            string customSelectId = isLastPage ? IdProvider.WAR_EDIT_SELECT_REMOVE_LAST_PLAYERS : IdProvider.WAR_EDIT_SELECT_REMOVE_PLAYERS;
+            SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+                .WithCustomId(customSelectId)
+                .WithMinValues(1)
+                .WithMaxValues(availablePlayers.Length);
+
+            availablePlayers
+                .ToList()
+                .ForEach(p =>
+                {
+                    menuBuilder.AddOption(p?.Name, p?.Tag, p?.Tag, CustomEmojis.ParseTownHallLevel(p?.TownHallLevel ?? 0));
+                });
+
+            // Next button
+            string customButtonId = isLastPage ? IdProvider.WAR_EDIT_BUTTON_REMOVE_LAST_NEXT_PLAYERS : IdProvider.WAR_EDIT_BUTTON_REMOVE_NEXT_PLAYERS;
+            string buttonText = isLastPage ? interactionText.WarEditRemovePlayersEnd : interactionText.WarEditRemovePlayersNext;
+            ButtonBuilder nextButtonBuilder = new ButtonBuilder()
+                .WithLabel(buttonText)
+                .WithDisabled(isLastPage && !playersTag.Any())
+                .WithStyle(ButtonStyle.Secondary)
+                .WithCustomId(customButtonId);
+
+            // Cancel button
+            ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+                .WithLabel(generalResponses.CancelButton)
+                .WithStyle(ButtonStyle.Danger)
+                .WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+
+            // Build component
+            ComponentBuilder componentBuilder = new ComponentBuilder()
+                .WithSelectMenu(menuBuilder)
+                .WithButton(cancelButtonBuilder)
+                .WithButton(nextButtonBuilder);
+
+            IUserMessage message = await FollowupAsync(interactionText.WarEditRemovePlayersSelect(currentPage + 1, nbPages, playersTag.Length), components: componentBuilder.Build(), ephemeral: true);
+
+            // Inserts new datas
+            datas = new[] { eventId, currentPage.ToString() }.Concat(playersTag).ToArray();
+            storage.MessageDatas.TryAdd(message.Id, datas);
         }
 
         [ComponentInteraction(IdProvider.WAR_EDIT_SELECT_START_HOUR, runMode: RunMode.Async)]

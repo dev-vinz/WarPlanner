@@ -74,21 +74,25 @@
 
         public const string WAR_DELETE_SELECT_EVENT = "war_delete_select_event";
 
+        public const string WAR_EDIT_SELECT_ADD_PLAYERS = "war_edit_select_add_players";
+        public const string WAR_EDIT_SELECT_ADD_LAST_PLAYERS = "war_edit_select_add_last_players";
         public const string WAR_EDIT_SELECT_CHOOSE_UPDATE = "war_edit_select_choose_update";
         public const string WAR_EDIT_SELECT_DAY = "war_edit_select_day";
         public const string WAR_EDIT_SELECT_FORMAT_PREPARATION = "war_edit_select_format_preparation";
         public const string WAR_EDIT_SELECT_FORMAT_WAR = "war_edit_select_format_war";
-        public const string WAR_EDIT_SELECT_PLAYERS = "war_edit_select_players";
-        public const string WAR_EDIT_SELECT_LAST_PLAYERS = "war_edit_select_last_players";
+        public const string WAR_EDIT_SELECT_REMOVE_PLAYERS = "war_edit_select_remove_players";
+        public const string WAR_EDIT_SELECT_REMOVE_LAST_PLAYERS = "war_edit_select_remove_last_players";
         public const string WAR_EDIT_SELECT_START_HOUR = "war_edit_select_start_hour";
         public const string WAR_EDIT_SELECT_START_MINUTE = "war_edit_select_start_minute";
         public const string WAR_EDIT_BUTTON_ADD_PLAYER = "war_edit_button_add_player";
+        public const string WAR_EDIT_BUTTON_ADD_LAST_NEXT_PLAYERS = "war_edit_button_add_last_next_players";
+        public const string WAR_EDIT_BUTTON_ADD_NEXT_PLAYERS = "war_edit_button_add_next_players";
         public const string WAR_EDIT_BUTTON_DAY = "war_edit_button_day";
         public const string WAR_EDIT_BUTTON_FORMAT = "war_edit_button_format";
-        public const string WAR_EDIT_BUTTON_LAST_NEXT_PLAYERS = "war_edit_button_last_next_players";
-        public const string WAR_EDIT_BUTTON_NEXT_PLAYERS = "war_edit_button_next_players";
         public const string WAR_EDIT_BUTTON_OPPONENT = "war_edit_button_opponent";
         public const string WAR_EDIT_BUTTON_REMOVE_PLAYER = "war_edit_button_remove_player";
+        public const string WAR_EDIT_BUTTON_REMOVE_LAST_NEXT_PLAYERS = "war_edit_button_remove_last_next_players";
+        public const string WAR_EDIT_BUTTON_REMOVE_NEXT_PLAYERS = "war_edit_button_remove_next_players";
         public const string WAR_EDIT_BUTTON_START_HOUR = "war_edit_button_start_hour";
     }
 }
