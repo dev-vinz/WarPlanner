@@ -7,9 +7,9 @@
 		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         public string EmbedInformations => "Informations";
-        public string EmbedDescription => "Projet réalisé dans le cadre de la Haute-École ARC, lors des cours P3";
+        public string EmbedDescription => "Bot de gestion d'équipe e-Sport";
         public string EmbedFieldAuthor => "Auteur";
-        public string EmbedFieldYear => "Année de réalisation";
+        public string EmbedFieldLastConnection => "Temps de fonctionnement";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                      PLAYER CLAIM INTERACTION                     *|

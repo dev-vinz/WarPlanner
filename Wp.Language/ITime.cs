@@ -9,6 +9,15 @@
         public string CalendarDisplayCannotSend { get; }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                          GUILD JOIN EVENT                         *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string GuildJoinedTitle { get; }
+        public string GuildJoinedDescription(string username);
+        public string GuildJoinedFieldTimeZoneTitle { get; }
+        public string GuildJoinedFieldTimeZoneDescription(string timeZone, double offset);
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          WAR REMIND EVENT                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

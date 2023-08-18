@@ -12,295 +12,288 @@ using GoogleCalendar = Google.Apis.Calendar.v3.Data.Calendar;
 
 namespace Wp.Bot.Modules.ApplicationCommands.Admin
 {
-	[RequireUserRole(RoleType.ADMINISTRATOR)]
-	[Group("calendar", "Calendar commands handler")]
-	public class Calendar : InteractionModuleBase<SocketInteractionContext>
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+    [RequireUserRole(RoleType.ADMINISTRATOR)]
+    [Group("calendar", "Calendar commands handler")]
+    public class Calendar : InteractionModuleBase<SocketInteractionContext>
+    {
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		private readonly CommandHandler handler;
+        private readonly CommandHandler handler;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                             PROPERTIES                            *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public InteractionService? Commands { get; set; }
+        public InteractionService? Commands { get; set; }
 
-		/* * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
         \* * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                            CONSTRUCTORS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public Calendar(CommandHandler handler)
-		{
-			this.handler = handler;
-		}
+        public Calendar(CommandHandler handler)
+        {
+            this.handler = handler;
+        }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          ABSTRACT METHODS                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		[SlashCommand("channel", "Set or replace the channel where the calendar is displayed", runMode: RunMode.Async)]
-		public async Task Channel([Summary("channel", "The channel where the calendar is displayed")] SocketChannel channel)
-		{
-			await DeferAsync(true);
+        [SlashCommand("channel", "Set or replace the channel where the calendar is displayed", runMode: RunMode.Async)]
+        public async Task Channel([Summary("channel", "The channel where the calendar is displayed")] SocketTextChannel channel)
+        {
+            await DeferAsync(true);
 
-			// Loads databases infos
-			DbCalendars calendars = Database.Context.Calendars;
-			Guild dbGuild = Database.Context
-				.Guilds
-				.First(g => g.Id == Context.Guild.Id);
+            // Loads databases infos
+            DbCalendars calendars = Database.Context.Calendars;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
 
-			// Gets command responses
-			IAdmin commandText = dbGuild.AdminText;
-			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+            // Gets command responses
+            IAdmin commandText = dbGuild.AdminText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
-			if (channel is not SocketTextChannel guildChannel)
-			{
-				await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.ChannelNotText);
+            // Filters for guild
+            Common.Models.Calendar? dbCalendar = calendars
+                .AsParallel()
+                .Where(c => c.Guild == dbGuild)
+                .FirstOrDefault();
 
-				return;
-			}
+            if (dbCalendar is null)
+            {
+                await ModifyOriginalResponseAsync(msg => msg.Content = commandText.CalendarIdNotSet);
 
-			// Filters for guild
-			Common.Models.Calendar? dbCalendar = calendars
-				.AsParallel()
-				.Where(c => c.Guild == dbGuild)
-				.FirstOrDefault();
+                return;
+            }
 
-			if (dbCalendar is null)
-			{
-				await ModifyOriginalResponseAsync(msg => msg.Content = commandText.CalendarIdNotSet);
+            RestUserMessage? restUserMessage = null;
 
-				return;
-			}
+            try
+            {
+                restUserMessage = await channel.SendMessageAsync(commandText.CalendarWillBeDisplayedHere(Context.User.Mention));
+            }
+            catch (Exception)
+            {
+                await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.NotThePermissionToWrite);
 
-			RestUserMessage? restUserMessage = null;
+                return;
+            }
 
-			try
-			{
-				restUserMessage = await guildChannel.SendMessageAsync(commandText.CalendarWillBeDisplayedHere(Context.User.Mention));
-			}
-			catch (Exception)
-			{
-				await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.NotThePermissionToWrite);
+            bool isAdd = dbCalendar.ChannelId is null;
 
-				return;
-			}
+            // Change dbCalendar values
+            dbCalendar.ChannelId = channel.Id;
+            dbCalendar.MessageId = restUserMessage.Id;
 
-			bool isAdd = dbCalendar.ChannelId is null;
+            // Update object
+            calendars.Update(dbCalendar);
 
-			// Change dbCalendar values
-			dbCalendar.ChannelId = guildChannel.Id;
-			dbCalendar.MessageId = restUserMessage.Id;
+            if (isAdd)
+            {
+                // Add time object corresponding to calendar announcement
 
-			// Update object
-			calendars.Update(dbCalendar);
+                Time displayTime = new(dbGuild, TimeAction.DISPLAY_CALENDAR, DateTimeOffset.UtcNow, Time.CALENDAR_INTERVAL, DefaultParameters.DEFAULT_TIME_ADDITIONAL)
+                {
+                    // Number of display per day
+                    Optional = DefaultParameters.DEFAULT_NUMBER_CALENDAR_DISPLAY_PER_DAY.ToString(),
+                };
 
-			if (isAdd)
-			{
-				// Add time object corresponding to calendar announcement
+                Database.Context.Times.Add(displayTime);
+            }
 
-				Time displayTime = new(dbGuild, TimeAction.DISPLAY_CALENDAR, DateTimeOffset.UtcNow, Time.CALENDAR_INTERVAL, DefaultParameters.DEFAULT_TIME_ADDITIONAL)
-				{
-					// Number of display per day
-					Optional = DefaultParameters.DEFAULT_NUMBER_CALENDAR_DISPLAY_PER_DAY.ToString(),
-				};
+            await ModifyOriginalResponseAsync(msg => msg.Content = commandText.CalendarChannelChanged(channel.Mention));
+        }
 
-				Database.Context.Times.Add(displayTime);
-			}
+        [SlashCommand("options", "Change some options of the calendar", runMode: RunMode.Async)]
+        public async Task Options()
+        {
+            await DeferAsync(true);
 
-			await ModifyOriginalResponseAsync(msg => msg.Content = commandText.CalendarChannelChanged(guildChannel.Mention));
-		}
+            // Loads databases infos
+            DbCalendars calendars = Database.Context.Calendars;
+            DbTimes times = Database.Context.Times;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
 
-		[SlashCommand("options", "Change some options of the calendar", runMode: RunMode.Async)]
-		public async Task Options()
-		{
-			await DeferAsync(true);
+            // Filters for guild
+            Common.Models.Calendar? dbCalendar = calendars
+                .AsParallel()
+                .Where(c => c.Guild == dbGuild)
+                .FirstOrDefault();
 
-			// Loads databases infos
-			DbCalendars calendars = Database.Context.Calendars;
-			DbTimes times = Database.Context.Times;
-			Guild dbGuild = Database.Context
-				.Guilds
-				.First(g => g.Id == Context.Guild.Id);
+            Time[] dbTimes = times
+                .AsParallel()
+                .Where(t => t.Guild == dbGuild)
+                .ToArray();
 
-			// Filters for guild
-			Common.Models.Calendar? dbCalendar = calendars
-				.AsParallel()
-				.Where(c => c.Guild == dbGuild)
-				.FirstOrDefault();
+            // Gets command responses
+            IAdmin commandText = dbGuild.AdminText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
-			Time[] dbTimes = times
-				.AsParallel()
-				.Where(t => t.Guild == dbGuild)
-				.ToArray();
+            if (dbCalendar is null)
+            {
+                await ModifyOriginalResponseAsync(msg => msg.Content = commandText.CalendarIdNotSet);
 
-			// Gets command responses
-			IAdmin commandText = dbGuild.AdminText;
-			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+                return;
+            }
 
-			if (dbCalendar is null)
-			{
-				await ModifyOriginalResponseAsync(msg => msg.Content = commandText.CalendarIdNotSet);
+            PremiumLevel premiumRequired = PremiumLevel.LOW;
 
-				return;
-			}
+            // (Dis)activate calendar display button
+            Time? display = dbTimes.FirstOrDefault(t => t.Action == TimeAction.DISPLAY_CALENDAR);
+            ButtonBuilder displayButtonBuilder = new ButtonBuilder()
+                .WithLabel(commandText.CalendarOptionsDisplayed(display is not null))
+                .WithStyle(display is not null ? ButtonStyle.Danger : ButtonStyle.Success)
+                .WithCustomId(IdProvider.CALENDAR_OPTIONS_BUTTON_DISPLAY);
 
-			PremiumLevel premiumRequired = PremiumLevel.LOW;
+            // Choose calendar display frequency button
+            ButtonBuilder frequencyButtonBuilder = new ButtonBuilder()
+                .WithLabel(commandText.CalendarOptionsFrequency(display?.Optional))
+                .WithStyle(ButtonStyle.Secondary)
+                .WithDisabled(dbGuild.PremiumLevel < premiumRequired || display is null)
+                .WithCustomId(IdProvider.CALENDAR_OPTIONS_BUTTON_DISPLAY_FREQUENCY);
 
-			// (Dis)activate calendar display button
-			Time? display = dbTimes.FirstOrDefault(t => t.Action == TimeAction.DISPLAY_CALENDAR);
-			ButtonBuilder displayButtonBuilder = new ButtonBuilder()
-				.WithLabel(commandText.CalendarOptionsDisplayed(display is not null))
-				.WithStyle(display is not null ? ButtonStyle.Danger : ButtonStyle.Success)
-				.WithCustomId(IdProvider.CALENDAR_OPTIONS_BUTTON_DISPLAY);
+            // (Dis)activate remind war button
+            Time? remind = dbTimes.FirstOrDefault(t => t.Action == TimeAction.REMIND_WAR);
+            ButtonBuilder remindButtonBuilder = new ButtonBuilder()
+                .WithLabel(commandText.CalendarOptionsRemind(remind is not null))
+                .WithStyle(remind is not null ? ButtonStyle.Danger : ButtonStyle.Success)
+                .WithCustomId(IdProvider.CALENDAR_OPTIONS_BUTTON_REMIND_WAR);
 
-			// Choose calendar display frequency button
-			ButtonBuilder frequencyButtonBuilder = new ButtonBuilder()
-				.WithLabel(commandText.CalendarOptionsFrequency(display?.Optional))
-				.WithStyle(ButtonStyle.Secondary)
-				.WithDisabled(dbGuild.PremiumLevel < premiumRequired || display is null)
-				.WithCustomId(IdProvider.CALENDAR_OPTIONS_BUTTON_DISPLAY_FREQUENCY);
+            // Choose reminds before war button
+            ButtonBuilder nbRemindsButtonBuilder = new ButtonBuilder()
+                .WithLabel(commandText.CalendarOptionsChooseRemind(remind?.Optional?.ToCharArray()?.Length.ToString()))
+                .WithStyle(ButtonStyle.Secondary)
+                .WithDisabled(dbGuild.PremiumLevel < premiumRequired || remind is null)
+                .WithCustomId(IdProvider.CALENDAR_OPTIONS_BUTTON_CHOOSE_REMIND_WAR);
 
-			// (Dis)activate remind war button
-			Time? remind = dbTimes.FirstOrDefault(t => t.Action == TimeAction.REMIND_WAR);
-			ButtonBuilder remindButtonBuilder = new ButtonBuilder()
-				.WithLabel(commandText.CalendarOptionsRemind(remind is not null))
-				.WithStyle(remind is not null ? ButtonStyle.Danger : ButtonStyle.Success)
-				.WithCustomId(IdProvider.CALENDAR_OPTIONS_BUTTON_REMIND_WAR);
+            // Build component
+            ComponentBuilder componentBuilder = new ComponentBuilder()
+                .WithButton(displayButtonBuilder, 0)
+                .WithButton(frequencyButtonBuilder, 0)
+                .WithButton(remindButtonBuilder, 1)
+                .WithButton(nbRemindsButtonBuilder, 1);
 
-			// Choose reminds before war button
-			ButtonBuilder nbRemindsButtonBuilder = new ButtonBuilder()
-				.WithLabel(commandText.CalendarOptionsChooseRemind(remind?.Optional?.ToCharArray()?.Length.ToString()))
-				.WithStyle(ButtonStyle.Secondary)
-				.WithDisabled(dbGuild.PremiumLevel < premiumRequired || remind is null)
-				.WithCustomId(IdProvider.CALENDAR_OPTIONS_BUTTON_CHOOSE_REMIND_WAR);
+            await ModifyOriginalResponseAsync(msg =>
+            {
+                msg.Content = commandText.CalendarChooseOption;
+                msg.Components = new(componentBuilder.Build());
+            });
+        }
 
-			// Build component
-			ComponentBuilder componentBuilder = new ComponentBuilder()
-				.WithButton(displayButtonBuilder, 0)
-				.WithButton(frequencyButtonBuilder, 0)
-				.WithButton(remindButtonBuilder, 1)
-				.WithButton(nbRemindsButtonBuilder, 1);
+        [SlashCommand("set", "Set or replace the calendar ID", runMode: RunMode.Async)]
+        public async Task Set([Summary("id", "The calendar ID")] string id)
+        {
+            await DeferAsync(true);
 
-			await ModifyOriginalResponseAsync(msg =>
-			{
-				msg.Content = commandText.CalendarChooseOption;
-				msg.Components = new(componentBuilder.Build());
-			});
-		}
+            // Loads databases infos
+            DbCalendars calendars = Database.Context.Calendars;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
 
-		[SlashCommand("set", "Set or replace the calendar ID", runMode: RunMode.Async)]
-		public async Task Set([Summary("id", "The calendar ID")] string id)
-		{
-			await DeferAsync(true);
+            // Filters for guild
+            Common.Models.Calendar? dbCalendar = calendars
+                .AsParallel()
+                .Where(c => c.Guild == dbGuild)
+                .FirstOrDefault();
 
-			// Loads databases infos
-			DbCalendars calendars = Database.Context.Calendars;
-			Guild dbGuild = Database.Context
-				.Guilds
-				.First(g => g.Id == Context.Guild.Id);
+            // Gets command responses
+            IAdmin commandText = dbGuild.AdminText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
-			// Filters for guild
-			Common.Models.Calendar? dbCalendar = calendars
-				.AsParallel()
-				.Where(c => c.Guild == dbGuild)
-				.FirstOrDefault();
+            GoogleCalendar? calendar = await GoogleCalendarApi.Calendars.GetAsync(id);
 
-			// Gets command responses
-			IAdmin commandText = dbGuild.AdminText;
-			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+            if (calendar is null)
+            {
+                // Documentation button
+                ButtonBuilder docButtonBuilder = new ButtonBuilder()
+                    .WithLabel(generalResponses.Documentation)
+                    .WithStyle(ButtonStyle.Link)
+                    .WithUrl(Utilities.GITBOOK_DOCUMENTATION)
+                    .WithEmote(new Emoji("📚"));
 
-			GoogleCalendar? calendar = await GoogleCalendarApi.Calendars.GetAsync(id);
+                // Build component
+                ComponentBuilder componentBuilder = new ComponentBuilder()
+                    .WithButton(docButtonBuilder);
 
-			if (calendar is null)
-			{
-				// Documentation button
-				ButtonBuilder docButtonBuilder = new ButtonBuilder()
-					.WithLabel(generalResponses.Documentation)
-					.WithStyle(ButtonStyle.Link)
-					.WithUrl(Utilities.GITBOOK_DOCUMENTATION)
-					.WithEmote(new Emoji("📚"));
+                await ModifyOriginalResponseAsync(msg =>
+                {
+                    msg.Content = generalResponses.GoogleCannotAccessCalendar;
+                    msg.Components = new(componentBuilder.Build());
+                });
 
-				// Build component
-				ComponentBuilder componentBuilder = new ComponentBuilder()
-					.WithButton(docButtonBuilder);
+                return;
+            }
 
-				await ModifyOriginalResponseAsync(msg =>
-				{
-					msg.Content = generalResponses.GoogleCannotAccessCalendar;
-					msg.Components = new(componentBuilder.Build());
-				});
+            bool isAdd = dbCalendar is null;
 
-				return;
-			}
+            if (isAdd)
+            {
+                // Add calendar
+                calendars.Add(new(dbGuild, id));
+            }
+            else
+            {
+                // Update calendar
+                dbCalendar!.Id = id;
+                calendars.Update(dbCalendar);
+            }
 
-			bool isAdd = dbCalendar is null;
+            await ModifyOriginalResponseAsync(msg => msg.Content = isAdd ? commandText.CalendarIdAdded(id) : commandText.CalendarIdUpdated(id));
+        }
 
-			if (isAdd)
-			{
-				// Add calendar
-				calendars.Add(new(dbGuild, id));
-			}
-			else
-			{
-				// Update calendar
-				dbCalendar!.Id = id;
-				calendars.Update(dbCalendar);
-			}
-
-			await ModifyOriginalResponseAsync(msg => msg.Content = isAdd ? commandText.CalendarIdAdded(id) : commandText.CalendarIdUpdated(id));
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         PROTECTED METHODS                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          PRIVATE METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          OVERRIDE METHODS                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           STATIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                              INDEXERS                             *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         OPERATORS OVERLOAD                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
-	}
+    }
 }

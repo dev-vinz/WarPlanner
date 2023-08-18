@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.Rest;
 using Discord.WebSocket;
 using Wp.Bot.Modules.TimeEvents;
 using Wp.Bot.Services.Logger.Event;
@@ -6,6 +7,9 @@ using Wp.Common.Models;
 using Wp.Common.Services;
 using Wp.Common.Settings;
 using Wp.Database.Services;
+using Wp.Discord;
+using Wp.Discord.Extensions;
+using Wp.Language;
 
 namespace Wp.Bot.Services
 {
@@ -21,6 +25,7 @@ namespace Wp.Bot.Services
         private bool isDatabaseVerified;
         private Thread threadEvent;
         private System.Timers.Timer eventTimer;
+        private DateTimeOffset startDate;
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                             PROPERTIES                            *|
@@ -32,7 +37,7 @@ namespace Wp.Bot.Services
         |*            SHORTCUTS            *|
         \* * * * * * * * * * * * * * * * * */
 
-
+        public TimeSpan Uptime => DateTimeOffset.UtcNow - startDate;
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                            CONSTRUCTORS                           *|
@@ -68,7 +73,7 @@ namespace Wp.Bot.Services
         {
             // Initialize client with time loop when ready
             client.Ready += HandleTime;
-            //client.Ready += async () => await logger.ClientReadyAsync();
+            client.Ready += OnReadyAsync;
 
             // Initialize bots events
             client.JoinedGuild += GuildJoinedAsync;
@@ -128,6 +133,61 @@ namespace Wp.Bot.Services
             times.Add(endWar);
             times.Add(warStatus);
 
+            // Gets responses
+            IGeneralResponse generalResponses = newGuild.GeneralResponses;
+            ITime timeResponses = newGuild.TimeText;
+
+            DateTimeOffset guildNow = newGuild.Now;
+            TimeSpan offset = guildNow.Offset;
+
+            // Documentation button
+            ButtonBuilder docButtonBuilder = new ButtonBuilder()
+                .WithLabel(generalResponses.Documentation)
+                .WithStyle(ButtonStyle.Link)
+                .WithUrl(Utilities.GITBOOK_DOCUMENTATION)
+                .WithEmote(new Emoji("📚"));
+
+            // Support button
+            ButtonBuilder supportButtonBuilder = new ButtonBuilder()
+                .WithLabel(generalResponses.SupportServer)
+                .WithStyle(ButtonStyle.Link)
+                .WithUrl(Utilities.SUPPORT_GUILD_INVITATION)
+                .WithEmote(new Emoji("⚙️"));
+
+            // Build component
+            ComponentBuilder componentBuilder = new ComponentBuilder()
+                .WithButton(supportButtonBuilder)
+                .WithButton(docButtonBuilder);
+
+            IEnumerable<IGuildUser> users = await guild.GetUsersAsync().FlattenAsync();
+            IGuildUser? owner = users.FirstOrDefault(u => u.Id == guild.OwnerId);
+
+            if (owner == null) return true;
+
+            // Embed
+            EmbedBuilder embed = new EmbedBuilder()
+                .WithTitle(timeResponses.GuildJoinedTitle)
+                .WithRandomColor()
+                .WithDescription($"{CustomEmojis.WarPlanner} | {timeResponses.GuildJoinedDescription(owner.Username)}")
+                .AddField(timeResponses.GuildJoinedFieldTimeZoneTitle, timeResponses.GuildJoinedFieldTimeZoneDescription(newGuild.TimeZone.AsAttribute().DisplayName, offset.TotalHours), true)
+                .WithFooter($"{guildNow.Year} © {guild.CurrentUser.Username}");
+
+            try
+            {
+                await owner.SendMessageAsync(embed: embed.Build(), components: componentBuilder.Build());
+            }
+            catch (Exception)
+            {
+                IReadOnlyCollection<SocketTextChannel> allChannels = guild.TextChannels;
+
+                foreach (SocketTextChannel channel in guild.TextChannels)
+                {
+                    RestUserMessage msg = await channel.SendMessageAsync(owner.Mention, embed: embed.Build(), components: componentBuilder.Build());
+
+                    if (msg != null) break;
+                }
+            }
+
             return true;
         }
 
@@ -178,12 +238,18 @@ namespace Wp.Bot.Services
                 LogMessage logMessage = new(LogSeverity.Info, "Discord", "Time loop started");
                 Console.WriteLine(logMessage.ToString());
 
-                //await logger.EventExecutionStartedAsync();
+                await logger.EventExecutionStartedAsync();
             });
 
             threadEvent.Start();
 
             return Task.CompletedTask;
+        }
+
+        private async Task OnReadyAsync()
+        {
+            await logger.ClientReadyAsync();
+            startDate = DateTimeOffset.UtcNow;
         }
 
         private async Task PrepareClientForEventsAsync()

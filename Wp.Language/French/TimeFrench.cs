@@ -9,6 +9,16 @@
         public string CalendarDisplayCannotSend => "Le salon servant à afficher le calendrier a été supprimé";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                          GUILD JOIN EVENT                         *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string GuildJoinedTitle => "Merci de m'avoir ajouté !";
+        public string GuildJoinedDescription(string username) => $"Hello **{username}**, merci de m'avoir ajouté à votre serveur";
+        public string GuildJoinedFieldTimeZoneTitle => "Fuseau Horaire";
+        public string GuildJoinedFieldTimeZoneDescription(string timeZone, double offset) => $"`{timeZone}` : UTC{offset:+#;-#;+0}" +
+            $"\n*Pour le changer, exécutez la commande `/timezone`*";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          WAR REMIND EVENT                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

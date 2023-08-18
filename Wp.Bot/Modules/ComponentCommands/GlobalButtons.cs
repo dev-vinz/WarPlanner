@@ -60,7 +60,7 @@ namespace Wp.Bot.Modules.ComponentCommands
 
             // Remove any storage component data
             ComponentStorage storage = ComponentStorage.GetInstance();
-            storage.MessageDatas.TryRemove(msg.Id, out string[] _);
+            _ = storage.MessageDatas.TryRemove(msg.Id, out _);
 
             await FollowupAsync(generalResponses.ActionCanceledByButton, ephemeral: true);
         }
