@@ -55,6 +55,7 @@ namespace Wp.Bot.Modules.TimeEvents.War
 
             // Update time
             DateTimeOffset utcNow = DateTimeOffset.UtcNow;
+            DateTimeOffset guildNow = dbGuild.Now;
 
             dbTime.Date = utcNow;
             times.Update(dbTime);
@@ -70,8 +71,8 @@ namespace Wp.Bot.Modules.TimeEvents.War
                 .AsParallel()
                 .Where(e =>
                 {
-                    TimeSpan timeSpan = e.Start - dbGuild.Now;
-                    int nbMinutes = (int)Math.Ceiling(timeSpan.TotalMinutes);
+                    TimeSpan timeSpan = e.Start - guildNow;
+                    int nbMinutes = (int)Math.Floor(timeSpan.TotalMinutes);
                     return nbMinutes == Settings.CALENDAR_REMIND_STATUS;
                 })
                 .Where(e => dbCompetitions.Any(c => c.Name == e.CompetitionName))
