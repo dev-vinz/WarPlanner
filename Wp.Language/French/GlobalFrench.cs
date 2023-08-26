@@ -12,6 +12,16 @@
         public string EmbedFieldLastConnection => "Temps de fonctionnement";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                      PLAYER ACCOUNTS COMMAND                      *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string PlayerAccountsNoAccounts => "Vous n'avez aucun compte enregistré";
+
+        public string PlayerAccountsEmbedTitle => "Comptes enregistrés";
+
+        public string PlayerAccountsEmbedDescription => "Voici vos différents comptes enregistrés";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                      PLAYER CLAIM INTERACTION                     *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -20,6 +20,14 @@
         public string RequireUserAttribute => "Vous ne possédez pas la permission suffisante pour exécuter cette commande";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                           CLASH OF CLANS                          *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string TownHallFullName => "Hôtel de ville";
+
+        public string TownHallShortcut => "HDV";
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         GOOGLE CALENDAR API                       *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

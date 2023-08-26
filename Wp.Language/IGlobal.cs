@@ -12,6 +12,16 @@
         public string EmbedFieldLastConnection { get; }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+		|*                      PLAYER ACCOUNTS COMMAND                      *|
+		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string PlayerAccountsNoAccounts { get; }
+
+        public string PlayerAccountsEmbedTitle { get; }
+
+        public string PlayerAccountsEmbedDescription { get; }
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                      PLAYER CLAIM INTERACTION                     *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

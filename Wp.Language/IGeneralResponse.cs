@@ -22,6 +22,14 @@ namespace Wp.Language
         public string RequireUserAttribute { get; }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        |*                           CLASH OF CLANS                          *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        public string TownHallFullName { get; }
+
+        public string TownHallShortcut { get; }
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         CLASH OF CLANS API                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
