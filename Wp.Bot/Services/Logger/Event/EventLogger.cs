@@ -123,7 +123,7 @@ namespace Wp.Bot.Services.Logger.Event
             Color color = new(255, 128, 64);
             string description = "I've left a guild";
             string guildName = id.ToString();
-            string guildThumbnail = client.CurrentUser.GetAvatarUrl();
+            string? guildThumbnail = client?.CurrentUser?.GetAvatarUrl();
 
             EventLoggerMessage message = new(title, color, description, guildName, guildThumbnail);
 
@@ -158,10 +158,14 @@ namespace Wp.Bot.Services.Logger.Event
 
             EmbedBuilder embedBuilder = new EmbedBuilder()
                 .WithTitle(message.Title)
-                .WithThumbnailUrl(message.GuildThumbnail)
                 .WithColor(message.Color)
                 .WithDescription(message.Description)
                 .WithFooter($"{now.Year} © {client.CurrentUser.Username}");
+
+            if (message.GuildThumbnail != null)
+            {
+                embedBuilder.WithThumbnailUrl(message.GuildThumbnail);
+            }
 
             if (message.Guild != null)
             {

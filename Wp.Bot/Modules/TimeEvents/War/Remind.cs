@@ -147,7 +147,7 @@ namespace Wp.Bot.Modules.TimeEvents.War
             }
         }
 
-        private static async Task WarnPlayerApiOfflineAsync(IGuildUser user, Player player, Guild guild, CalendarEvent calendarEvent)
+        private static async Task WarnPlayerApiOfflineAsync(IGuildUser user, Guild guild, CalendarEvent calendarEvent)
         {
             // Gets remaining time
             TimeSpan remaining = calendarEvent.Start.UtcDateTime - DateTime.UtcNow;
@@ -226,7 +226,7 @@ namespace Wp.Bot.Modules.TimeEvents.War
             // Checks that Clash of Clans API is online
             if (!await ClashOfClansApi.TryAccessApiAsync())
             {
-                await WarnPlayerApiOfflineAsync(user, player, dbCompetition.Guild, calendarEvent);
+                await WarnPlayerApiOfflineAsync(user, dbCompetition.Guild, calendarEvent);
 
                 return;
             }
