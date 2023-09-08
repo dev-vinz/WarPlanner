@@ -17,12 +17,12 @@ namespace Wp.Database.Services
 
         public DbTimes(Time[] times)
         {
-            lock (_lock)
-            {
-                times
-                    .ToList()
-                    .ForEach(t => base.Add(t));
-            }
+            //lock (_lock)
+            //{
+            times
+                .ToList()
+                .ForEach(t => base.Add(t));
+            //}
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -35,15 +35,15 @@ namespace Wp.Database.Services
         /// <param name="time">The time to be added to the database</param>
         public new void Add(Time time)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                ctx.Times.Add(time.ToEFModel());
-                ctx.SaveChanges();
+            ctx.Times.Add(time.ToEFModel());
+            ctx.SaveChanges();
 
-                base.Add(time);
-            }
+            base.Add(time);
+            //}
         }
 
         /// <summary>
@@ -53,19 +53,19 @@ namespace Wp.Database.Services
         /// <returns>true if time is successfully removed; false otherwise</returns>
         public new bool Remove(Time time)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                EFModels.Time? dbTime = ctx.Times.GetEFModel(time);
+            EFModels.Time? dbTime = ctx.Times.GetEFModel(time);
 
-                if (dbTime == null) return false;
+            if (dbTime == null) return false;
 
-                ctx.Times.Remove(dbTime);
-                ctx.SaveChanges();
+            ctx.Times.Remove(dbTime);
+            ctx.SaveChanges();
 
-                return base.Remove(time);
-            }
+            return base.Remove(time);
+            //}
         }
 
         /// <summary>
@@ -86,24 +86,24 @@ namespace Wp.Database.Services
         /// <param name="time">The time to be updated</param>
         public void Update(Time time)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                EFModels.Time? dbTime = ctx.Times.GetEFModel(time);
+            EFModels.Time? dbTime = ctx.Times.GetEFModel(time);
 
-                if (dbTime == null) return;
+            if (dbTime == null) return;
 
-                dbTime.Date = time.Date.TruncSeconds().UtcDateTime;
-                dbTime.Additional = time.Additional;
-                dbTime.Optional = time.Optional;
+            dbTime.Date = time.Date.TruncSeconds().UtcDateTime;
+            dbTime.Additional = time.Additional;
+            dbTime.Optional = time.Optional;
 
-                ctx.Times.Update(dbTime);
-                ctx.SaveChanges();
+            ctx.Times.Update(dbTime);
+            ctx.SaveChanges();
 
-                base.Remove(time);
-                base.Add(time);
-            }
+            base.Remove(time);
+            base.Add(time);
+            //}
         }
     }
 }

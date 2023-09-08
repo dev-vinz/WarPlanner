@@ -16,12 +16,12 @@ namespace Wp.Database.Services
 
         public DbPlayers(Player[] players)
         {
-            lock (_lock)
-            {
-                players
-                    .ToList()
-                    .ForEach(p => base.Add(p));
-            }
+            //lock (_lock)
+            //{
+            players
+                .ToList()
+                .ForEach(p => base.Add(p));
+            //}
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -34,15 +34,15 @@ namespace Wp.Database.Services
         /// <param name="player">The player to be added to the database</param>
         public new void Add(Player player)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                ctx.Players.Add(player.ToEFModel());
-                ctx.SaveChanges();
+            ctx.Players.Add(player.ToEFModel());
+            ctx.SaveChanges();
 
-                base.Add(player);
-            }
+            base.Add(player);
+            //}
         }
 
         /// <summary>
@@ -52,19 +52,19 @@ namespace Wp.Database.Services
         /// <returns>true if player is successfully removed; false otherwise</returns>
         public new bool Remove(Player player)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                EFModels.Player? dbPlayer = ctx.Players.GetEFModel(player);
+            EFModels.Player? dbPlayer = ctx.Players.GetEFModel(player);
 
-                if (dbPlayer == null) return false;
+            if (dbPlayer == null) return false;
 
-                ctx.Players.Remove(dbPlayer);
-                ctx.SaveChanges();
+            ctx.Players.Remove(dbPlayer);
+            ctx.SaveChanges();
 
-                return base.Remove(player);
-            }
+            return base.Remove(player);
+            //}
         }
 
         /// <summary>

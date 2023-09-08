@@ -16,12 +16,12 @@ namespace Wp.Database.Services
 
         public DbRoles(Role[] roles)
         {
-            lock (_lock)
-            {
-                roles
-                    .ToList()
-                    .ForEach(r => base.Add(r));
-            }
+            //lock (_lock)
+            //{
+            roles
+                .ToList()
+                .ForEach(r => base.Add(r));
+            //}
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -34,15 +34,15 @@ namespace Wp.Database.Services
         /// <param name="role">The role to be added to the database</param>
         public new void Add(Role role)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                ctx.Roles.Add(role.ToEFModel());
-                ctx.SaveChanges();
+            ctx.Roles.Add(role.ToEFModel());
+            ctx.SaveChanges();
 
-                base.Add(role);
-            }
+            base.Add(role);
+            //}
         }
 
         /// <summary>
@@ -52,19 +52,19 @@ namespace Wp.Database.Services
         /// <returns>true if role is successfully removed; false otherwise</returns>
         public new bool Remove(Role role)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                EFModels.Role? dbRole = ctx.Roles.GetEFModel(role);
+            EFModels.Role? dbRole = ctx.Roles.GetEFModel(role);
 
-                if (dbRole == null) return false;
+            if (dbRole == null) return false;
 
-                ctx.Roles.Remove(dbRole);
-                ctx.SaveChanges();
+            ctx.Roles.Remove(dbRole);
+            ctx.SaveChanges();
 
-                return base.Remove(role);
-            }
+            return base.Remove(role);
+            //}
         }
 
         /// <summary>

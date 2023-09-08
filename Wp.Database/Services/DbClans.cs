@@ -16,12 +16,12 @@ namespace Wp.Database.Services
 
         public DbClans(Clan[] clans)
         {
-            lock (_lock)
-            {
-                clans
-                    .ToList()
-                    .ForEach(c => base.Add(c));
-            }
+            //lock (_lock)
+            //{
+            clans
+                .ToList()
+                .ForEach(c => base.Add(c));
+            //}
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -34,15 +34,15 @@ namespace Wp.Database.Services
         /// <param name="clan">The clan to be added to the database</param>
         public new void Add(Clan clan)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                ctx.Clans.Add(clan.ToEFModel());
-                ctx.SaveChanges();
+            ctx.Clans.Add(clan.ToEFModel());
+            ctx.SaveChanges();
 
-                base.Add(clan);
-            }
+            base.Add(clan);
+            //}
         }
 
         /// <summary>
@@ -52,19 +52,19 @@ namespace Wp.Database.Services
 		/// <returns>true if clan is successfully removed; false otherwise</returns>
         public new bool Remove(Clan clan)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                EFModels.Clan? dbClan = ctx.Clans.GetEFModel(clan);
+            EFModels.Clan? dbClan = ctx.Clans.GetEFModel(clan);
 
-                if (dbClan == null) return false;
+            if (dbClan == null) return false;
 
-                ctx.Clans.Remove(dbClan);
-                ctx.SaveChanges();
+            ctx.Clans.Remove(dbClan);
+            ctx.SaveChanges();
 
-                return base.Remove(clan);
-            }
+            return base.Remove(clan);
+            //}
         }
 
         /// <summary>

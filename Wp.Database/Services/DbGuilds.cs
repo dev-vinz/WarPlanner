@@ -16,12 +16,12 @@ namespace Wp.Database.Services
 
         public DbGuilds(Guild[] guilds)
         {
-            lock (_lock)
-            {
-                guilds
-                    .ToList()
-                    .ForEach(g => base.Add(g));
-            }
+            //lock (_lock)
+            //{
+            guilds
+                .ToList()
+                .ForEach(g => base.Add(g));
+            //}
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -34,15 +34,15 @@ namespace Wp.Database.Services
         /// <param name="guild">The guild to be added to the database</param>
         public new void Add(Guild guild)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                ctx.Guilds.Add(guild.ToEFModel());
-                ctx.SaveChanges();
+            ctx.Guilds.Add(guild.ToEFModel());
+            ctx.SaveChanges();
 
-                base.Add(guild);
-            }
+            base.Add(guild);
+            //}
         }
 
         /// <summary>
@@ -52,19 +52,19 @@ namespace Wp.Database.Services
         /// <returns>true if guild is successfully removed; false otherwise</returns>
         public new bool Remove(Guild guild)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                EFModels.Guild? dbGuild = ctx.Guilds.GetEFModel(guild);
+            EFModels.Guild? dbGuild = ctx.Guilds.GetEFModel(guild);
 
-                if (dbGuild == null) return false;
+            if (dbGuild == null) return false;
 
-                ctx.Guilds.Remove(dbGuild);
-                ctx.SaveChanges();
+            ctx.Guilds.Remove(dbGuild);
+            ctx.SaveChanges();
 
-                return base.Remove(guild);
-            }
+            return base.Remove(guild);
+            //}
         }
 
         /// <summary>
@@ -85,25 +85,25 @@ namespace Wp.Database.Services
         /// <param name="guild">The guild to be updated</param>
         public void Update(Guild guild)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                EFModels.Guild? dbGuild = ctx.Guilds.GetEFModel(guild);
+            EFModels.Guild? dbGuild = ctx.Guilds.GetEFModel(guild);
 
-                if (dbGuild == null) return;
+            if (dbGuild == null) return;
 
-                dbGuild.Language = (int)guild.Language;
-                dbGuild.TimeZone = (int)guild.TimeZone;
-                dbGuild.PremiumLevel = (int)guild.PremiumLevel;
-                dbGuild.MinThlevel = (int)guild.MinimalTownHallLevel;
+            dbGuild.Language = (int)guild.Language;
+            dbGuild.TimeZone = (int)guild.TimeZone;
+            dbGuild.PremiumLevel = (int)guild.PremiumLevel;
+            dbGuild.MinThlevel = (int)guild.MinimalTownHallLevel;
 
-                ctx.Guilds.Update(dbGuild);
-                ctx.SaveChanges();
+            ctx.Guilds.Update(dbGuild);
+            ctx.SaveChanges();
 
-                base.Remove(guild);
-                base.Add(guild);
-            }
+            base.Remove(guild);
+            base.Add(guild);
+            //}
         }
     }
 }

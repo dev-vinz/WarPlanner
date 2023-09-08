@@ -23,19 +23,19 @@ namespace Wp.Database
         {
             get
             {
-                lock (_lock)
-                {
-                    EFModels.HeArcP3Context ctx = new();
+                //lock (_lock)
+                //{
+                EFModels.HeArcP3Context ctx = new();
 
-                    Common.Models.Calendar[] calendars = ctx.Calendars
-                        .Include(c => c.GuildNavigation)
-                        .Select(c => c.ToModel())
-                        .CopyAsArray();
+                Common.Models.Calendar[] calendars = ctx.Calendars
+                    .Include(c => c.GuildNavigation)
+                    .Select(c => c.ToModel())
+                    .CopyAsArray();
 
-                    ctx.Dispose();
+                ctx.Dispose();
 
-                    return new DbCalendars(calendars);
-                }
+                return new DbCalendars(calendars);
+                //}
             }
         }
 
@@ -46,19 +46,19 @@ namespace Wp.Database
         {
             get
             {
-                lock (_lock)
-                {
-                    EFModels.HeArcP3Context ctx = new();
+                //lock (_lock)
+                //{
+                EFModels.HeArcP3Context ctx = new();
 
-                    Common.Models.Clan[] clans = ctx.Clans
-                        .Include(c => c.GuildNavigation)
-                        .Select(c => c.ToModel())
-                        .CopyAsArray();
+                Common.Models.Clan[] clans = ctx.Clans
+                    .Include(c => c.GuildNavigation)
+                    .Select(c => c.ToModel())
+                    .CopyAsArray();
 
-                    ctx.Dispose();
+                ctx.Dispose();
 
-                    return new DbClans(clans);
-                }
+                return new DbClans(clans);
+                //}
             }
         }
 
@@ -69,19 +69,19 @@ namespace Wp.Database
         {
             get
             {
-                lock (_lock)
-                {
-                    EFModels.HeArcP3Context ctx = new();
+                //lock (_lock)
+                //{
+                EFModels.HeArcP3Context ctx = new();
 
-                    Common.Models.Competition[] competitions = ctx.Competitions
-                        .Include(c => c.GuildNavigation)
-                        .Select(c => c.ToModel())
-                        .CopyAsArray();
+                Common.Models.Competition[] competitions = ctx.Competitions
+                    .Include(c => c.GuildNavigation)
+                    .Select(c => c.ToModel())
+                    .CopyAsArray();
 
-                    ctx.Dispose();
+                ctx.Dispose();
 
-                    return new DbCompetitions(competitions);
-                }
+                return new DbCompetitions(competitions);
+                //}
             }
         }
 
@@ -92,18 +92,18 @@ namespace Wp.Database
         {
             get
             {
-                lock (_lock)
-                {
-                    EFModels.HeArcP3Context ctx = new();
+                //lock (_lock)
+                //{
+                EFModels.HeArcP3Context ctx = new();
 
-                    Common.Models.Guild[] guilds = ctx.Guilds
-                        .Select(c => c.ToModel())
-                        .CopyAsArray();
+                Common.Models.Guild[] guilds = ctx.Guilds
+                    .Select(c => c.ToModel())
+                    .CopyAsArray();
 
-                    ctx.Dispose();
+                ctx.Dispose();
 
-                    return new DbGuilds(guilds);
-                }
+                return new DbGuilds(guilds);
+                //}
             }
         }
 
@@ -114,19 +114,19 @@ namespace Wp.Database
         {
             get
             {
-                lock (_lock)
-                {
-                    EFModels.HeArcP3Context ctx = new();
+                //lock (_lock)
+                //{
+                EFModels.HeArcP3Context ctx = new();
 
-                    Common.Models.Player[] players = ctx.Players
-                        .Include(p => p.GuildNavigation)
-                        .Select(c => c.ToModel())
-                        .CopyAsArray();
+                Common.Models.Player[] players = ctx.Players
+                    .Include(p => p.GuildNavigation)
+                    .Select(c => c.ToModel())
+                    .CopyAsArray();
 
-                    ctx.Dispose();
+                ctx.Dispose();
 
-                    return new DbPlayers(players);
-                }
+                return new DbPlayers(players);
+                //}
             }
         }
 
@@ -137,19 +137,19 @@ namespace Wp.Database
         {
             get
             {
-                lock (_lock)
-                {
-                    EFModels.HeArcP3Context ctx = new();
+                //lock (_lock)
+                //{
+                EFModels.HeArcP3Context ctx = new();
 
-                    Common.Models.PlayerStatistic[] playerStatistics = ctx.PlayerStatistics
-                        .Include(ps => ps.GuildNavigation)
-                        .Select(c => c.ToModel())
-                        .CopyAsArray();
+                Common.Models.PlayerStatistic[] playerStatistics = ctx.PlayerStatistics
+                    .Include(ps => ps.GuildNavigation)
+                    .Select(c => c.ToModel())
+                    .CopyAsArray();
 
-                    ctx.Dispose();
+                ctx.Dispose();
 
-                    return new DbPlayerStatistics(playerStatistics);
-                }
+                return new DbPlayerStatistics(playerStatistics);
+                //}
             }
         }
 
@@ -160,19 +160,19 @@ namespace Wp.Database
         {
             get
             {
-                lock (_lock)
-                {
-                    EFModels.HeArcP3Context ctx = new();
+                //lock (_lock)
+                //{
+                EFModels.HeArcP3Context ctx = new();
 
-                    Common.Models.Role[] roles = ctx.Roles
-                        .Include(r => r.GuildNavigation)
-                        .Select(c => c.ToModel())
-                        .CopyAsArray();
+                Common.Models.Role[] roles = ctx.Roles
+                    .Include(r => r.GuildNavigation)
+                    .Select(c => c.ToModel())
+                    .CopyAsArray();
 
-                    ctx.Dispose();
+                ctx.Dispose();
 
-                    return new DbRoles(roles);
-                }
+                return new DbRoles(roles);
+                //}
             }
         }
 
@@ -183,19 +183,19 @@ namespace Wp.Database
         {
             get
             {
-                lock (_lock)
-                {
-                    EFModels.HeArcP3Context ctx = new();
+                //lock (_lock)
+                //{
+                EFModels.HeArcP3Context ctx = new();
 
-                    Common.Models.Time[] times = ctx.Times
-                        .Include(t => t.GuildNavigation)
-                        .Select(c => c.ToModel())
-                        .CopyAsArray();
+                Common.Models.Time[] times = ctx.Times
+                    .Include(t => t.GuildNavigation)
+                    .Select(c => c.ToModel())
+                    .CopyAsArray();
 
-                    ctx.Dispose();
+                ctx.Dispose();
 
-                    return new DbTimes(times);
-                }
+                return new DbTimes(times);
+                //}
             }
         }
 
@@ -206,19 +206,19 @@ namespace Wp.Database
         {
             get
             {
-                lock (_lock)
-                {
-                    EFModels.HeArcP3Context ctx = new();
+                //lock (_lock)
+                //{
+                EFModels.HeArcP3Context ctx = new();
 
-                    Common.Models.WarStatistic[] warStatistics = ctx.WarStatistics
-                        .Include(ws => ws.GuildNavigation)
-                        .Select(c => c.ToModel())
-                        .CopyAsArray();
+                Common.Models.WarStatistic[] warStatistics = ctx.WarStatistics
+                    .Include(ws => ws.GuildNavigation)
+                    .Select(c => c.ToModel())
+                    .CopyAsArray();
 
-                    ctx.Dispose();
+                ctx.Dispose();
 
-                    return new DbWarStatistics(warStatistics);
-                }
+                return new DbWarStatistics(warStatistics);
+                //}
             }
         }
     }

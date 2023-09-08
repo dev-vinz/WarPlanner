@@ -16,12 +16,12 @@ namespace Wp.Database.Services
 
         public DbCalendars(Calendar[] calendars)
         {
-            lock (_lock)
-            {
-                calendars
-                    .ToList()
-                    .ForEach(c => base.Add(c));
-            }
+            //lock (_lock)
+            //{
+            calendars
+                .ToList()
+                .ForEach(c => base.Add(c));
+            //}
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -34,15 +34,15 @@ namespace Wp.Database.Services
         /// <param name="calendar">The calendar to be added to the database</param>
         public new void Add(Calendar calendar)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                ctx.Calendars.Add(calendar.ToEFModel());
-                ctx.SaveChanges();
+            ctx.Calendars.Add(calendar.ToEFModel());
+            ctx.SaveChanges();
 
-                base.Add(calendar);
-            }
+            base.Add(calendar);
+            //}
         }
 
         /// <summary>
@@ -52,19 +52,19 @@ namespace Wp.Database.Services
         /// <returns>true if calendar is successfully removed; false otherwise</returns>
         public new bool Remove(Calendar calendar)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                EFModels.Calendar? dbCalendar = ctx.Calendars.GetEFModel(calendar);
+            EFModels.Calendar? dbCalendar = ctx.Calendars.GetEFModel(calendar);
 
-                if (dbCalendar == null) return false;
+            if (dbCalendar == null) return false;
 
-                ctx.Calendars.Remove(dbCalendar);
-                ctx.SaveChanges();
+            ctx.Calendars.Remove(dbCalendar);
+            ctx.SaveChanges();
 
-                return base.Remove(calendar);
-            }
+            return base.Remove(calendar);
+            //}
         }
 
         /// <summary>
@@ -85,24 +85,24 @@ namespace Wp.Database.Services
         /// <param name="calendar">The calendar to be updated</param>
         public void Update(Calendar calendar)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                EFModels.Calendar? dbCalendar = ctx.Calendars.GetEFModel(calendar);
+            EFModels.Calendar? dbCalendar = ctx.Calendars.GetEFModel(calendar);
 
-                if (dbCalendar == null) return;
+            if (dbCalendar == null) return;
 
-                dbCalendar.CalendarId = calendar.Id;
-                dbCalendar.ChannelId = calendar.ChannelId;
-                dbCalendar.MessageId = calendar.MessageId;
+            dbCalendar.CalendarId = calendar.Id;
+            dbCalendar.ChannelId = calendar.ChannelId;
+            dbCalendar.MessageId = calendar.MessageId;
 
-                ctx.Calendars.Update(dbCalendar);
-                ctx.SaveChanges();
+            ctx.Calendars.Update(dbCalendar);
+            ctx.SaveChanges();
 
-                base.Remove(calendar);
-                base.Add(calendar);
-            }
+            base.Remove(calendar);
+            base.Add(calendar);
+            //}
         }
     }
 }

@@ -16,12 +16,12 @@ namespace Wp.Database.Services
 
         public DbCompetitions(Competition[] competitions)
         {
-            lock (_lock)
-            {
-                competitions
-                    .ToList()
-                    .ForEach(c => base.Add(c));
-            }
+            //lock (_lock)
+            //{
+            competitions
+                .ToList()
+                .ForEach(c => base.Add(c));
+            //}
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -34,15 +34,15 @@ namespace Wp.Database.Services
 		/// <param name="competition">The competition to be added to the database</param>
         public new void Add(Competition competition)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                ctx.Competitions.Add(competition.ToEFModel());
-                ctx.SaveChanges();
+            ctx.Competitions.Add(competition.ToEFModel());
+            ctx.SaveChanges();
 
-                base.Add(competition);
-            }
+            base.Add(competition);
+            //}
         }
 
         /// <summary>
@@ -52,19 +52,19 @@ namespace Wp.Database.Services
 		/// <returns>true if competition is successfully removed; false otherwise</returns>
         public new bool Remove(Competition competition)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                EFModels.Competition? dbCompetition = ctx.Competitions.GetEFModel(competition);
+            EFModels.Competition? dbCompetition = ctx.Competitions.GetEFModel(competition);
 
-                if (dbCompetition == null) return false;
+            if (dbCompetition == null) return false;
 
-                ctx.Competitions.Remove(dbCompetition);
-                ctx.SaveChanges();
+            ctx.Competitions.Remove(dbCompetition);
+            ctx.SaveChanges();
 
-                return base.Remove(competition);
-            }
+            return base.Remove(competition);
+            //}
         }
 
         /// <summary>
@@ -85,25 +85,25 @@ namespace Wp.Database.Services
 		/// <param name="competition">The competition to be updated</param>
         public void Update(Competition competition)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                EFModels.Competition? dbCompetition = ctx.Competitions.GetEFModel(competition);
+            EFModels.Competition? dbCompetition = ctx.Competitions.GetEFModel(competition);
 
-                if (dbCompetition == null) return;
+            if (dbCompetition == null) return;
 
-                dbCompetition.ResultId = competition.ResultId;
-                dbCompetition.Name = competition.Name;
-                dbCompetition.MainClan = competition.MainTag;
-                dbCompetition.SecondClan = competition.SecondTag;
+            dbCompetition.ResultId = competition.ResultId;
+            dbCompetition.Name = competition.Name;
+            dbCompetition.MainClan = competition.MainTag;
+            dbCompetition.SecondClan = competition.SecondTag;
 
-                ctx.Competitions.Update(dbCompetition);
-                ctx.SaveChanges();
+            ctx.Competitions.Update(dbCompetition);
+            ctx.SaveChanges();
 
-                base.Remove(competition);
-                base.Add(competition);
-            }
+            base.Remove(competition);
+            base.Add(competition);
+            //}
         }
     }
 }

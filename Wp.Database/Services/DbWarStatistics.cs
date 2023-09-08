@@ -2,81 +2,81 @@
 
 namespace Wp.Database.Services
 {
-	public class DbWarStatistics : List<WarStatistic>
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+    public class DbWarStatistics : List<WarStatistic>
+    {
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		private static readonly object _lock = new();
+        private static readonly object _lock = new();
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
 		|*                            CONSTRUCTORS                           *|
 		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public DbWarStatistics(WarStatistic[] warStatistics)
-		{
-			lock (_lock)
-			{
-				warStatistics
-					.ToList()
-					.ForEach(ws => base.Add(ws));
-			}
-		}
+        public DbWarStatistics(WarStatistic[] warStatistics)
+        {
+            //lock (_lock)
+            //{
+            warStatistics
+                .ToList()
+                .ForEach(ws => base.Add(ws));
+            //}
+        }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		/// <summary>
-		/// Adds a war statistic to the database and saves it
-		/// </summary>
-		/// <param name="warStatistic">The war statistic to be added to the database</param>
-		public new void Add(WarStatistic warStatistic)
-		{
-			lock (_lock)
-			{
-				using EFModels.HeArcP3Context ctx = new();
+        /// <summary>
+        /// Adds a war statistic to the database and saves it
+        /// </summary>
+        /// <param name="warStatistic">The war statistic to be added to the database</param>
+        public new void Add(WarStatistic warStatistic)
+        {
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-				ctx.WarStatistics.Add(warStatistic.ToEFModel());
-				ctx.SaveChanges();
+            ctx.WarStatistics.Add(warStatistic.ToEFModel());
+            ctx.SaveChanges();
 
-				base.Add(warStatistic);
-			}
-		}
+            base.Add(warStatistic);
+            //}
+        }
 
-		/// <summary>
-		/// Removes a war statistic from the database
-		/// </summary>
-		/// <param name="warStatistic">The war statistic to be removed</param>
-		/// <returns>true if war statistic is successfully removed; false otherwise</returns>
-		public new bool Remove(WarStatistic warStatistic)
-		{
-			lock (_lock)
-			{
-				using EFModels.HeArcP3Context ctx = new();
+        /// <summary>
+        /// Removes a war statistic from the database
+        /// </summary>
+        /// <param name="warStatistic">The war statistic to be removed</param>
+        /// <returns>true if war statistic is successfully removed; false otherwise</returns>
+        public new bool Remove(WarStatistic warStatistic)
+        {
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-				EFModels.WarStatistic? dbWarStatistic = ctx.WarStatistics.GetEFModel(warStatistic);
+            EFModels.WarStatistic? dbWarStatistic = ctx.WarStatistics.GetEFModel(warStatistic);
 
-				if (dbWarStatistic is null) return false;
+            if (dbWarStatistic is null) return false;
 
-				ctx.WarStatistics.Remove(dbWarStatistic);
-				ctx.SaveChanges();
+            ctx.WarStatistics.Remove(dbWarStatistic);
+            ctx.SaveChanges();
 
-				return base.Remove(warStatistic);
-			}
-		}
+            return base.Remove(warStatistic);
+            //}
+        }
 
-		/// <summary>
-		/// Removes a war statistic from the database
-		/// </summary>
-		/// <param name="predicate">A delegate for the matching war statistic to be removed</param>
-		/// <returns>true if war statistic is successfully removed; false otherwise</returns>
-		public bool Remove(Predicate<WarStatistic> predicate)
-		{
-			WarStatistic? warStatistic = Find(predicate);
+        /// <summary>
+        /// Removes a war statistic from the database
+        /// </summary>
+        /// <param name="predicate">A delegate for the matching war statistic to be removed</param>
+        /// <returns>true if war statistic is successfully removed; false otherwise</returns>
+        public bool Remove(Predicate<WarStatistic> predicate)
+        {
+            WarStatistic? warStatistic = Find(predicate);
 
-			return warStatistic != null && Remove(warStatistic);
-		}
-	}
+            return warStatistic != null && Remove(warStatistic);
+        }
+    }
 }

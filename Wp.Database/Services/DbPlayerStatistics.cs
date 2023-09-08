@@ -16,12 +16,12 @@ namespace Wp.Database.Services
 
         public DbPlayerStatistics(PlayerStatistic[] playerStatistics)
         {
-            lock (_lock)
-            {
-                playerStatistics
-                    .ToList()
-                    .ForEach(ps => base.Add(ps));
-            }
+            //lock (_lock)
+            //{
+            playerStatistics
+                .ToList()
+                .ForEach(ps => base.Add(ps));
+            //}
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -34,15 +34,15 @@ namespace Wp.Database.Services
         /// <param name="playerStatistic">The player statistic to be added to the database</param>
         public new void Add(PlayerStatistic playerStatistic)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                ctx.PlayerStatistics.Add(playerStatistic.ToEFModel());
-                ctx.SaveChanges();
+            ctx.PlayerStatistics.Add(playerStatistic.ToEFModel());
+            ctx.SaveChanges();
 
-                base.Add(playerStatistic);
-            }
+            base.Add(playerStatistic);
+            //}
         }
 
         /// <summary>
@@ -52,19 +52,19 @@ namespace Wp.Database.Services
         /// <returns>true if player statistic is successfully removed; false otherwise</returns>
         public new bool Remove(PlayerStatistic playerStatistic)
         {
-            lock (_lock)
-            {
-                using EFModels.HeArcP3Context ctx = new();
+            //lock (_lock)
+            //{
+            using EFModels.HeArcP3Context ctx = new();
 
-                EFModels.PlayerStatistic? dbPlayerStatistic = ctx.PlayerStatistics.GetEFModel(playerStatistic);
+            EFModels.PlayerStatistic? dbPlayerStatistic = ctx.PlayerStatistics.GetEFModel(playerStatistic);
 
-                if (dbPlayerStatistic == null) return false;
+            if (dbPlayerStatistic == null) return false;
 
-                ctx.PlayerStatistics.Remove(dbPlayerStatistic);
-                ctx.SaveChanges();
+            ctx.PlayerStatistics.Remove(dbPlayerStatistic);
+            ctx.SaveChanges();
 
-                return base.Remove(playerStatistic);
-            }
+            return base.Remove(playerStatistic);
+            //}
         }
 
         /// <summary>
