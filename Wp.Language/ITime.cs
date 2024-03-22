@@ -7,6 +7,7 @@
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         public string CalendarDisplayCannotSend { get; }
+        public string CalendarDisplayMissingAccess { get; }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          GUILD JOIN EVENT                         *|

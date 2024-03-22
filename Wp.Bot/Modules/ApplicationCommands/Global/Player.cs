@@ -117,6 +117,7 @@ namespace Wp.Bot.Modules.ApplicationCommands.Global
                 .WithFooter($"{dbGuild.Now.Year} © {Context.Client.CurrentUser.Username}", Context.Client.CurrentUser.GetAvatarUrl());
 
             Dictionary<int, List<Common.Models.Player>> dictAccounts = dbPlayers
+                .OrderByDescending(p => p.Account.TownHallLevel)
                 .GroupBy(p => p.Account.TownHallLevel)
                 .ToDictionary(g => g.Key, g => g.OrderBy(p => p.Account.Name).ToList());
 

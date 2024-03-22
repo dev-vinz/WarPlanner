@@ -25,7 +25,7 @@ namespace Wp.Bot.Modules.ApplicationCommands.AutoCompletion
             //CultureInfo cultureInfo = dbGuild.CultureInfo;
 
             // Gets date and culture info
-            DateTimeOffset today = DateTimeOffset.UtcNow.Date;
+            DateTimeOffset today = new(DateTimeOffset.UtcNow.Date, TimeSpan.Zero);
             CultureInfo cultureInfo = new("fr-FR");
 
             List<AutocompleteResult> results = new();

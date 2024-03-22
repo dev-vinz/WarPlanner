@@ -1,7 +1,10 @@
-﻿using Discord;
+﻿using System.Globalization;
+using Discord;
 using SixLabors.Fonts;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
-using System.Globalization;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 using Wp.Api;
 using Wp.Api.Models;
 using Wp.Common.Models;
@@ -18,24 +21,22 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
     public static class Display
     {
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-		|*                               FIELDS                              *|
-		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+        |*                               FIELDS                              *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         private static readonly int CANVAS_WIDTH = 800;
         private static readonly int CANVAS_HEIGHT = 300;
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-		|*                           PUBLIC METHODS                          *|
-		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+        |*                           PUBLIC METHODS                          *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         public static void Execute(IGuild guild)
         {
             // Loads databases infos
             DbCalendars calendars = Context.Calendars;
             DbTimes times = Context.Times;
-            Guild dbGuild = Context
-                .Guilds
-                .First(g => g.Id == guild.Id);
+            Guild dbGuild = Context.Guilds.First(g => g.Id == guild.Id);
 
             // Filters for guild
             Common.Models.Calendar? dbCalendar = calendars
@@ -47,9 +48,11 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
                 .FirstOrDefault(t => t.Guild == dbGuild && t.Action == TimeAction.DISPLAY_CALENDAR);
 
             // Makes some verifications
-            if (dbCalendar == null || dbTime == null) return;
+            if (dbCalendar == null || dbTime == null)
+                return;
 
-            if (!dbTime.IsScanAllowed()) return;
+            if (!dbTime.IsScanAllowed())
+                return;
 
             // Update time
             DateTimeOffset utcNow = DateTimeOffset.UtcNow;
@@ -65,7 +68,8 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
             DateTimeOffset guildMidnight = new(guildNow.Date, guildNow.Offset);
 
             // Checks each interval
-            Enumerable.Range(0, timesPerDay)
+            Enumerable
+                .Range(0, timesPerDay)
                 .Select(k => guildMidnight.AddHours(k * hoursToAdd))
                 .ToList()
                 .ForEach(async date =>
@@ -80,8 +84,8 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
-		|*                          PRIVATE METHODS                          *|
-		\* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+        |*                          PRIVATE METHODS                          *|
+        \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         private static Dictionary<string, Stream> CreateCanvas(string calendarId, Guild guild)
         {
@@ -90,7 +94,11 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
             NodaConverter converter = new();
 
             // Gets all events during the week
-            List<CalendarEvent>[] currentWeek = GetCalendarInformations(calendarId, guild.TimeZone, out int nbImages);
+            List<CalendarEvent>[] currentWeek = GetCalendarInformations(
+                calendarId,
+                guild.TimeZone,
+                out int nbImages
+            );
 
             int totalEvents = currentWeek
                 .Select(events => events.Count == 0 ? 1 : events.Count)
@@ -141,10 +149,19 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
                     #region Draw Background
                     for (int i = lineWidth; i < CANVAS_WIDTH - intervalWidth; i += intervalWidth)
                     {
-                        int multiplicator = currentWeek.ElementAt(count).Count == 0 ? 1 : currentWeek.ElementAt(count).Count;
+                        int multiplicator =
+                            currentWeek.ElementAt(count).Count == 0
+                                ? 1
+                                : currentWeek.ElementAt(count).Count;
 
                         Color fillColor = color++ % 2 == 0 ? darkOrange : lightOrange;
-                        RectangleF rectBackground = new(i, lineWidth, (i + intervalWidth) * multiplicator, CANVAS_HEIGHT - lineWidth);
+                        RectangleF rectBackground =
+                            new(
+                                i,
+                                lineWidth,
+                                (i + intervalWidth) * multiplicator,
+                                CANVAS_HEIGHT - lineWidth
+                            );
 
                         ctx.Fill(new SolidBrush(fillColor), rectBackground);
 
@@ -157,13 +174,25 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
                     if (firstImage)
                     {
                         Color greyColor = Color.FromRgb(217, 217, 217);
-                        RectangleF rectFirst = new(lineWidth, 2 * intervalHeight, CANVAS_WIDTH - lineWidth, 3 * intervalHeight);
+                        RectangleF rectFirst =
+                            new(
+                                lineWidth,
+                                2 * intervalHeight,
+                                CANVAS_WIDTH - lineWidth,
+                                3 * intervalHeight
+                            );
 
                         ctx.Fill(new SolidBrush(greyColor), rectFirst);
                     }
                     #endregion
 
-                    RectangleF rect = new(lineWidth, lineWidth, CANVAS_WIDTH - 2 * lineWidth, CANVAS_HEIGHT - 2 * lineWidth);
+                    RectangleF rect =
+                        new(
+                            lineWidth,
+                            lineWidth,
+                            CANVAS_WIDTH - 2 * lineWidth,
+                            CANVAS_HEIGHT - 2 * lineWidth
+                        );
                     ctx.Draw(blackPen, rect);
 
                     count = 0;
@@ -175,7 +204,10 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
                     do
                     {
                         quicksand = fontFamily.CreateFont(fontSize--);
-                    } while (TextMeasurer.MeasureSize(dayMax, new TextOptions(quicksand)).Width > intervalWidth - 20);
+                    } while (
+                        TextMeasurer.MeasureSize(dayMax, new TextOptions(quicksand)).Width
+                        > intervalWidth - 20
+                    );
 
                     Font font = fontFamily.CreateFont(fontSize, FontStyle.Bold);
 
@@ -185,7 +217,10 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
                         #region Only For The First Image
                         if (firstImage)
                         {
-                            float multiplicator = currentWeek.ElementAt(count).Count == 0 ? 1 : currentWeek.ElementAt(count).Count;
+                            float multiplicator =
+                                currentWeek.ElementAt(count).Count == 0
+                                    ? 1
+                                    : currentWeek.ElementAt(count).Count;
                             float posX = i + (multiplicator / 2) * intervalWidth;
                             float posY = lineWidth + (intervalHeight / 2f);
 
@@ -195,12 +230,13 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
 
                             PointF point = new(posX, posY);
 
-                            RichTextOptions option = new(font)
-                            {
-                                Origin = point,
-                                HorizontalAlignment = HorizontalAlignment.Center,
-                                VerticalAlignment = VerticalAlignment.Center,
-                            };
+                            RichTextOptions option =
+                                new(font)
+                                {
+                                    Origin = point,
+                                    HorizontalAlignment = HorizontalAlignment.Center,
+                                    VerticalAlignment = VerticalAlignment.Center,
+                                };
 
                             ctx.DrawText(option, today, new SolidBrush(Color.Black));
                         }
@@ -238,18 +274,34 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
                         if (firstImage)
                         {
                             DateTimeOffset gToday = converter.ConvertNowTo(guild.TimeZone).Date;
-                            int add = currentWeek.ElementAt(i).Count > 0 ? currentWeek.ElementAt(i).Count : 1;
+                            int add =
+                                currentWeek.ElementAt(i).Count > 0
+                                    ? currentWeek.ElementAt(i).Count
+                                    : 1;
 
-                            PointF position = new((float)(lineWidth + nbColonne * intervalWidth + add / 2.0 * intervalWidth), (float)(lineWidth + 3.0 / 2.0 * intervalHeight));
+                            PointF position =
+                                new(
+                                    (float)(
+                                        lineWidth
+                                        + nbColonne * intervalWidth
+                                        + add / 2.0 * intervalWidth
+                                    ),
+                                    (float)(lineWidth + 3.0 / 2.0 * intervalHeight)
+                                );
 
-                            RichTextOptions options = new(font)
-                            {
-                                Origin = position,
-                                HorizontalAlignment = HorizontalAlignment.Center,
-                                VerticalAlignment = VerticalAlignment.Center,
-                            };
+                            RichTextOptions options =
+                                new(font)
+                                {
+                                    Origin = position,
+                                    HorizontalAlignment = HorizontalAlignment.Center,
+                                    VerticalAlignment = VerticalAlignment.Center,
+                                };
 
-                            ctx.DrawText(options, gToday.AddDays(i).ToString("dd/MM", cultureInfo), new SolidBrush(Color.Black));
+                            ctx.DrawText(
+                                options,
+                                gToday.AddDays(i).ToString("dd/MM", cultureInfo),
+                                new SolidBrush(Color.Black)
+                            );
                         }
                         #endregion
 
@@ -263,15 +315,21 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
                             float textPosX = (float)(posX + intervalWidth / 2.0);
                             float textPosY = (float)(posY + intervalHeight / 2.0);
 
-                            if (j != 0) ctx.DrawLine(blackPen, new PointF(posX, posY), new PointF(posX, CANVAS_HEIGHT - lineWidth));
+                            if (j != 0)
+                                ctx.DrawLine(
+                                    blackPen,
+                                    new PointF(posX, posY),
+                                    new PointF(posX, CANVAS_HEIGHT - lineWidth)
+                                );
 
                             Brush brushColor = new SolidBrush(Color.Black);
 
-                            RichTextOptions options = new(quicksand)
-                            {
-                                HorizontalAlignment = HorizontalAlignment.Center,
-                                VerticalAlignment = VerticalAlignment.Center,
-                            };
+                            RichTextOptions options =
+                                new(quicksand)
+                                {
+                                    HorizontalAlignment = HorizontalAlignment.Center,
+                                    VerticalAlignment = VerticalAlignment.Center,
+                                };
 
                             #region Only For The First Image
                             if (firstImage)
@@ -280,10 +338,17 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
                                 ctx.DrawText(options, @event.CompetitionName, brushColor);
 
                                 options.Origin = new PointF(textPosX, textPosY + intervalHeight);
-                                ctx.DrawText(options, @event.OpponentClan?.Name, brushColor);
+                                ctx.DrawText(options, @event.OpponentClan?.Name ?? "", brushColor);
 
-                                options.Origin = new PointF(textPosX, textPosY + 2 * intervalHeight);
-                                ctx.DrawText(options, @event.Start.ToString("t", cultureInfo), brushColor);
+                                options.Origin = new PointF(
+                                    textPosX,
+                                    textPosY + 2 * intervalHeight
+                                );
+                                ctx.DrawText(
+                                    options,
+                                    @event.Start.ToString("t", cultureInfo),
+                                    brushColor
+                                );
                             }
                             #endregion
 
@@ -291,9 +356,12 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
                             int playersToTake = firstImage ? 5 : 10;
                             int playersToSkip = firstImage ? 0 : k * 10 - 5;
 
-                            string[] playersDisplay = @event.Players?.Skip(playersToSkip)?.Take(playersToTake).ToArray() ?? Array.Empty<string>();
+                            string[] playersDisplay =
+                                @event.Players?.Skip(playersToSkip)?.Take(playersToTake).ToArray()
+                                ?? Array.Empty<string>();
 
-                            PointF point2 = new(textPosX, textPosY + (startRow + 1) * intervalHeight);
+                            PointF point2 =
+                                new(textPosX, textPosY + (startRow + 1) * intervalHeight);
 
                             for (int l = 0; l < playersDisplay.Length; l++)
                             {
@@ -301,11 +369,12 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
                                 var cPlayer = ClashOfClansApi.Players.GetByTagAsync(tag);
                                 cPlayer.Wait();
 
-                                PointF point = new(textPosX, textPosY + (startRow + l) * intervalHeight);
+                                PointF point =
+                                    new(textPosX, textPosY + (startRow + l) * intervalHeight);
 
                                 options.Origin = point;
 
-                                ctx.DrawText(options, cPlayer?.Result?.Name, brushColor);
+                                ctx.DrawText(options, cPlayer?.Result?.Name ?? "", brushColor);
                             }
                         }
 
@@ -328,15 +397,27 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
         private static async Task DisplayAsync(IGuild guild, Common.Models.Calendar dbCalendar)
         {
             // Just to be sure
-            if (dbCalendar.ChannelId == null) return;
+            if (dbCalendar.ChannelId == null)
+                return;
 
             // Gets text channel
             ITextChannel? channel = await guild.GetTextChannelAsync((ulong)dbCalendar.ChannelId);
 
             if (channel == null)
             {
-                IUser owner = await guild.GetOwnerAsync();
-                await owner.SendMessageAsync(dbCalendar.Guild.TimeText.CalendarDisplayCannotSend);
+                IGuildUser owner = await guild.GetOwnerAsync();
+
+                // Tries to warn owner
+                try
+                {
+                    await owner.SendMessageAsync(
+                        dbCalendar.Guild.TimeText.CalendarDisplayCannotSend
+                    );
+                }
+                catch (Exception)
+                {
+                    // Do nothing
+                }
 
                 return;
             }
@@ -348,18 +429,20 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
             try
             {
                 IMessage? oldMsg = await channel.GetMessageAsync(dbCalendar.MessageId ?? 0);
-                if (oldMsg != null) await oldMsg.DeleteAsync();
+                if (oldMsg != null)
+                    await oldMsg.DeleteAsync();
 
                 while (oldMsg?.Reference != null)
                 {
-                    oldMsg = await channel.GetMessageAsync(oldMsg.Reference.MessageId.GetValueOrDefault());
+                    oldMsg = await channel.GetMessageAsync(
+                        oldMsg.Reference.MessageId.GetValueOrDefault()
+                    );
 
-                    if (oldMsg != null) await oldMsg.DeleteAsync();
+                    if (oldMsg != null)
+                        await oldMsg.DeleteAsync();
                 }
             }
-            catch (Exception)
-            {
-            }
+            catch (Exception) { }
 
             // Transforms canvas into FileAttachment
             FileAttachment[] files = canvas
@@ -369,10 +452,39 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
             // Sends new messages with file
             IMessage? msg = null;
 
-            foreach (FileAttachment attachment in files)
+            // Tries to send calendar
+            try
             {
-                MessageReference? messageReference = msg != null ? new(msg.Id, msg.Channel.Id, guild.Id) : null;
-                msg = await channel.SendFileAsync(attachment, messageReference: messageReference);
+                foreach (FileAttachment attachment in files)
+                {
+                    MessageReference? messageReference =
+                        msg != null ? new(msg.Id, msg.Channel.Id, guild.Id) : null;
+                    msg = await channel.SendFileAsync(
+                        attachment,
+                        messageReference: messageReference
+                    );
+                }
+            }
+            catch (Exception)
+            {
+                // Channel permissions have changed
+                // WarPlanner missing access
+
+                IGuildUser owner = await guild.GetOwnerAsync();
+
+                // Tries to warn owner
+                try
+                {
+                    await owner.SendMessageAsync(
+                        dbCalendar.Guild.TimeText.CalendarDisplayMissingAccess
+                    );
+                }
+                catch (Exception)
+                {
+                    // Do nothing
+                }
+
+                return;
             }
 
             // Update in database
@@ -380,7 +492,11 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
             Context.Calendars.Update(dbCalendar);
         }
 
-        private static List<CalendarEvent>[] GetCalendarInformations(string calendarId, Common.Models.TimeZone tZone, out int nbImages)
+        private static List<CalendarEvent>[] GetCalendarInformations(
+            string calendarId,
+            Common.Models.TimeZone tZone,
+            out int nbImages
+        )
         {
             nbImages = 1;
 
@@ -397,7 +513,9 @@ namespace Wp.Bot.Modules.TimeEvents.Calendar
 
             // Filters events
             int maxPlayers = 0;
-            IEnumerable<CalendarEvent> currentWeek = events.Where(m => m.IsBetweenDate(startDate, endDate));
+            IEnumerable<CalendarEvent> currentWeek = events.Where(
+                m => m.IsBetweenDate(startDate, endDate)
+            );
 
             List<CalendarEvent>[] tabEvents =
             {

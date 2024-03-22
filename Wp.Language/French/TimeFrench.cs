@@ -7,6 +7,7 @@
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
         public string CalendarDisplayCannotSend => "Le salon servant à afficher le calendrier a été supprimé";
+        public string CalendarDisplayMissingAccess => "Désolé, mais je n'ai pas pu afficher le calendrier, il me manque la permission d'écrire dans le salon";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          GUILD JOIN EVENT                         *|

@@ -160,7 +160,7 @@ namespace Wp.Bot.Services.Logger.Event
                 .WithTitle(message.Title)
                 .WithColor(message.Color)
                 .WithDescription(message.Description)
-                .WithFooter($"{now.Year} © {client.CurrentUser.Username}");
+                .WithFooter($"{now.Year} © {client.CurrentUser?.Username}");
 
             if (message.GuildThumbnail != null)
             {

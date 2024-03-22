@@ -22,17 +22,21 @@ namespace Wp.Api
 
         static GoogleCalendarApi()
         {
-            ServiceAccountCredential credential = new(
-                new ServiceAccountCredential.Initializer(email)
-                {
-                    Scopes = new string[] { CalendarService.Scope.Calendar, CalendarService.Scope.CalendarEvents }
-                }.FromPrivateKey(Keys.GOOGLE_CALENDAR_TOKEN)
-            );
+            ServiceAccountCredential credential =
+                new(
+                    new ServiceAccountCredential.Initializer(email)
+                    {
+                        Scopes = new string[]
+                        {
+                            CalendarService.Scope.Calendar,
+                            CalendarService.Scope.CalendarEvents
+                        }
+                    }.FromPrivateKey(Keys.GOOGLE_CALENDAR_TOKEN)
+                );
 
-            service = new CalendarService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential
-            });
+            service = new CalendarService(
+                new BaseClientService.Initializer() { HttpClientInitializer = credential }
+            );
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -57,9 +61,7 @@ namespace Wp.Api
                 {
                     calendar = await service.Calendars.Get(calendarId).ExecuteAsync();
                 }
-                catch (Exception)
-                {
-                }
+                catch (Exception) { }
 
                 return calendar;
             }
@@ -88,9 +90,7 @@ namespace Wp.Api
                 {
                     result = await service.Events.Delete(calendarId, eventId).ExecuteAsync();
                 }
-                catch (Exception)
-                {
-                }
+                catch (Exception) { }
 
                 return result is not null;
             }
@@ -111,16 +111,24 @@ namespace Wp.Api
 
                     if (result != null)
                     {
-                        string[] playersTag = result.Description?
-                            .Split("\n", StringSplitOptions.RemoveEmptyEntries)?
-                            .ToArray() ?? Array.Empty<string>();
+                        string[] playersTag =
+                            result
+                                .Description?.Split("\n", StringSplitOptions.RemoveEmptyEntries)
+                                ?.ToArray() ?? Array.Empty<string>();
 
-                        calendarEvent = new(result.Id, result.Summary, result.Location, DateTimeOffset.Parse(result.Start.DateTimeRaw), DateTimeOffset.Parse(result.End.DateTimeRaw), playersTag);
+                        calendarEvent = new(
+                            result.Id,
+                            result.Summary,
+                            result.Location,
+                            DateTimeOffset.Parse(result.Start.DateTimeRaw),
+                            DateTimeOffset.Parse(result.End.DateTimeRaw),
+                            playersTag
+                        );
+
+                        calendarEvent = calendarEvent.Validate();
                     }
                 }
-                catch (Exception)
-                {
-                }
+                catch (Exception) { }
 
                 return calendarEvent;
             }
@@ -132,33 +140,36 @@ namespace Wp.Api
             /// <param name="zoneId">A TimeZone id</param>
             /// <param name="calendarId">A calendar id, where the event has to be inserted</param>
             /// <returns>A confirmation of the successful insertion of event</returns>
-            public static async Task<Event?> InsertAsync(CalendarEvent calendarEvent, string zoneId, string calendarId)
+            public static async Task<Event?> InsertAsync(
+                CalendarEvent calendarEvent,
+                string zoneId,
+                string calendarId
+            )
             {
                 Event? result = null;
-                Event matchEvent = new()
-                {
-                    Summary = calendarEvent.CompetitionName,
-                    Location = calendarEvent.OpponentTag,
-                    Start = new EventDateTime
+                Event matchEvent =
+                    new()
                     {
-                        DateTimeDateTimeOffset = calendarEvent.Start.UtcDateTime,
-                        TimeZone = zoneId,
-                    },
-                    End = new EventDateTime
-                    {
-                        DateTimeDateTimeOffset = calendarEvent.End.UtcDateTime,
-                        TimeZone = zoneId,
-                    },
-                    Description = string.Join("\n", calendarEvent.Players),
-                };
+                        Summary = calendarEvent.CompetitionName,
+                        Location = calendarEvent.OpponentTag,
+                        Start = new EventDateTime
+                        {
+                            DateTimeDateTimeOffset = calendarEvent.Start.UtcDateTime,
+                            TimeZone = zoneId,
+                        },
+                        End = new EventDateTime
+                        {
+                            DateTimeDateTimeOffset = calendarEvent.End.UtcDateTime,
+                            TimeZone = zoneId,
+                        },
+                        Description = string.Join("\n", calendarEvent.Players),
+                    };
 
                 try
                 {
                     result = await service.Events.Insert(matchEvent, calendarId).ExecuteAsync();
                 }
-                catch (Exception)
-                {
-                }
+                catch (Exception) { }
 
                 return result;
             }
@@ -169,17 +180,31 @@ namespace Wp.Api
             /// <param name="calendarId">A Google Calendar id</param>
             /// <param name="fromNow">A flag that indicates if we have to take only next events from now</param>
             /// <returns>An array containing all the calendar events from a Google Calendar</returns>
-            public static async Task<CalendarEvent[]> ListAsync(string calendarId, bool fromNow = true)
+            public static async Task<CalendarEvent[]> ListAsync(
+                string calendarId,
+                bool fromNow = true
+            )
             {
                 List<CalendarEvent> list = new();
 
                 // If fromNow is false, take only 1 month before
-                DateTimeOffset dateUtc = !fromNow ? DateTimeOffset.UtcNow.AddMonths(-1) : DateTimeOffset.UtcNow;
+                DateTimeOffset dateUtc = !fromNow
+                    ? DateTimeOffset.UtcNow.AddMonths(-1)
+                    : DateTimeOffset.UtcNow;
 
                 try
                 {
-                    Google.Apis.Calendar.v3.Data.Events? result = await service.Events.List(calendarId).ExecuteAsync();
-                    Event[]? items = result.Items.Where(i => i.Start?.DateTimeRaw != null && DateTimeOffset.Parse(i.Start.DateTimeRaw).UtcDateTime > dateUtc).ToArray();
+                    EventsResource.ListRequest request = service.Events.List(calendarId);
+                    request.MaxResults = 2500;
+
+                    Google.Apis.Calendar.v3.Data.Events? result = await request.ExecuteAsync();
+                    Event[]? items = result
+                        .Items.Where(
+                            i =>
+                                i.Start?.DateTimeRaw != null
+                                && DateTimeOffset.Parse(i.Start.DateTimeRaw).UtcDateTime > dateUtc
+                        )
+                        .ToArray();
 
                     foreach (Event @event in items)
                     {
@@ -191,9 +216,7 @@ namespace Wp.Api
                             list.Add(calendarEvent);
                     }
                 }
-                catch (Exception)
-                {
-                }
+                catch (Exception) { }
 
                 return list.OrderBy(e => e.Start).ToArray();
             }
@@ -204,32 +227,41 @@ namespace Wp.Api
             /// <param name="calendarEvent">A calendar event updated</param>
             /// <param name="calendarId">A Google Calendar id</param>
             /// <returns>A boolean that indicates wether the event has been updated or not</returns>
-            public static async Task<bool> UpdateAsync(CalendarEvent calendarEvent, string calendarId)
+            public static async Task<bool> UpdateAsync(
+                CalendarEvent calendarEvent,
+                string calendarId
+            )
             {
                 try
                 {
-                    Event? oldEvent = await service.Events.Get(calendarId, calendarEvent.Id).ExecuteAsync();
+                    Event? oldEvent = await service
+                        .Events.Get(calendarId, calendarEvent.Id)
+                        .ExecuteAsync();
 
-                    if (oldEvent == null) return false;
+                    if (oldEvent == null)
+                        return false;
 
-                    Event newEvent = new()
-                    {
-                        Summary = calendarEvent.CompetitionName,
-                        Location = calendarEvent.OpponentTag,
-                        Start = new EventDateTime
+                    Event newEvent =
+                        new()
                         {
-                            DateTimeDateTimeOffset = calendarEvent.Start.UtcDateTime,
-                            TimeZone = oldEvent.Start.TimeZone,
-                        },
-                        End = new EventDateTime
-                        {
-                            DateTimeDateTimeOffset = calendarEvent.End.UtcDateTime,
-                            TimeZone = oldEvent.End.TimeZone,
-                        },
-                        Description = string.Join("\n", calendarEvent.Players),
-                    };
+                            Summary = calendarEvent.CompetitionName,
+                            Location = calendarEvent.OpponentTag,
+                            Start = new EventDateTime
+                            {
+                                DateTimeDateTimeOffset = calendarEvent.Start.UtcDateTime,
+                                TimeZone = oldEvent.Start.TimeZone,
+                            },
+                            End = new EventDateTime
+                            {
+                                DateTimeDateTimeOffset = calendarEvent.End.UtcDateTime,
+                                TimeZone = oldEvent.End.TimeZone,
+                            },
+                            Description = string.Join("\n", calendarEvent.Players),
+                        };
 
-                    await service.Events.Update(newEvent, calendarId, calendarEvent.Id).ExecuteAsync();
+                    await service
+                        .Events.Update(newEvent, calendarId, calendarEvent.Id)
+                        .ExecuteAsync();
 
                     return true;
                 }

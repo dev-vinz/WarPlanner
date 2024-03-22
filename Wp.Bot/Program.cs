@@ -8,149 +8,160 @@ using Wp.Database.Settings;
 
 namespace Wp.Bot
 {
-	public class Program
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+    public class Program
+    {
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		private DiscordSocketClient? client;
-		private InteractionService? commands;
+        private DiscordSocketClient? client;
+        private InteractionService? commands;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                             PROPERTIES                            *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		private static bool IsDebug
-		{
-			get
-			{
+        private static bool IsDebug
+        {
+            get
+            {
 #if DEBUG
-				return true;
+                return true;
 #else
                 return false;
 #endif
-			}
-		}
+            }
+        }
 
-		/* * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
         \* * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                            CONSTRUCTORS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          ABSTRACT METHODS                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public async Task MainAsync()
-		{
-			// Call ConfigureServices to create the ServiceCollection/Provider for passing around the services
-			using ServiceProvider services = ConfigureServices();
+        public async Task MainAsync()
+        {
+            // Call ConfigureServices to create the ServiceCollection/Provider for passing around the services
+            using ServiceProvider services = ConfigureServices();
 
-			// Get the client and assign to client 
-			// You get the services via GetRequiredService<T>
-			client = services.GetRequiredService<DiscordSocketClient>();
-			commands = services.GetRequiredService<InteractionService>();
+            // Get the client and assign to client
+            // You get the services via GetRequiredService<T>
+            client = services.GetRequiredService<DiscordSocketClient>();
+            commands = services.GetRequiredService<InteractionService>();
 
-			// Setup logging and the ready event
-			client.Log += LogAsync;
-			client.Ready += ReadyAsync;
-			commands.Log += LogAsync;
+            // Setup logging and the ready event
+            client.Log += LogAsync;
+            client.Ready += ReadyAsync;
+            commands.Log += LogAsync;
 
-			// This is where we get the Token value from the configuration file, and start the bot
-			await client.LoginAsync(TokenType.Bot, Keys.DISCORD_BOT_TOKEN);
-			await client.StartAsync();
+            // This is where we get the Token value from the configuration file, and start the bot
+            await client.LoginAsync(TokenType.Bot, Keys.DISCORD_BOT_TOKEN);
+            await client.StartAsync();
 
-			// We get the CommandHandler class here and call the InitializeAsync method to start things up for the CommandHandler service
-			await services.GetRequiredService<CommandHandler>().InitializeAsync();
+            // We get the CommandHandler class here and call the InitializeAsync method to start things up for the CommandHandler service
+            await services.GetRequiredService<CommandHandler>().InitializeAsync();
 
-			// Same for EventHandler
-			await services.GetRequiredService<Services.EventHandler>().InitializeAsync();
+            // Same for EventHandler
+            await services.GetRequiredService<Services.EventHandler>().InitializeAsync();
 
-			await Task.Delay(Timeout.Infinite);
-		}
+            await Task.Delay(Timeout.Infinite);
+        }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         PROTECTED METHODS                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          PRIVATE METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		private Task LogAsync(LogMessage log)
-		{
-			Console.WriteLine(log.ToString());
-			return Task.CompletedTask;
-		}
+        private Task LogAsync(LogMessage log)
+        {
+            Console.WriteLine(log.ToString());
+            return Task.CompletedTask;
+        }
 
-		private async Task ReadyAsync()
-		{
-			if (IsDebug)
-			{
-				Console.WriteLine($"DEBUG MODE : Adding commands to {Configurations.DEV_GUILD_ID}...");
-				await commands!.RegisterCommandsToGuildAsync(Configurations.DEV_GUILD_ID);
-			}
-			else
-			{
-				await client!.SetGameAsync("Clash Of Clans");
-				await commands!.RegisterCommandsGloballyAsync(true);
-			}
+        private async Task ReadyAsync()
+        {
+            if (IsDebug)
+            {
+                Console.WriteLine(
+                    $"DEBUG MODE : Adding commands to {Configurations.DEV_GUILD_ID}..."
+                );
+                await commands!.RegisterCommandsToGuildAsync(Configurations.DEV_GUILD_ID);
+            }
+            else
+            {
+                await client!.SetGameAsync("Clash Of Clans");
+                await commands!.RegisterCommandsGloballyAsync(true);
+            }
 
-			Console.WriteLine($"Connected as [{client!.CurrentUser}]");
-		}
+            Console.WriteLine($"Connected as [{client!.CurrentUser}]");
+        }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          OVERRIDE METHODS                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           STATIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		private static ServiceProvider ConfigureServices()
-		{
-			return new ServiceCollection()
-				.AddSingleton(x => new DiscordSocketClient(new DiscordSocketConfig
-				{
-					GatewayIntents = GatewayIntents.AllUnprivileged,
-					AlwaysDownloadUsers = true,
-					DefaultRetryMode = RetryMode.RetryTimeouts,
-					LogGatewayIntentWarnings = false,
-				}))
-				.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
-				.AddSingleton<CommandHandler>()
-				.AddSingleton<Services.EventHandler>()
-				.BuildServiceProvider();
-		}
+        private static ServiceProvider ConfigureServices()
+        {
+            return new ServiceCollection()
+                .AddSingleton(
+                    x =>
+                        new DiscordSocketClient(
+                            new DiscordSocketConfig
+                            {
+                                GatewayIntents =
+                                    GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers,
+                                AlwaysDownloadUsers = true,
+                                DefaultRetryMode = RetryMode.RetryTimeouts,
+                                LogGatewayIntentWarnings = false,
+                                UseInteractionSnowflakeDate = false,
+                            }
+                        )
+                )
+                .AddSingleton(
+                    x => new InteractionService(x.GetRequiredService<DiscordSocketClient>())
+                )
+                .AddSingleton<CommandHandler>()
+                .AddSingleton<Services.EventHandler>()
+                .BuildServiceProvider();
+        }
 
-		public static Task Main(string[] _) => new Program().MainAsync();
+        public static Task Main(string[] _) => new Program().MainAsync();
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                              INDEXERS                             *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         OPERATORS OVERLOAD                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	}
+    }
 }

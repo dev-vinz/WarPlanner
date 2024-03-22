@@ -6,6 +6,6 @@
         public static readonly ulong DEV_GUILD_ID = 1029658630636720129;
         public static readonly ulong DEV_LOG_CHANNEL_ID = 1029661005162225704;
 
-        public static readonly ulong SUPPORT_GUILD_ID = 1029658630636720129;
+        public static readonly ulong SUPPORT_GUILD_ID = 856971486351196190;
     }
 }

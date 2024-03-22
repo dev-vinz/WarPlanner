@@ -988,34 +988,52 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
                 |*      CHANNELS CREATION      *|
                 \* * * * * * * * * * * * * * * */
 
-                IGuildChannel category = guild.CreateCategoryAsync($"🏆 {competitionName}").Result;
-                IGuildChannel informations = guild.CreateTextChannelAsync($"{interactionText.CompetitionEnvironmentInformationChannel}-{competitionName}", c => c.CategoryId = category.Id).Result;
+                IGuildChannel category = guild.CreateCategoryAsync($"🏆 {competitionName}", c =>
+                {
+                    c.PermissionOverwrites = new(new Overwrite[]
+                    {
+                        new(botMember.Id, PermissionTarget.User, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow)),
+                        new(referentRole.Id, PermissionTarget.Role, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, manageMessages: PermValue.Allow, sendMessages: PermValue.Allow)),
+                        new(tournamentRole.Id, PermissionTarget.Role,OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow)),
+                        new(guild.EveryoneRole.Id, PermissionTarget.Role, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Deny)),
+                    });
+                }).Result;
+
+                IGuildChannel informations = guild.CreateTextChannelAsync($"{interactionText.CompetitionEnvironmentInformationChannel}-{competitionName}", c =>
+                {
+                    c.CategoryId = category.Id;
+                    c.PermissionOverwrites = new(new Overwrite[]
+                    {
+                        new(botMember.Id, PermissionTarget.User, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow)),
+                        new(referentRole.Id, PermissionTarget.Role, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, manageMessages: PermValue.Allow, sendMessages: PermValue.Allow)),
+                        new(tournamentRole.Id, PermissionTarget.Role, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, sendMessages: PermValue.Deny)),
+                        new(guild.EveryoneRole.Id, PermissionTarget.Role, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Deny, sendMessages: PermValue.Deny))
+                    });
+                }).Result;
+
                 IGuildChannel flood = guild.CreateTextChannelAsync($"{interactionText.CompetitionEnvironmentFloodChannel}-{competitionName}", c => c.CategoryId = category.Id).Result;
-                IGuildChannel result = guild.CreateTextChannelAsync(interactionText.CompetitionenvironmentResultChannel, c => c.CategoryId = category.Id).Result;
-                IGuildChannel voice = guild.CreateVoiceChannelAsync(interactionText.CompetitionEnvironmentVoiceChannel, c => c.CategoryId = category.Id).Result;
 
-                /* * * * * * * * * * * * * * * *\
-                |*     CHANNELS PERMISSION     *|
-                \* * * * * * * * * * * * * * * */
+                IGuildChannel result = guild.CreateTextChannelAsync(interactionText.CompetitionenvironmentResultChannel, c =>
+                {
+                    c.CategoryId = category.Id;
+                    c.PermissionOverwrites = new(new Overwrite[]
+                    {
+                        new(botMember.Id, PermissionTarget.User, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, sendMessages: PermValue.Allow)),
+                        new(referentRole.Id, PermissionTarget.Role, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, manageMessages: PermValue.Allow, sendMessages: PermValue.Allow)),
+                        new(guild.EveryoneRole.Id, PermissionTarget.Role, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Deny, sendMessages: PermValue.Deny))
+                    });
+                }).Result;
 
-                category.AddPermissionOverwriteAsync(botMember, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow)).Wait();
-                category.AddPermissionOverwriteAsync(referentRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, manageMessages: PermValue.Allow, sendMessages: PermValue.Allow)).Wait();
-                category.AddPermissionOverwriteAsync(tournamentRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow)).Wait();
-                category.AddPermissionOverwriteAsync(guild.EveryoneRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Deny)).Wait();
-
-                informations.AddPermissionOverwriteAsync(botMember, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow)).Wait();
-                informations.AddPermissionOverwriteAsync(referentRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, manageMessages: PermValue.Allow, sendMessages: PermValue.Allow)).Wait();
-                informations.AddPermissionOverwriteAsync(tournamentRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, sendMessages: PermValue.Deny)).Wait();
-                informations.AddPermissionOverwriteAsync(guild.EveryoneRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Deny)).Wait();
-
-                result.AddPermissionOverwriteAsync(botMember, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, sendMessages: PermValue.Allow)).Wait();
-                result.AddPermissionOverwriteAsync(referentRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, manageMessages: PermValue.Allow, sendMessages: PermValue.Allow)).Wait();
-                result.AddPermissionOverwriteAsync(guild.EveryoneRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Deny, sendMessages: PermValue.Deny)).Wait();
-
-                voice.AddPermissionOverwriteAsync(botMember, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow)).Wait();
-                voice.AddPermissionOverwriteAsync(referentRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, useVoiceActivation: PermValue.Allow, speak: PermValue.Allow)).Wait();
-                voice.AddPermissionOverwriteAsync(tournamentRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, useVoiceActivation: PermValue.Allow, speak: PermValue.Allow)).Wait();
-                voice.AddPermissionOverwriteAsync(guild.EveryoneRole, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Deny)).Wait();
+                IGuildChannel voice = guild.CreateVoiceChannelAsync(interactionText.CompetitionEnvironmentVoiceChannel, c =>
+                {
+                    c.CategoryId = category.Id;
+                    c.PermissionOverwrites = new(new Overwrite[] {
+                        new(botMember.Id, PermissionTarget.User, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow)) ,
+                        new(referentRole.Id, PermissionTarget.Role, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, speak: PermValue.Allow)) ,
+                        new(tournamentRole.Id, PermissionTarget.Role, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Allow, speak: PermValue.Allow)) ,
+                        new(guild.EveryoneRole.Id, PermissionTarget.Role, OverwritePermissions.InheritAll.Modify(viewChannel: PermValue.Deny)) ,
+                    });
+                }).Result;
 
                 /* * * * * * * * * * * * * * * *\
                 |*      RESULT PERMISSION      *|
@@ -1038,7 +1056,6 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
                     .Where(u => u.IsAManager())
                     .ForAll(async u => await u.AddRoleAsync(referentRole));
 
-
                 /* * * * * * * * * * * * * * * *\
                 |*          RETURN IDS         *|
                 \* * * * * * * * * * * * * * * */
@@ -1049,8 +1066,10 @@ namespace Wp.Bot.Modules.ComponentCommands.Manager
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.Error.WriteLine(e.ToString());
+
                 categoryId = null;
                 resultId = null;
                 refRole = null;

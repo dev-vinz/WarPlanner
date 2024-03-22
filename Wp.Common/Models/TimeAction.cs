@@ -21,10 +21,5 @@
         /// Reminds the war to players
         /// </summary>
         REMIND_WAR = 2,
-
-        /// <summary>
-        /// Reminds to turn war status off
-        /// </summary>
-        REMIND_WAR_STATUS = 3,
     }
 }

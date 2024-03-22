@@ -116,7 +116,8 @@ namespace Wp.Bot.Services
             DbGuilds guilds = Database.Context.Guilds;
 
             // In doupts, checks that guild doesn't exists
-            if (guilds.Any(g => g.Id == guild.Id)) return false;
+            if (guilds.Any(g => g.Id == guild.Id))
+                return false;
 
             await logger.GuildJoinedAsync(guild);
 
@@ -127,11 +128,16 @@ namespace Wp.Bot.Services
             // Adds classic time actions too
             DbTimes times = Database.Context.Times;
 
-            Time endWar = new(newGuild, TimeAction.DETECT_END_WAR, DateTimeOffset.UtcNow, Time.DETECT_END_WAR_INTERVAL, DefaultParameters.DEFAULT_TIME_ADDITIONAL);
-            Time warStatus = new(newGuild, TimeAction.REMIND_WAR_STATUS, DateTimeOffset.UtcNow, Time.REMIND_WAR_STATUS_INTERVAL, DefaultParameters.DEFAULT_TIME_ADDITIONAL);
+            Time endWar =
+                new(
+                    newGuild,
+                    TimeAction.DETECT_END_WAR,
+                    DateTimeOffset.UtcNow,
+                    Time.DETECT_END_WAR_INTERVAL,
+                    DefaultParameters.DEFAULT_TIME_ADDITIONAL
+                );
 
             times.Add(endWar);
-            times.Add(warStatus);
 
             // Gets responses
             IGeneralResponse generalResponses = newGuild.GeneralResponses;
@@ -162,19 +168,32 @@ namespace Wp.Bot.Services
             IEnumerable<IGuildUser> users = await guild.GetUsersAsync().FlattenAsync();
             IGuildUser? owner = users.FirstOrDefault(u => u.Id == guild.OwnerId);
 
-            if (owner == null) return true;
+            if (owner == null)
+                return true;
 
             // Embed
             EmbedBuilder embed = new EmbedBuilder()
                 .WithTitle(timeResponses.GuildJoinedTitle)
                 .WithRandomColor()
-                .WithDescription($"{CustomEmojis.WarPlanner} | {timeResponses.GuildJoinedDescription(owner.Username)}")
-                .AddField(timeResponses.GuildJoinedFieldTimeZoneTitle, timeResponses.GuildJoinedFieldTimeZoneDescription(newGuild.TimeZone.AsAttribute().DisplayName, offset.TotalHours), true)
+                .WithDescription(
+                    $"{CustomEmojis.WarPlanner} | {timeResponses.GuildJoinedDescription(owner.Username)}"
+                )
+                .AddField(
+                    timeResponses.GuildJoinedFieldTimeZoneTitle,
+                    timeResponses.GuildJoinedFieldTimeZoneDescription(
+                        newGuild.TimeZone.AsAttribute().DisplayName,
+                        offset.TotalHours
+                    ),
+                    true
+                )
                 .WithFooter($"{guildNow.Year} © {guild.CurrentUser.Username}");
 
             try
             {
-                await owner.SendMessageAsync(embed: embed.Build(), components: componentBuilder.Build());
+                await owner.SendMessageAsync(
+                    embed: embed.Build(),
+                    components: componentBuilder.Build()
+                );
             }
             catch (Exception)
             {
@@ -182,9 +201,14 @@ namespace Wp.Bot.Services
 
                 foreach (SocketTextChannel channel in guild.TextChannels)
                 {
-                    RestUserMessage msg = await channel.SendMessageAsync(owner.Mention, embed: embed.Build(), components: componentBuilder.Build());
+                    RestUserMessage msg = await channel.SendMessageAsync(
+                        owner.Mention,
+                        embed: embed.Build(),
+                        components: componentBuilder.Build()
+                    );
 
-                    if (msg != null) break;
+                    if (msg != null)
+                        break;
                 }
             }
 
@@ -203,37 +227,74 @@ namespace Wp.Bot.Services
                     Thread.Sleep(10);
                 }
 
-                eventTimer = JSFunctions.SetInterval(async () =>
-                {
-                    try
+                List<Thread> threads = new();
+
+                eventTimer = JSFunctions.SetInterval(
+                    async () =>
                     {
-                        DbTimes times = Database.Context.Times;
+                        try
+                        {
+                            //Console.WriteLine("------------------------------------------");
+                            //Console.WriteLine($"1) {DateTimeOffset.UtcNow}");
+                            DbTimes times = Database.Context.Times;
+                            //Console.WriteLine($"2) {DateTimeOffset.UtcNow}");
 
-                        // In each guild	
-                        client.Guilds
-                            .AsParallel()
-                            .ForAll(guild =>
-                            {
-                                Time[] events = times.Where(t => t.Guild.Id == guild.Id).ToArray();
+                            //// In each guild
+                            //foreach (SocketGuild? guild in client.Guilds)
+                            //{
+                            //    if (guild == null) continue;
 
-                                // For each time events
-                                events
-                                    .AsParallel()
-                                    .ForAll(@event => TimeCaller.Execute(@event.Action, guild));
-                            });
-                    }
-                    catch (Exception e)
-                    {
-                        LogMessage logMessage = new(LogSeverity.Info, "TimeLoop", "Error while executing time loop");
-                        Console.WriteLine(logMessage.ToString());
+                            //    Time[] events = times.Where(t => t.Guild.Id == guild.Id)
+                            //                         .ToArray();
 
-                        await logger.EventExecutionFailedAsync(e);
+                            //    foreach (Time @event in events)
+                            //    {
+                            //        Thread thread = new(() => TimeCaller.Execute(@event.Action, guild));
+                            //        thread.Start();
 
-                        JSFunctions.ClearInterval(ref eventTimer);
+                            //        threads.Add(thread);
+                            //    }
+                            //}
 
-                        await HandleTime();
-                    }
-                }, TimeSpan.FromSeconds(15));
+                            //threads.RemoveAll(thread => !thread.IsAlive);
+
+                            //Console.WriteLine(threads.Count);
+                            //Console.WriteLine($"3) {DateTimeOffset.UtcNow}");
+
+                            // In each guild
+                            client
+                                .Guilds.AsParallel()
+                                .ForAll(guild =>
+                                {
+                                    Time[] events = times
+                                        .Where(t => t.Guild.Id == guild.Id)
+                                        .ToArray();
+
+                                    // For each time events
+                                    events
+                                        .AsParallel()
+                                        .ForAll(@event => TimeCaller.Execute(@event.Action, guild));
+                                });
+                        }
+                        catch (Exception e)
+                        {
+                            LogMessage logMessage =
+                                new(
+                                    LogSeverity.Info,
+                                    "TimeLoop",
+                                    "Error while executing time loop"
+                                );
+                            Console.WriteLine(logMessage.ToString());
+
+                            await logger.EventExecutionFailedAsync(e);
+
+                            JSFunctions.ClearInterval(ref eventTimer);
+
+                            await HandleTime();
+                        }
+                    },
+                    TimeSpan.FromSeconds(15)
+                );
 
                 LogMessage logMessage = new(LogSeverity.Info, "Discord", "Time loop started");
                 Console.WriteLine(logMessage.ToString());
@@ -265,7 +326,8 @@ namespace Wp.Bot.Services
                 // Checks if there's missing guilds
                 bool joined = await GuildJoinedAsync(guild);
 
-                if (joined) cptJoined += 1;
+                if (joined)
+                    cptJoined += 1;
             }
 
             // Checks if we have to remove some guilds in DB
@@ -275,11 +337,17 @@ namespace Wp.Bot.Services
                 {
                     bool left = await GuildLeftAsync(guild.Id);
 
-                    if (left) cptLeft += 1;
+                    if (left)
+                        cptLeft += 1;
                 }
             }
 
-            LogMessage logMessage = new(LogSeverity.Info, "Database", $"Verified and operational (+{cptJoined}/-{cptLeft})");
+            LogMessage logMessage =
+                new(
+                    LogSeverity.Info,
+                    "Database",
+                    $"Verified and operational (+{cptJoined}/-{cptLeft})"
+                );
             Console.WriteLine(logMessage.ToString());
 
             isDatabaseVerified = true;
@@ -306,8 +374,5 @@ namespace Wp.Bot.Services
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         OPERATORS OVERLOAD                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-
-
     }
 }

@@ -55,6 +55,7 @@
         |*                      COMPETITION EDIT COMMAND                     *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        public string EditPleaseSelectCompetitionFromMenu => "Veuillez sélectionner la compétition depuis le menu, lors de la commande";
         public string EditCompetitionName => "Nom";
         public string EditCompetitionResultChannel => "Salon d'annonce des résultats";
         public string EditCompetitionMainClan => "Clan principal";

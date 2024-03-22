@@ -22,32 +22,54 @@ namespace Wp.Api.Models
         /// <summary>
         /// Gets the event id
         /// </summary>
-        public string Id { get => id; }
+        public string Id
+        {
+            get => id;
+        }
 
         /// <summary>
         /// Gets the match competition name
         /// </summary>
-        public string CompetitionName { get => competitionName; }
+        public string CompetitionName
+        {
+            get => competitionName;
+        }
 
         /// <summary>
         /// Gets the match opponent tag
         /// </summary>
-        public string OpponentTag { get => opponentTag; set => opponentTag = value; }
+        public string OpponentTag
+        {
+            get => opponentTag;
+            set => opponentTag = value;
+        }
 
         /// <summary>
         /// Gets the match start time
         /// </summary>
-        public DateTimeOffset Start { get => start; set => start = value; }
+        public DateTimeOffset Start
+        {
+            get => start;
+            set => start = value;
+        }
 
         /// <summary>
         /// Gets the match end time
         /// </summary>
-        public DateTimeOffset End { get => end; set => end = value; }
+        public DateTimeOffset End
+        {
+            get => end;
+            set => end = value;
+        }
 
         /// <summary>
         /// Gets the match players
         /// </summary>
-        public IReadOnlyCollection<string> Players { get => players; set => players = value.ToArray(); }
+        public IReadOnlyCollection<string> Players
+        {
+            get => players;
+            set => players = value.ToArray();
+        }
 
         /* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
@@ -56,11 +78,9 @@ namespace Wp.Api.Models
         /// <summary>
         /// Gets the Clash Of Clans opponent clan profile via the API
         /// </summary>
-        public Clan OpponentClan => ClashOfClansApi.Clans.GetByTagAsync(opponentTag).Result ?? new ClashOfClans.Models.Clan
-        {
-            Name = "[DELETED]",
-            Tag = opponentTag,
-        };
+        public Clan OpponentClan =>
+            ClashOfClansApi.Clans.GetByTagAsync(opponentTag).Result
+            ?? new Clan { Name = "[DELETED]", Tag = opponentTag, };
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                            CONSTRUCTORS                           *|
@@ -75,7 +95,14 @@ namespace Wp.Api.Models
         /// <param name="start">A start time</param>
         /// <param name="end">An end time</param>
         /// <param name="players">An array of players</param>
-        public CalendarEvent(string id, string competitionName, string opponentTag, DateTimeOffset start, DateTimeOffset end, string[] players)
+        public CalendarEvent(
+            string id,
+            string competitionName,
+            string opponentTag,
+            DateTimeOffset start,
+            DateTimeOffset end,
+            string[] players
+        )
         {
             this.id = id;
             this.competitionName = competitionName;
@@ -93,9 +120,14 @@ namespace Wp.Api.Models
         /// <param name="start">A start time</param>
         /// <param name="end">An end time</param>
         /// <param name="players">An array of players</param>
-        public CalendarEvent(string competitionName, string opponentTag, DateTimeOffset start, DateTimeOffset end, string[] players) : this(string.Empty, competitionName, opponentTag, start, end, players)
-        {
-        }
+        public CalendarEvent(
+            string competitionName,
+            string opponentTag,
+            DateTimeOffset start,
+            DateTimeOffset end,
+            string[] players
+        )
+            : this(string.Empty, competitionName, opponentTag, start, end, players) { }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          ABSTRACT METHODS                         *|
@@ -115,8 +147,8 @@ namespace Wp.Api.Models
         /// <returns>true if this instance is situated between the two dates; false otherwise</returns>
         public bool IsBetweenDate(DateTimeOffset start, DateTimeOffset end)
         {
-            return this.start.UtcDateTime.Date >= start.UtcDateTime.Date &&
-                this.end.UtcDateTime.Date <= end.UtcDateTime.Date;
+            return this.start.UtcDateTime.Date >= start.UtcDateTime.Date
+                && this.end.UtcDateTime.Date <= end.UtcDateTime.Date;
         }
 
         /// <summary>
@@ -125,9 +157,16 @@ namespace Wp.Api.Models
         /// <returns>true if this instance is valid; false otherwise</returns>
         public bool IsValid()
         {
-            return competitionName is not null &&
-                opponentTag is not null &&
-                players.Any();
+            return competitionName is not null && opponentTag is not null && players.Any();
+        }
+
+        /// <summary>
+        /// Validate the current instance and returns null if it's not valid
+        /// </summary>
+        /// <returns>The current instance if it's valid; null otherwise</returns>
+        public CalendarEvent? Validate()
+        {
+            return IsValid() ? this : null;
         }
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -163,8 +202,5 @@ namespace Wp.Api.Models
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         OPERATORS OVERLOAD                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-
-
     }
 }

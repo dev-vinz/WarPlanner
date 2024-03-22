@@ -55,6 +55,7 @@
         |*                      COMPETITION EDIT COMMAND                     *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        public string EditPleaseSelectCompetitionFromMenu { get; }
         public string EditCompetitionName { get; }
         public string EditCompetitionResultChannel { get; }
         public string EditCompetitionMainClan { get; }

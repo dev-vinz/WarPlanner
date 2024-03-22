@@ -5,7 +5,6 @@
         public static readonly TimeSpan CALENDAR_INTERVAL = TimeSpan.FromSeconds(60);
         public static readonly TimeSpan DETECT_END_WAR_INTERVAL = TimeSpan.FromSeconds(60);
         public static readonly TimeSpan REMIND_INTERVAL = TimeSpan.FromSeconds(60);
-        public static readonly TimeSpan REMIND_WAR_STATUS_INTERVAL = TimeSpan.FromSeconds(60);
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
@@ -25,32 +24,53 @@
         /// <summary>
         /// Gets the discord server associated at this instance
         /// </summary>
-        public Guild Guild { get => guild; }
+        public Guild Guild
+        {
+            get => guild;
+        }
 
         /// <summary>
         /// Gets the purpose of this instance
         /// </summary>
-        public TimeAction Action { get => action; }
+        public TimeAction Action
+        {
+            get => action;
+        }
 
         /// <summary>
         /// Gets / Sets the last date this instance has been checked
         /// </summary>
-        public DateTimeOffset Date { get => date; set => date = value; }
+        public DateTimeOffset Date
+        {
+            get => date;
+            set => date = value;
+        }
 
         /// <summary>
         /// Gets the interval between to scans
         /// </summary>
-        public TimeSpan Interval { get => interval; }
+        public TimeSpan Interval
+        {
+            get => interval;
+        }
 
         /// <summary>
         /// Gets / Sets an additional information
         /// </summary>
-        public string Additional { get => additional; set => additional = value; }
+        public string Additional
+        {
+            get => additional;
+            set => additional = value;
+        }
 
         /// <summary>
         /// Gets / Sets and optional information
         /// </summary>
-        public string? Optional { get => optional; set => optional = value; }
+        public string? Optional
+        {
+            get => optional;
+            set => optional = value;
+        }
 
         /* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
@@ -70,7 +90,13 @@
         /// <param name="date">The last time this has been checked</param>
         /// <param name="interval">An interval between 2 scans</param>
         /// <param name="additional">An additional information, depending on the action</param>
-        public Time(Guild guild, TimeAction action, DateTimeOffset date, TimeSpan interval, string additional)
+        public Time(
+            Guild guild,
+            TimeAction action,
+            DateTimeOffset date,
+            TimeSpan interval,
+            string additional
+        )
         {
             // Inputs
             {
@@ -139,7 +165,9 @@
             {
                 Time? time = obj as Time;
 
-                return Guild == time?.Guild && Action == time?.Action && Additional == time?.Additional;
+                return Guild == time?.Guild
+                    && Action == time?.Action
+                    && Additional == time?.Additional;
             }
         }
 

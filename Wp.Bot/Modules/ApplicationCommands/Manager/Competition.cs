@@ -12,322 +12,327 @@ using Wp.Language;
 
 namespace Wp.Bot.Modules.ApplicationCommands.Manager
 {
-	[RequireUserRole(RoleType.MANAGER)]
-	[Group("competition", "Competition commands handler")]
-	public class Competition : InteractionModuleBase<SocketInteractionContext>
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+    [RequireUserRole(RoleType.MANAGER)]
+    [Group("competition", "Competition commands handler")]
+    public class Competition : InteractionModuleBase<SocketInteractionContext>
+    {
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                               FIELDS                              *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		private readonly CommandHandler handler;
+        private readonly CommandHandler handler;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                             PROPERTIES                            *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public InteractionService? Commands { get; set; }
+        public InteractionService? Commands { get; set; }
 
-		/* * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * *\
         |*            SHORTCUTS            *|
         \* * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                            CONSTRUCTORS                           *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		public Competition(CommandHandler handler)
-		{
-			this.handler = handler;
-		}
+        public Competition(CommandHandler handler)
+        {
+            this.handler = handler;
+        }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          ABSTRACT METHODS                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           PUBLIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		[SlashCommand("add", "Register a new competition within the guild", runMode: RunMode.Async)]
-		public async Task Add([Summary("name", "A competition's name")] string name)
-		{
-			await DeferAsync(true);
+        [SlashCommand("add", "Register a new competition within the guild", runMode: RunMode.Async)]
+        public async Task Add([Summary("name", "A competition's name")] string name)
+        {
+            await DeferAsync(true);
 
-			// Loads databases infos
-			DbClans clans = Database.Context.Clans;
-			DbCompetitions competitions = Database.Context.Competitions;
-			Guild dbGuild = Database.Context
-				.Guilds
-				.First(g => g.Id == Context.Guild.Id);
+            // Loads databases infos
+            DbClans clans = Database.Context.Clans;
+            DbCompetitions competitions = Database.Context.Competitions;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
 
-			// Filters for guild
-			Common.Models.Clan[] dbClans = clans
-				.AsParallel()
-				.Where(c => c.Guild == dbGuild)
-				.ToArray();
+            // Filters for guild
+            Common.Models.Clan[] dbClans = clans
+                .AsParallel()
+                .Where(c => c.Guild == dbGuild)
+                .ToArray();
 
-			// Gets command responses
-			IManager commandText = dbGuild.ManagerText;
-			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+            // Gets command responses
+            IManager commandText = dbGuild.ManagerText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
-			if (Encoding.UTF8.GetByteCount(name) != name.Length)
-			{
-				await ModifyOriginalResponseAsync(msg => msg.Content = commandText.CompetitionNameContainsEmoji);
+            if (Encoding.UTF8.GetByteCount(name) != name.Length)
+            {
+                await ModifyOriginalResponseAsync(msg => msg.Content = commandText.CompetitionNameContainsEmoji);
 
-				return;
-			}
+                return;
+            }
 
-			// Checks if there's at least one clan registered
-			if (!dbClans.Any())
-			{
-				await ModifyOriginalResponseAsync(msg => msg.Content = commandText.NoClanRegisteredToRemove);
+            // Checks if there's at least one clan registered
+            if (!dbClans.Any())
+            {
+                await ModifyOriginalResponseAsync(msg => msg.Content = commandText.NoClanRegisteredToRemove);
 
-				return;
-			}
+                return;
+            }
 
-			// Checks Clash Of Clans API
-			if (!await ClashOfClansApi.TryAccessApiAsync())
-			{
-				await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.ClashOfClansError);
+            // Checks Clash Of Clans API
+            if (!await ClashOfClansApi.TryAccessApiAsync())
+            {
+                await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.ClashOfClansError);
 
-				return;
-			}
+                return;
+            }
 
-			// Build select menu
-			SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
-				.WithCustomId(IdProvider.COMPETITION_ADD_SELECT_MAIN_CLAN);
+            // Build select menu
+            SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+                .WithCustomId(IdProvider.COMPETITION_ADD_SELECT_MAIN_CLAN);
 
-			dbClans
-				.AsParallel()
-				.ForAll(c =>
-				{
-					ClashOfClans.Models.Clan cClan = c.Profile;
-					menuBuilder.AddOption(cClan.Name, c.Tag, c.Tag, CustomEmojis.ParseClanLevel(cClan.ClanLevel));
-				});
+            dbClans
+                .AsParallel()
+                .ForAll(c =>
+                {
+                    ClashOfClans.Models.Clan cClan = c.Profile;
+                    menuBuilder.AddOption(cClan.Name, c.Tag, c.Tag, CustomEmojis.ParseClanLevel(cClan.ClanLevel));
+                });
 
-			// Sort options by name
-			menuBuilder.Options = menuBuilder.Options
-				.AsParallel()
-				.OrderBy(o => o.Label)
-				.ToList();
+            // Sort options by name
+            menuBuilder.Options = menuBuilder.Options
+                .AsParallel()
+                .OrderBy(o => o.Label)
+                .ToList();
 
-			// Cancel button
-			ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
-				.WithLabel(generalResponses.CancelButton)
-				.WithStyle(ButtonStyle.Danger)
-				.WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+            // Cancel button
+            ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+                .WithLabel(generalResponses.CancelButton)
+                .WithStyle(ButtonStyle.Danger)
+                .WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
 
-			// Build component
-			ComponentBuilder componentBuilder = new ComponentBuilder()
-				.WithSelectMenu(menuBuilder)
-				.WithButton(cancelButtonBuilder);
+            // Build component
+            ComponentBuilder componentBuilder = new ComponentBuilder()
+                .WithSelectMenu(menuBuilder)
+                .WithButton(cancelButtonBuilder);
 
-			IUserMessage message = await ModifyOriginalResponseAsync(msg =>
-			{
-				msg.Content = commandText.ChooseCompetitionMainClan;
-				msg.Components = new(componentBuilder.Build());
-			});
+            IUserMessage message = await ModifyOriginalResponseAsync(msg =>
+            {
+                msg.Content = commandText.ChooseCompetitionMainClan;
+                msg.Components = new(componentBuilder.Build());
+            });
 
-			// Registers informations into storage
-			ComponentStorage storage = ComponentStorage.GetInstance();
+            // Registers informations into storage
+            ComponentStorage storage = ComponentStorage.GetInstance();
 
-			string[] datas = new[] { name };
-			storage.MessageDatas.TryAdd(message.Id, datas);
-		}
+            string[] datas = new[] { name };
+            storage.MessageDatas.TryAdd(message.Id, datas);
+        }
 
-		[SlashCommand("delete", "Delete an existing competition registered within the guild", runMode: RunMode.Async)]
-		public async Task Delete()
-		{
-			await DeferAsync(true);
+        [SlashCommand("delete", "Delete an existing competition registered within the guild", runMode: RunMode.Async)]
+        public async Task Delete()
+        {
+            await DeferAsync(true);
 
-			// Loads databases infos
-			DbCompetitions competitions = Database.Context.Competitions;
-			Guild dbGuild = Database.Context
-				.Guilds
-				.First(g => g.Id == Context.Guild.Id);
+            // Loads databases infos
+            DbCompetitions competitions = Database.Context.Competitions;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
 
-			// Filters for guild
-			Common.Models.Competition[] dbCompetitions = competitions
-				.AsParallel()
-				.Where(c => c.Guild == dbGuild)
-				.ToArray();
+            // Filters for guild
+            Common.Models.Competition[] dbCompetitions = competitions
+                .AsParallel()
+                .Where(c => c.Guild == dbGuild)
+                .ToArray();
 
-			// Gets command responses
-			IManager commandText = dbGuild.ManagerText;
-			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+            // Gets command responses
+            IManager commandText = dbGuild.ManagerText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
-			// Checks if there's at least one competition registered
-			if (!dbCompetitions.Any())
-			{
-				await ModifyOriginalResponseAsync(msg => msg.Content = commandText.NoCompetitionToDelete);
+            // Checks if there's at least one competition registered
+            if (!dbCompetitions.Any())
+            {
+                await ModifyOriginalResponseAsync(msg => msg.Content = commandText.NoCompetitionToDelete);
 
-				return;
-			}
+                return;
+            }
 
-			// Checks Clash Of Clans API
-			if (!await ClashOfClansApi.TryAccessApiAsync())
-			{
-				await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.ClashOfClansError);
+            // Checks Clash Of Clans API
+            if (!await ClashOfClansApi.TryAccessApiAsync())
+            {
+                await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.ClashOfClansError);
 
-				return;
-			}
+                return;
+            }
 
-			// Build select menu
-			SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
-				.WithCustomId(IdProvider.COMPETITION_DELETE_SELECT);
+            // Build select menu
+            SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+                .WithCustomId(IdProvider.COMPETITION_DELETE_SELECT);
 
-			dbCompetitions
-				.AsParallel()
-				.ForAll(c =>
-				{
-					menuBuilder.AddOption(c.Name, c.Id.ToString(), emote: CustomEmojis.CocTrophy);
-				});
+            dbCompetitions
+                .AsParallel()
+                .ForAll(c =>
+                {
+                    menuBuilder.AddOption(c.Name, c.Id.ToString(), emote: CustomEmojis.CocTrophy);
+                });
 
-			// Sort options by name
-			menuBuilder.Options = menuBuilder.Options
-				.AsParallel()
-				.OrderBy(o => o.Label)
-				.ToList();
+            // Sort options by name
+            menuBuilder.Options = menuBuilder.Options
+                .AsParallel()
+                .OrderBy(o => o.Label)
+                .ToList();
 
-			// Cancel button
-			ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
-				.WithLabel(generalResponses.CancelButton)
-				.WithStyle(ButtonStyle.Danger)
-				.WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+            // Cancel button
+            ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+                .WithLabel(generalResponses.CancelButton)
+                .WithStyle(ButtonStyle.Danger)
+                .WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
 
-			// Build component
-			ComponentBuilder componentBuilder = new ComponentBuilder()
-				.WithSelectMenu(menuBuilder)
-				.WithButton(cancelButtonBuilder);
+            // Build component
+            ComponentBuilder componentBuilder = new ComponentBuilder()
+                .WithSelectMenu(menuBuilder)
+                .WithButton(cancelButtonBuilder);
 
-			IUserMessage message = await ModifyOriginalResponseAsync(msg =>
-			{
-				msg.Content = commandText.ChooseCompetitionToDelete;
-				msg.Components = new(componentBuilder.Build());
-			});
-		}
+            IUserMessage message = await ModifyOriginalResponseAsync(msg =>
+            {
+                msg.Content = commandText.ChooseCompetitionToDelete;
+                msg.Components = new(componentBuilder.Build());
+            });
+        }
 
-		[SlashCommand("edit", "Edit an existing competition registered within the guild", runMode: RunMode.Async)]
-		public async Task Edit([Summary("competition", "A registered competition"), Autocomplete(typeof(CompetitionAutocompleteHandler))] string competition)
-		{
-			await DeferAsync(true);
+        [SlashCommand("edit", "Edit an existing competition registered within the guild", runMode: RunMode.Async)]
+        public async Task Edit([Summary("competition", "A registered competition"), Autocomplete(typeof(CompetitionAutocompleteHandler))] string competition)
+        {
+            await DeferAsync(true);
 
-			ulong competitionId = ulong.Parse(competition);
+            // Loads databases infos
+            DbCompetitions competitions = Database.Context.Competitions;
+            Guild dbGuild = Database.Context
+                .Guilds
+                .First(g => g.Id == Context.Guild.Id);
 
-			// Loads databases infos
-			DbCompetitions competitions = Database.Context.Competitions;
-			Guild dbGuild = Database.Context
-				.Guilds
-				.First(g => g.Id == Context.Guild.Id);
+            // Gets interaction texts
+            IManager commandText = dbGuild.ManagerText;
+            IGeneralResponse generalResponses = dbGuild.GeneralResponses;
 
-			// Filters for guild
-			Common.Models.Competition dbCompetition = competitions
-				.First(c => c.Id == competitionId && c.Guild == dbGuild);
+            if (!ulong.TryParse(competition, out ulong competitionId))
+            {
+                await ModifyOriginalResponseAsync(msg => msg.Content = commandText.EditPleaseSelectCompetitionFromMenu);
 
-			// Gets interaction texts
-			IManager commandText = dbGuild.ManagerText;
-			IGeneralResponse generalResponses = dbGuild.GeneralResponses;
+                return;
+            }
 
-			// Checks Clash Of Clans API
-			if (!await ClashOfClansApi.TryAccessApiAsync())
-			{
-				await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.ClashOfClansError);
+            // Checks Clash Of Clans API
+            if (!await ClashOfClansApi.TryAccessApiAsync())
+            {
+                await ModifyOriginalResponseAsync(msg => msg.Content = generalResponses.ClashOfClansError);
 
-				return;
-			}
+                return;
+            }
 
-			// Edit name button
-			ButtonBuilder nameButtonBuilder = new ButtonBuilder()
-				.WithLabel(commandText.EditCompetitionName)
-				.WithStyle(ButtonStyle.Secondary)
-				.WithCustomId(IdProvider.COMPETITION_EDIT_BUTTON_NAME);
+            // Filters for guild
+            Common.Models.Competition dbCompetition = competitions
+                .First(c => c.Id == competitionId && c.Guild == dbGuild);
 
-			// Edit result channel
-			ButtonBuilder resultButtonBuilder = new ButtonBuilder()
-				.WithLabel(commandText.EditCompetitionResultChannel)
-				.WithDisabled(dbGuild.PremiumLevel < PremiumLevel.LOW)
-				.WithStyle(ButtonStyle.Secondary)
-				.WithCustomId(IdProvider.COMPETITION_EDIT_BUTTON_RESULT_CHANNEL);
+            // Edit name button
+            ButtonBuilder nameButtonBuilder = new ButtonBuilder()
+                .WithLabel(commandText.EditCompetitionName)
+                .WithStyle(ButtonStyle.Secondary)
+                .WithCustomId(IdProvider.COMPETITION_EDIT_BUTTON_NAME);
 
-			// Edit main clan
-			ButtonBuilder mainButtonBuilder = new ButtonBuilder()
-				.WithLabel(commandText.EditCompetitionMainClan)
-				.WithStyle(ButtonStyle.Secondary)
-				.WithCustomId(IdProvider.COMPETITION_EDIT_BUTTON_MAIN_CLAN);
+            // Edit result channel
+            ButtonBuilder resultButtonBuilder = new ButtonBuilder()
+                .WithLabel(commandText.EditCompetitionResultChannel)
+                .WithDisabled(dbGuild.PremiumLevel < PremiumLevel.LOW)
+                .WithStyle(ButtonStyle.Secondary)
+                .WithCustomId(IdProvider.COMPETITION_EDIT_BUTTON_RESULT_CHANNEL);
 
-			// Edit second clan
-			ButtonBuilder secondButtonBuilder = new ButtonBuilder()
-				.WithLabel(commandText.EditCompetitionSecondClan)
-				.WithStyle(ButtonStyle.Secondary)
-				.WithCustomId(IdProvider.COMPETITION_EDIT_BUTTON_SECOND_CLAN);
+            // Edit main clan
+            ButtonBuilder mainButtonBuilder = new ButtonBuilder()
+                .WithLabel(commandText.EditCompetitionMainClan)
+                .WithStyle(ButtonStyle.Secondary)
+                .WithCustomId(IdProvider.COMPETITION_EDIT_BUTTON_MAIN_CLAN);
 
-			// Cancel button
-			ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
-				.WithLabel(generalResponses.CancelButton)
-				.WithStyle(ButtonStyle.Danger)
-				.WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
+            // Edit second clan
+            ButtonBuilder secondButtonBuilder = new ButtonBuilder()
+                .WithLabel(commandText.EditCompetitionSecondClan)
+                .WithStyle(ButtonStyle.Secondary)
+                .WithCustomId(IdProvider.COMPETITION_EDIT_BUTTON_SECOND_CLAN);
 
-			// Build component
-			ComponentBuilder componentBuilder = new ComponentBuilder()
-				.WithButton(nameButtonBuilder, 0)
-				.WithButton(resultButtonBuilder, 0)
-				.WithButton(mainButtonBuilder, 1)
-				.WithButton(secondButtonBuilder, 1)
-				.WithButton(cancelButtonBuilder, 2);
+            // Cancel button
+            ButtonBuilder cancelButtonBuilder = new ButtonBuilder()
+                .WithLabel(generalResponses.CancelButton)
+                .WithStyle(ButtonStyle.Danger)
+                .WithCustomId(IdProvider.GLOBAL_CANCEL_BUTTON);
 
-			IUserMessage message = await ModifyOriginalResponseAsync(msg =>
-			{
-				msg.Content = commandText.EditCompetitionChooseEdition(dbCompetition.Name);
-				msg.Components = new(componentBuilder.Build());
-			});
+            // Build component
+            ComponentBuilder componentBuilder = new ComponentBuilder()
+                .WithButton(nameButtonBuilder, 0)
+                .WithButton(resultButtonBuilder, 0)
+                .WithButton(mainButtonBuilder, 1)
+                .WithButton(secondButtonBuilder, 1)
+                .WithButton(cancelButtonBuilder, 2);
 
-			// Registers informations into storage
-			ComponentStorage storage = ComponentStorage.GetInstance();
+            IUserMessage message = await ModifyOriginalResponseAsync(msg =>
+            {
+                msg.Content = commandText.EditCompetitionChooseEdition(dbCompetition.Name);
+                msg.Components = new(componentBuilder.Build());
+            });
 
-			string[] datas = new[] { competition };
-			storage.MessageDatas.TryAdd(message.Id, datas);
-		}
+            // Registers informations into storage
+            ComponentStorage storage = ComponentStorage.GetInstance();
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+            string[] datas = new[] { competition };
+            storage.MessageDatas.TryAdd(message.Id, datas);
+        }
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         PROTECTED METHODS                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          PRIVATE METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                          OVERRIDE METHODS                         *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                           STATIC METHODS                          *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                              INDEXERS                             *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
         |*                         OPERATORS OVERLOAD                        *|
         \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 
-	}
+    }
 }
